@@ -703,7 +703,7 @@ export default function Page() {
           <div className="container">
             <div className="hero-copy">
               <span className="eyebrow-chip"><span className="dot"></span>Gestão de receitas médicas</span>
-              <h1>Cada receita, sob controle, do balcão ao histórico</h1>
+              <h1>Cada receita, do balcão ao histórico</h1>
               <p className="hero-sub">O Farma+ centraliza o cadastro, a consulta e o acompanhamento de receitas médicas da sua farmácia, ajudando a equipe a vender com segurança e dentro das exigências legais — sem depender de papel.</p>
               <div className="hero-actions">
                 <button className="btn btn-primary" onClick={openLogin}>Entrar no sistema</button>
