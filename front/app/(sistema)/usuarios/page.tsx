@@ -1,31 +1,55 @@
-import Link from "next/link";
-
-export default function Usuarios(){
-    return(
-    <div> 
-        <div>
-            <h1>Gestao de usuarios</h1>
-            <Link href={"/usuarios/novo"}></Link>
-        </div>
-
-        <div>
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                Henrique
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+export default function Usuarios() {
+    return (
+      <div className="space-y-6">
+    <h1 className="text-2xl font-bold text-teal-800 tracking-tight">
+        Usuários
+    </h1>
+    <table className="w-full border-collapse overflow-hidden rounded-xl shadow-md border border-teal-100">
+        <thead>
+            <tr className="bg-teal-50">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
+                    ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
+                    Nome
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
+                    CPF
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
+                    Senha
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
+                    Email
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
+                    Status
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr className="border-t border-teal-100 hover:bg-teal-50/50 transition-colors">
+                <td className="px-4 py-3 text-sm text-gray-700">
+                    1
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                    Henrique
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                    123.456.789-00
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                    ********
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                    henrique@email.com
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                    Ativo
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
     );
 }
