@@ -17,9 +17,6 @@ export default function Usuarios() {
                     CPF
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
-                    Senha
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
                     Email
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
@@ -37,9 +34,6 @@ export default function Usuarios() {
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-700">
                     123.456.789-00
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-700">
-                    ********
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-700">
                     henrique@email.com

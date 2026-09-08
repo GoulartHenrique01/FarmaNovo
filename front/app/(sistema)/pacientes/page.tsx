@@ -29,9 +29,6 @@ export default function Pacientes() {
                     Email
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
-                    Alergias
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
                     Observações
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-teal-800">
@@ -61,9 +58,6 @@ export default function Pacientes() {
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-700">
                     joao@email.com
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-700">
-                    Penicilina
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-700">
                     Sem observações
