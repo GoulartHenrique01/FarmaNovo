@@ -40,6 +40,7 @@ public class JwtFilter extends OncePerRequestFilter{
                 || uri.startsWith("/auth/login/esqueci-senha")
                 || uri.startsWith("/auth/login/recuperar-senha")
                 || (uri.equals("/usuarios") && method.equals("POST")) // cadastro de usuário precisa ser público
+                || uri.startsWith("/")
         ){
             filterChain.doFilter(request,response);
             return;
@@ -65,7 +66,6 @@ public class JwtFilter extends OncePerRequestFilter{
             response.getWriter().println("Token Invalido");
             return;
         }
-
         filterChain.doFilter(request, response);
     }
 }
