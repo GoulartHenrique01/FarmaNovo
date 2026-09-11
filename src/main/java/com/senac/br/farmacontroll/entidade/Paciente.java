@@ -22,7 +22,7 @@ public class Paciente {
     private Long id;
     private String nome;
     private String cpf;
-    private Date dataNascimento;
+    private LocalDate dataNascimento;
     private String sexo;
     private String telefone;
     private String email;
