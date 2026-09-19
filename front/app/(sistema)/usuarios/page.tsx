@@ -2,6 +2,7 @@
 
 import { Usuario } from "@/app/types/usuario";
 import axios from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -28,7 +29,7 @@ export default function Usuarios() {
     };
 
     return (
-        <main className="min-h-screen bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
+        <main className="bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-7xl space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
@@ -42,9 +43,13 @@ export default function Usuarios() {
                             Acompanhe os usuários cadastrados no sistema.
                         </p>
                     </div>
-                    <span className="w-fit rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 shadow-sm">
-                        {usuarios.length} cadastrados
-                    </span>
+                    <button
+                        type="button"
+                        onClick={() => router.push("/usuarios/novo")}
+                        className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                    >
+                        Novo Usuário
+                    </button>
                 </div>
 
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_35px_rgba(15,118,110,0.08)]">
@@ -52,56 +57,62 @@ export default function Usuarios() {
                         <table className="w-full min-w-[680px] border-collapse">
                             <thead>
                                 <tr className="border-b border-slate-200 bg-slate-50">
-                            <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                            Código
-                        </th>
-                            <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                            Nome
-                        </th>
-                            <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                            CPF
-                        </th>
-                            <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                            Email
-                        </th>
-                            <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                            Status
-                        </th>
+                                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        Código
+                                    </th>
+                                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        Nome
+                                    </th>
+                                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        CPF
+                                    </th>
+                                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        Email
+                                    </th>
+                                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        Status
+                                    </th>
+                                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        Ações
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
 
-                    {usuarios.map((usuario) => (
+                                {usuarios.map((usuario) => (
 
-                        <tr key={usuario.id} className="transition-colors hover:bg-emerald-50/40">
-                            <td className="px-5 py-4 text-sm font-semibold text-slate-700">
-                                {usuario.id}
-                            </td>
-                            <td className="px-5 py-4 text-sm font-medium text-slate-800">
-                                {usuario.nome}
-                            </td>
-                            <td className="px-5 py-4 text-sm text-slate-600">
-                                {usuario.cpf}
-                            </td>
-                            <td className="px-5 py-4 text-sm text-slate-600">
-                                {usuario.email}
-                            </td>
-                            <td className="px-5 py-4 text-sm text-slate-600">
-                                <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                    {usuario.status}
-                                </span>
-                            </td>
-                        </tr>
-                    ))}
+                                    <tr key={usuario.id} className="transition-colors hover:bg-emerald-50/40">
+                                        <td className="px-5 py-4 text-sm font-semibold text-slate-700">
+                                            {usuario.id}
+                                        </td>
+                                        <td className="px-5 py-4 text-sm font-medium text-slate-800">
+                                            {usuario.nome}
+                                        </td>
+                                        <td className="px-5 py-4 text-sm text-slate-600">
+                                            {usuario.cpf}
+                                        </td>
+                                        <td className="px-5 py-4 text-sm text-slate-600">
+                                            {usuario.email}
+                                        </td>
+                                        <td className="px-5 py-4 text-sm text-slate-600">
+                                            <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                {usuario.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-4 text-sm text-slate-600">
+                                            <Link href={`/usuarios/${usuario.id}/editar`}>Editar</Link>
+                                        </td>
+                                    </tr>
+                                ))}
 
-                    {usuarios.length === 0 && (
-                        <tr>
-                            <td colSpan={5} className="px-6 py-14 text-center text-sm text-slate-500">
-                                Nenhum usuario encontrado!
-                            </td>
-                        </tr>
-                    )
-                    }
+                                {usuarios.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-14 text-center text-sm text-slate-500">
+                                            Nenhum usuario encontrado!
+                                        </td>
+                                    </tr>
+                                )
+                                }
 
                             </tbody>
                         </table>
@@ -118,6 +129,6 @@ export default function Usuarios() {
             </div>
         </main>
 
-        
+
     );
 }
