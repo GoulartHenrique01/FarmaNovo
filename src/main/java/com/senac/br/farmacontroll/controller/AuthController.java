@@ -36,7 +36,7 @@ public class AuthController {
     @Operation(summary = "Autenticação de usuarios", description = "Método de login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
 
-        if (usuarioRepository.existsUsuarioByEmailAndSenha(loginRequest.email(), loginRequest.senha())){
+            if (usuarioRepository.existsUsuarioByEmailAndSenha(loginRequest.email(), loginRequest.senha())){
 
             var token = tokenService.gerarToken(loginRequest.email());
 

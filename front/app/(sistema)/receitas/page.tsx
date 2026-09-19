@@ -25,7 +25,7 @@ export default function Receitas() {
     };
 
     return (
-        <main className="min-h-screen bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
+        <main className="bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-7xl space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
