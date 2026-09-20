@@ -21,7 +21,7 @@ export default function Sidebar() {
             Receitas
         </Link>
         <Link href="/pacientes" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-teal-700 hover:bg-teal-50 hover:text-teal-900 transition-colors">
-            pacientes
+            Pacientes
         </Link>
     </nav>
 </aside>

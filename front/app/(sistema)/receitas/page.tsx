@@ -39,9 +39,13 @@ export default function Receitas() {
                             Consulte as receitas emitidas e seus períodos de validade.
                         </p>
                     </div>
-                    <span className="w-fit rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 shadow-sm">
-                        {receitas.length} cadastradas
-                    </span>
+                    <button
+                        type="button"
+                        onClick={() => router.push("/receitas/novo")}
+                        className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                    >
+                        Nova Receita
+                    </button>
                 </div>
 
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_35px_rgba(15,118,110,0.08)]">

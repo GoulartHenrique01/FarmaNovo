@@ -17,10 +17,63 @@ html {
   color-scheme: light;
 }
 
+html.dark {
+  color-scheme: dark;
+  background: #020817;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   background: linear-gradient(180deg, #f7fbfa 0%, #edf7f3 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+html.dark body {
+  background: linear-gradient(180deg, #020817 0%, #0f172a 100%);
+  color: #e2e8f0;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.4) !important;
+}
+
+html.dark [class*="bg-white"],
+html.dark [class*="bg-slate-50"],
+html.dark [class*="bg-teal-50"],
+html.dark [class*="bg-emerald-50"],
+html.dark [class*="bg-[#f4faf8]"] {
+  background-color: #0f172a !important;
+}
+
+html.dark [class*="text-slate-900"],
+html.dark [class*="text-slate-800"],
+html.dark [class*="text-slate-700"],
+html.dark [class*="text-slate-600"],
+html.dark [class*="text-slate-500"],
+html.dark [class*="text-gray-700"],
+html.dark [class*="text-gray-800"],
+html.dark [class*="text-teal-800"],
+html.dark [class*="text-teal-700"],
+html.dark [class*="text-teal-600"] {
+  color: #e2e8f0 !important;
+}
+
+html.dark [class*="border-teal-100"],
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-slate-300"],
+html.dark [class*="border-green-100"],
+html.dark [class*="border-teal-50"],
+html.dark [class*="border-emerald-200"] {
+  border-color: rgba(148, 163, 184, 0.35) !important;
+}
+
+html.dark [class*="text-emerald-700"],
+html.dark [class*="text-emerald-800"] {
+  color: #a7f3d0 !important;
 }
