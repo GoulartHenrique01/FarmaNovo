@@ -82,8 +82,11 @@ export default function Receitas() {
                             <td className="px-5 py-4 text-sm font-medium text-slate-800">{receita.diagnostico}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{receita.observacoes}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{receita.tipo}</td>
+                            
                         </tr>
                     ))}
+
+                    
 
                     {receitas.length === 0 && (
                         <tr>

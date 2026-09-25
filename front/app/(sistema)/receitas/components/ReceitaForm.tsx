@@ -1,16 +1,77 @@
-import Link from "next/link";
+'use client'
 
-export default function ReceitaForm() {
+import { Receita, ReceitaFormProps } from "@/app/types/receitas";
+import axios from "axios";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
+  const router = useRouter();
+
+    //Constante com array de informações
+    const [receita, setReceita] = useState<Receita>(
+        receitaExistente || 
+        new Receita(null, "", "", "", "", "")
+    );
+
+    const handlerChange = (
+        campo: 'dataEmissao' | 'dataValidade' | 'diagnostico' | 'observacoes' | 'tipo',
+        valor: string
+    ) => {
+        setReceita(valorAnterior =>
+            new Receita(
+                valorAnterior.id,
+                campo === 'dataEmissao' ? valor : valorAnterior.dataEmissao,
+                campo === 'dataValidade' ? valor : valorAnterior.dataValidade,
+                campo === 'diagnostico' ? valor : valorAnterior.diagnostico,
+                campo === 'observacoes' ? valor : valorAnterior.observacoes,
+                campo === 'tipo' ? valor : valorAnterior.tipo
+            )
+        );
+    }
+
+    //formData - nome / FormData - Tipo
+    const hanlderSalvar = async (formData: FormData) => {
+
+        if(receitaExistente){
+            var dadosRetorno = await axios.put<number>('http://localhost:8080/receitas'+receita.id, receita)
+
+        if (dadosRetorno.status == 200) {
+            alert("Receita salva com sucesso")
+        } else {
+            alert(dadosRetorno.data);
+            return;
+        }
+            
+        }else{
+
+        var dadosRetorno = await axios.post<number>('http://localhost:8080/receitas', receita)
+
+        if (dadosRetorno.status == 200) {
+            alert("Receita salva com sucesso")
+        } else {
+            alert(dadosRetorno.data);
+            return;
+        }
+        router.push("/receitas");
+
+    }
+}
+
   return (
-    <form className="max-w-2xl mx-auto">
+    <form action={hanlderSalvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">
             Data de Emissão
           </label>
           <input
+            name = "dataEmissao"
+            value={receita.dataEmissao}
+            required
             type="date"
-            name="Data de Emissão"
+            onChange={(e) => handlerChange('dataEmissao', e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -19,8 +80,11 @@ export default function ReceitaForm() {
             Data de Validade
           </label>
           <input
+            name="dataValidade"
+            value={receita.dataValidade}
+            required
             type="date"
-            name="Data de Validade"
+            onChange={(e) => handlerChange('dataValidade', e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -30,6 +94,9 @@ export default function ReceitaForm() {
           </label>
           <input
             name="diagnostico"
+            value={receita.diagnostico}
+            required
+            onChange={(e) => handlerChange('diagnostico', e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -38,19 +105,21 @@ export default function ReceitaForm() {
             Observações:
           </label>
         </div>
-
         <div className="space-y-2">
           <input
             name="observacoes"
+            value={receita.observacoes}
+            onChange={(e) => handlerChange('observacoes', e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
 
           <label className="block text-sm font-medium text-teal-700">
             Tipo:
           </label>
-
           <input
             name="tipo"
+            value={receita.tipo}
+            onChange={(e) => handlerChange('tipo', e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -58,7 +127,7 @@ export default function ReceitaForm() {
         <div className="flex items-center justify-between pt-4 border-t border-teal-50">
           <Link
             href="/receitas"
-            className="px-5 py-2.5 text-sm font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+            className="rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 focus:ring-red-400"
           >
             Cancelar
           </Link>

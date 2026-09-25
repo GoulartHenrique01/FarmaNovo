@@ -12,3 +12,7 @@ export class Receita {
         
     }
     }
+
+export interface ReceitaFormProps{
+    receitaExistente?:Receita
+}

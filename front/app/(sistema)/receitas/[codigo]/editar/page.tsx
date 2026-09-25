@@ -1,14 +1,41 @@
 'use client'
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import ReceitaForm from "../../components/ReceitaForm";
+import { useEffect, useState } from "react";
+import { Receita } from "@/app/types/receitas";
+import axios from "axios";
 
 export default function EditarReceita(){
     
+    const router = useRouter();
+
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
+
+    const [receita, setReceita] = useState<Receita | null>(null)
+
+    useEffect(() => {
+
+        buscarDados();
+
+    }, []);
+
+    const buscarDados = async () => {
+
+        const valorUsuarioBack = await axios.get<Receita>('http://localhost:8080/receitas/' + codigo);
+
+        if (valorUsuarioBack.status == 200) {
+            setReceita(valorUsuarioBack.data);
+        } else {
+            router.push("/receitas")
+        }
+
+    }
+
+    if (!receita) return (<div className="p-8">Carregando Dados...</div>)
 
     return(
         <div className="p-6">
@@ -30,7 +57,7 @@ export default function EditarReceita(){
             </p>
         </div>
         <div>
-            <ReceitaForm/>
+            <ReceitaForm receitaExistente={receita}/>
         </div>
     </div>
 </div>
