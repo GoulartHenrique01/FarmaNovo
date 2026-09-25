@@ -4,9 +4,14 @@ export class Usuario{
         public id:number | null,
         public nome:string,
         public email:string,
-        public status:string,
-        public cpf:string
+        public cpf:string,
+        public senha:string,
+        public status:string
     )
     {
     }
+}
+
+export interface UsuarioFormProps{
+    usuarioExistente?:Usuario
 }

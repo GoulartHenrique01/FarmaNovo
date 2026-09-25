@@ -9,16 +9,16 @@ export default function CadastroUsuario(){
         <div>
             <Link 
                 href="/usuarios" 
-                className="inline-flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition"
             >
                 Voltar para listagem
             </Link>
         </div>
         <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-teal-800 tracking-tight">
+            <h1 className="font-serif text-2xl font-bold text-teal-800 tracking-tight">
                 Novo Usuário
             </h1>
-            <p className="text-sm text-teal-600">
+            <p className="font-serif text-sm text-teal-600">
                 Preencha os dados para registrar um novo usuário
             </p>
         </div>

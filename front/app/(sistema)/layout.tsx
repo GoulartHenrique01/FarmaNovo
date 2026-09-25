@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 
 export default function SistemaLayout({ children }) {
     return (
-
+        
         <div className="flex min-h-screen bg-gradient-to-br from-white via-emerald-50/40 to-teal-50">
         <Sidebar />
     
