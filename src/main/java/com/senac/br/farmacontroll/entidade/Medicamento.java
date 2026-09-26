@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -21,7 +21,7 @@ public class Medicamento {
     Long id;
     public String nome;
     public String tipo;
-    public Date dataValidade;
+    public LocalDate dataValidade;
     public double dosagem;
     public String unidadeDosagem;
     public int quantidade;

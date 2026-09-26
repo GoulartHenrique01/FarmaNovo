@@ -103,6 +103,9 @@ export default function Pacientes() {
                     Email
                 </th>
                 <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Alergias
+                </th>
+                <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                     Observações
                 </th>
                 <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -121,6 +124,7 @@ export default function Pacientes() {
                             <td className="px-5 py-4 text-sm text-slate-600">{paciente.sexo}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{paciente.telefone}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{paciente.email}</td>
+                            <td className="px-5 py-4 text-sm text-slate-600">{paciente.alergias}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{paciente.observacoes}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">
                                 <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -137,7 +141,7 @@ export default function Pacientes() {
 
                     {pacientes.length === 0 && (
                         <tr>
-                            <td colSpan={10} className="px-6 py-14 text-center text-sm text-slate-500">
+                            <td colSpan={11} className="px-6 py-14 text-center text-sm text-slate-500">
                                 Nenhum paciente encontrado!
                             </td>
                         </tr>

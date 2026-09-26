@@ -22,7 +22,10 @@ export default function EditarMedicamentos() {
     // Carrega o medicamento ao entrar na página e retorna à listagem se houver falha.
     useEffect(() => {
         axios.get<Medicamento>(`http://localhost:8080/medicamentos/${codigo}`)
-            .then((resposta) => setMedicamento(resposta.data))
+            .then((resposta) => setMedicamento({
+                ...resposta.data,
+                dataValidade: resposta.data.dataValidade?.slice(0, 10) ?? "",
+            }))
             .catch(() => router.push("/medicamentos"));
     }, [codigo, router]);
 
