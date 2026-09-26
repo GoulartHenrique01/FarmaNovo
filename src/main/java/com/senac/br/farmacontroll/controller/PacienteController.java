@@ -2,6 +2,7 @@ package com.senac.br.farmacontroll.controller;
 
 import com.senac.br.farmacontroll.entidade.EnumStatusPaciente;
 import com.senac.br.farmacontroll.entidade.Paciente;
+import com.senac.br.farmacontroll.DTOs.AtualizarStatusPacienteRequest;
 import com.senac.br.farmacontroll.repository.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,6 +83,15 @@ public class PacienteController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> alterarStatus(@PathVariable Long id, @RequestBody AtualizarStatusPacienteRequest request) {
+        Paciente paciente = pacienteRepository.findById(id).orElse(null);
+        if (paciente == null) return ResponseEntity.notFound().build();
+        paciente.setStatus(request.status());
+        pacienteRepository.save(paciente);
+        return ResponseEntity.ok().build();
     }
 
 }

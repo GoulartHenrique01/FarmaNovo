@@ -7,22 +7,27 @@ import { useEffect, useState } from "react";
 import { Receita } from "@/app/types/receitas";
 import axios from "axios";
 
+// Busca a receita indicada na URL e abre o formulário com seus dados.
 export default function EditarReceita(){
     
     const router = useRouter();
 
+    // Código identificador recebido pelos parâmetros da rota.
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
 
+    // Mantém a página em carregamento até a receita ser obtida.
     const [receita, setReceita] = useState<Receita | null>(null)
 
+    // Carrega os dados da receita ao abrir a página de edição.
     useEffect(() => {
 
         buscarDados();
 
     }, []);
 
+    // Busca a receita; se ela não puder ser carregada, retorna à listagem.
     const buscarDados = async () => {
 
         const valorUsuarioBack = await axios.get<Receita>('http://localhost:8080/receitas/' + codigo);

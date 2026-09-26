@@ -9,12 +9,15 @@ import { useEffect, useState } from "react";
 export default function Pacientes() {
     const router = useRouter();
 
+    // Registros que serão exibidos na tabela de pacientes.
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
 
+    // Carrega os pacientes assim que a listagem é montada.
     useEffect(() => {
         carregarDados();
     }, []);
 
+    // Busca a lista atualizada na API.
     const carregarDados = async () => {
         try {
             const dados = await axios.get<Paciente[]>("http://localhost:8080/pacientes");
@@ -25,12 +28,14 @@ export default function Pacientes() {
         }
     };
 
+    // Solicita confirmação antes de excluir e recarrega a lista quando conclui.
     const excluir = async (paciente: Paciente) => {
         if (!confirm(`Excluir o paciente ${paciente.nome}?`)) return;
         try { await axios.delete(`http://localhost:8080/pacientes/${paciente.id}/excluir`); carregarDados(); }
         catch { alert("Erro ao excluir paciente"); }
     };
 
+    // Atualiza o status alternando entre ativo e bloqueado.
     const alterarStatus = async (paciente: Paciente) => {
         try {
             await axios.put(`http://localhost:8080/pacientes/${paciente.id}`, {
@@ -46,6 +51,7 @@ export default function Pacientes() {
         }
     };
 
+    // Apresenta os dados e as ações disponíveis para cada paciente.
     return (
         <main className="bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-7xl space-y-6">

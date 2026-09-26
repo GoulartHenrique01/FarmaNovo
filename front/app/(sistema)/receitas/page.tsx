@@ -9,12 +9,15 @@ import { useEffect, useState } from "react";
 export default function Receitas() {
     const router = useRouter();
 
+    // Registros que serão exibidos na tabela de receitas.
     const [receitas, setReceitas] = useState<Receita[]>([]);
 
+    // Carrega as receitas assim que a listagem é montada.
     useEffect(() => {
         carregarDados();
     }, []);
 
+    // Busca a lista atualizada na API.
     const carregarDados = async () => {
         try {
             const dados = await axios.get<Receita[]>("http://localhost:8080/receitas");
@@ -25,12 +28,14 @@ export default function Receitas() {
         }
     };
 
+    // Solicita confirmação antes da exclusão e atualiza a listagem ao concluir.
     const excluir = async (receita: Receita) => {
         if (!confirm(`Excluir a receita ${receita.id}?`)) return;
         try { await axios.delete(`http://localhost:8080/receitas/${receita.id}/excluir`); carregarDados(); }
         catch { alert("Erro ao excluir receita"); }
     };
 
+    // Exibe as receitas cadastradas e as ações disponíveis em cada linha.
     return (
         <main className="bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-7xl space-y-6">

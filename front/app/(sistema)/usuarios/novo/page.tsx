@@ -1,6 +1,7 @@
 import Link from "next/link";
 import UsuarioForm from "../components/UsuarioForm";
 
+// Página de cadastro: apresenta o contexto e reutiliza o formulário de usuário.
 export default function CadastroUsuario(){
 
     return(

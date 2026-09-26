@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+// Navegação principal entre as áreas autenticadas do sistema.
 export default function Sidebar() {
 
     return (

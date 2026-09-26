@@ -6,15 +6,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+// Formulário reutilizável para cadastrar ou editar uma receita médica.
 export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
+  // Permite voltar à listagem ao concluir o fluxo de gravação.
   const router = useRouter();
 
-    //Constante com array de informações
+    // Armazena os valores dos campos; na edição, parte dos dados já existentes.
     const [receita, setReceita] = useState<Receita>(
         receitaExistente || 
         new Receita(null, "", "", "", "", "")
     );
 
+    // Atualiza o campo escolhido criando uma nova instância com os demais valores preservados.
     const handlerChange = (
         campo: 'dataEmissao' | 'dataValidade' | 'diagnostico' | 'observacoes' | 'tipo',
         valor: string
@@ -31,7 +34,8 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
         );
     }
 
-    //formData - nome / FormData - Tipo
+    // Envia PUT para editar ou POST para cadastrar e informa o resultado da operação.
+    // Os dados enviados vêm do estado controlado pelos campos do formulário.
     const hanlderSalvar = async (formData: FormData) => {
 
         if(receitaExistente){

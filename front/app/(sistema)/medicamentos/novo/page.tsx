@@ -1,6 +1,7 @@
 import Link from "next/link";
 import MedicamentoForm from "../components/MedicamentoForm";
 
+// Página de cadastro que reutiliza o formulário compartilhado de medicamentos.
 export default function CadastroMedicamento() {
   return (
     <div className="p-6">

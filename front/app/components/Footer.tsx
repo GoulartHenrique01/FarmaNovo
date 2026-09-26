@@ -1,5 +1,6 @@
 export default function Footer() {
 
+    // Mantém o ano exibido no rodapé sempre atualizado.
     const currentYear = new Date().getFullYear();
 
     return (

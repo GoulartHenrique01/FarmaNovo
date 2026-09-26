@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import ReceitaForm from "../components/ReceitaForm";
 
+// Página de cadastro que reutiliza o formulário compartilhado de receitas.
 export default function CadastroReceita(){
 
     return(

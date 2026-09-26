@@ -2,6 +2,7 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 
+// Envolve as páginas internas com navegação lateral, cabeçalho e rodapé comuns.
 export default function SistemaLayout({ children }) {
     return (
         

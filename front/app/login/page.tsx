@@ -7,6 +7,7 @@ import { LoginResponse } from "../types/auth";
 export default function Login() {
     const router = useRouter();
 
+    // Lê as credenciais submetidas, autentica na API e encaminha o usuário após sucesso.
     const handlerLogin = async (formData: FormData) => {
         try{
         debugger

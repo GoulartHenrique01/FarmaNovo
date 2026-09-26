@@ -1,3 +1,4 @@
+// Modelo dos dados de estoque e das exigências de prescrição de um medicamento.
 export class Medicamento {
     constructor(
         public id: number,
@@ -14,6 +15,7 @@ export class Medicamento {
     }
 }
 
+// Registro opcional usado para preencher o formulário durante uma edição.
 export interface MedicamentoFormProps {
     medicamentoExistente?: Medicamento;
 }

@@ -6,15 +6,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+// Formulário reutilizável para cadastrar um usuário ou editar um usuário existente.
 export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
+    // Permite navegar de volta à listagem após salvar.
     const router = useRouter();
 
-    //Constante com array de informações
+    // Mantém os valores dos campos sincronizados com o formulário.
+    // Na edição, inicia com os dados recebidos; no cadastro, usa valores vazios e status ativo.
     const [usuario, setUsuario] = useState<Usuario>(
         usuarioExistente || 
         new Usuario(null, "", "", "", "", "ATIVO")
     );
 
+    // Atualiza apenas a propriedade alterada, preservando os demais dados do usuário.
     const handlerChange = (
         campo: 'nome' | 'cpf' | 'email' | 'senha',
         valor: string
@@ -31,10 +35,12 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
         );
     }
 
-    //formData - nome / FormData - Tipo
+    // Persiste os dados: PUT quando há usuário existente e POST durante um novo cadastro.
+    // O FormData é fornecido pelo atributo action do formulário; os valores são lidos do estado controlado.
     const hanlderSalvar = async (formData: FormData) => {
 
         if(usuarioExistente){
+            // Atualiza o usuário identificado pelo seu ID.
             var dadosRetorno = await axios.put<number>('http://localhost:8080/usuarios/' + usuario.id, usuario)
 
         if (dadosRetorno.status == 200) {
@@ -46,6 +52,7 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
             
         }else{
 
+        // Cria um novo usuário na API.
         var dadosRetorno = await axios.post<number>('http://localhost:8080/usuarios', usuario)
 
         if (dadosRetorno.status == 200) {
@@ -55,9 +62,11 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
             return;
         }
     }
+        // Após a gravação bem-sucedida, retorna à listagem de usuários.
         router.push("/usuarios");
 }
 
+    // Cada input abaixo é controlado pelo estado e obrigatório para o envio.
     return (
         <form action={hanlderSalvar} className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">

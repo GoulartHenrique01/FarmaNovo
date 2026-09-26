@@ -3,37 +3,46 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+// Página pública de apresentação do Farma+ e ponto de entrada para o login.
 export default function Page() {
+  // Controlam o menu móvel e o aviso exibido no formulário de demonstração.
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [showLoginNote, setShowLoginNote] = useState(false);
+  // Permite focar o campo de e-mail assim que a janela de login é aberta.
   const emailInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  // Os botões de acesso levam à tela de autenticação do sistema.
   function openLogin(e: React.MouseEvent) {
     e.preventDefault();
 
     router.push("/login")
   }
 
+  // Fecha a janela e limpa o aviso para a próxima abertura.
   function closeLogin() {
     setIsLoginOpen(false);
     setShowLoginNote(false);
   }
 
+  // Só fecha a janela quando o clique ocorre no fundo, não no conteúdo.
   function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target === e.currentTarget) closeLogin();
   }
 
+  // Este formulário é demonstrativo e apenas mostra uma observação ao enviar.
   function handleLoginSubmit(e: React.FormEvent) {
     e.preventDefault();
     setShowLoginNote(true);
   }
 
+  // Coloca o foco no e-mail ao abrir o diálogo de login.
   useEffect(() => {
     if (isLoginOpen) emailInputRef.current?.focus();
   }, [isLoginOpen]);
 
+  // Permite fechar o diálogo com Escape e remove o listener ao desmontar a página.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') closeLogin();

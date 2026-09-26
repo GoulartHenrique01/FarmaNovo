@@ -6,10 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+// Formulário reutilizável para cadastrar ou editar um paciente.
 export default function PacienteForm({ pacienteExistente }: PacienteFormProps) {
+  // Navegação para a listagem após a gravação bem-sucedida.
   const router = useRouter();
+  // Inicia com o registro recebido na edição ou com campos vazios no cadastro.
   const [paciente, setPaciente] = useState<Paciente>(pacienteExistente || new Paciente(null, "", "", "", "", "", "", "", "", "ATIVO"));
+  // Atualiza somente o campo informado, preservando os demais valores do objeto.
   const atualizar = (campo: keyof Paciente, valor: string) => setPaciente((anterior) => ({ ...anterior, [campo]: valor }));
+  // Escolhe POST ou PUT conforme o modo do formulário e trata sucesso ou falha.
   const salvar = async () => {
     try {
       if (pacienteExistente) await axios.put(`http://localhost:8080/pacientes/${paciente.id}`, paciente);

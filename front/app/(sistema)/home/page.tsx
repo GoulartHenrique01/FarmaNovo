@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+// Tela inicial apresentada após a entrada no sistema.
 export default function Home() {
 
     const router = useRouter();

@@ -1,3 +1,4 @@
+// Modelo que reúne os dados pessoais e o status de um paciente.
 export class Paciente {
     constructor(
         public id: number | null,
@@ -16,6 +17,7 @@ export class Paciente {
     }
   }
 
+// Propriedade opcional que permite reutilizar o formulário para edição.
 export interface PacienteFormProps {
         pacienteExistente?: Paciente;
 }

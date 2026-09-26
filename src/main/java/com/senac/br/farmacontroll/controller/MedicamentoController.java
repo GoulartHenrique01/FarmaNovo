@@ -81,7 +81,7 @@ public class MedicamentoController {
 
         Medicamento medicamentoBanco = medicamentoRepository.findById(id).orElse(null);
         if (medicamentoBanco!= null){
-            medicamentoRepository.save(medicamentoBanco);
+            medicamentoRepository.deleteById(id);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

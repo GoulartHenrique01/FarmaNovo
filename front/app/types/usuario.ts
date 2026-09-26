@@ -1,3 +1,4 @@
+// Modelo dos dados de usuário usados nas telas e nas respostas da API.
 export class Usuario{
     
     constructor(
@@ -12,6 +13,7 @@ export class Usuario{
     }
 }
 
+// Dados opcionais recebidos pelo formulário; sua presença indica modo de edição.
 export interface UsuarioFormProps{
     usuarioExistente?:Usuario
 }

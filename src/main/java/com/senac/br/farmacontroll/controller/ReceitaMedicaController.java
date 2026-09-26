@@ -65,4 +65,11 @@ public class ReceitaMedicaController {
         var receitaBanco = receitaRepository.save(receita);
         return ResponseEntity.ok(receitaBanco);
     }
+
+    @DeleteMapping("/{id}/excluir")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (!receitaRepository.existsById(id)) return ResponseEntity.notFound().build();
+        receitaRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
 }

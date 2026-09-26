@@ -6,10 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+// Formulário reutilizável para cadastrar ou editar um medicamento.
 export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFormProps) {
+  // Navegação para a listagem após salvar.
   const router = useRouter();
+  // Usa os dados existentes na edição ou valores iniciais no cadastro.
   const [medicamento, setMedicamento] = useState<Medicamento>(medicamentoExistente || new Medicamento(null as unknown as number, "", "", "", 0, "", 0, "", false));
+  // Atualiza um campo do objeto; valores numéricos e checkbox são convertidos nos inputs.
   const atualizar = (campo: keyof Medicamento, valor: string | number | boolean) => setMedicamento((anterior) => ({ ...anterior, [campo]: valor }));
+  // Envia POST para cadastro ou PUT para edição e apresenta o resultado da operação.
   const salvar = async () => {
     try {
       if (medicamentoExistente) await axios.put(`http://localhost:8080/medicamentos/${medicamento.id}`, medicamento);

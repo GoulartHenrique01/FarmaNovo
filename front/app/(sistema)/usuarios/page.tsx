@@ -9,12 +9,15 @@ import { useEffect, useState } from "react";
 export default function Usuarios() {
   const router = useRouter();
 
+  // Dados exibidos na tabela de usuários.
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
+  // Carrega a listagem uma vez quando a tela é montada.
   useEffect(() => {
     carregarDados();
   }, []);
 
+  // Busca os usuários na API e atualiza a tabela; informa ao usuário em caso de falha.
   const carregarDados = async () => {
     try {
       const dados = await axios.get<Usuario[]>(
@@ -27,6 +30,7 @@ export default function Usuarios() {
     }
   };
 
+  // Exclui o registro selecionado e recarrega a lista para refletir a alteração.
   const handlerDeletarUsuario = async (usuario: Usuario) => {
     var dadosRetorno = await axios.delete(
       "http://localhost:8080/usuarios/" + usuario.id + "/excluir"
@@ -63,10 +67,11 @@ export default function Usuarios() {
       return;
     }
 
-    // Atualiza a lista com o novo status
+    // Atualiza a lista com o novo status retornado pela API.
     carregarDados();
   };
 
+  // Renderiza a tabela e as ações disponíveis para cada usuário.
   return (
     <main className="min-h-full bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl space-y-6">

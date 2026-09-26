@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PacienteForm from "../components/PacienteForm";
 
+// Página de cadastro que reaproveita o formulário compartilhado de pacientes.
 export default function CadastroPaciente() {
   return (
     <div className="p-6">

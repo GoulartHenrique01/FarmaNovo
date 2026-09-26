@@ -9,12 +9,15 @@ import Link from "next/link";
 export default function Medicamentos() {
     const router = useRouter();
     
+    // Dados que alimentam a tabela de estoque.
     const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
 
+    // Carrega os medicamentos assim que a listagem é montada.
     useEffect(() => {
         carregarDados();
     }, []);
 
+    // Busca a lista atualizada na API.
     const carregarDados = async () => {
         try {
             const dados = await axios.get<Medicamento[]>("http://localhost:8080/medicamentos");
@@ -25,12 +28,14 @@ export default function Medicamentos() {
         }
     };
 
+    // Solicita confirmação antes da exclusão e atualiza a listagem ao concluir.
     const excluir = async (medicamento: Medicamento) => {
         if (!confirm(`Excluir o medicamento ${medicamento.nome}?`)) return;
         try { await axios.delete(`http://localhost:8080/medicamentos/${medicamento.id}/excluir`); carregarDados(); }
         catch { alert("Erro ao excluir medicamento"); }
     };
 
+    // Exibe os medicamentos e as ações de manutenção de cada registro.
     return (
         <main className="bg-[#f4faf8] px-4 py-8 sm:px-6 lg:px-10">
             <div className="mx-auto max-w-7xl space-y-6">

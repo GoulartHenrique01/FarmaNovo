@@ -7,21 +7,26 @@ import { useEffect, useState } from "react";
 import { Usuario } from "@/app/types/usuario";
 import axios from "axios";
 
+// Obtém o usuário pelo código da rota e entrega os dados ao formulário de edição.
 export default function EditarUsuario() {
     const router = useRouter();
 
+    // O código vem dos parâmetros dinâmicos da URL.
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
 
+    // Mantém a tela em estado de carregamento até a API responder.
     const [usuario, setUsuario] = useState<Usuario | null>(null)
 
+    // Busca os dados do usuário ao abrir a tela de edição.
     useEffect(() => {
 
         buscarDados();
 
     }, []);
 
+    // Se a busca for concluída, prepara o formulário; se não, volta à listagem.
     const buscarDados = async () => {
 
         const valorUsuarioBack = await axios.get<Usuario>('http://localhost:8080/usuarios/' + codigo);

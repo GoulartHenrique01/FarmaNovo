@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 
 export default function Header() {
+    // Guarda a preferência de tema aplicada ao documento.
     const [darkMode, setDarkMode] = useState(false);
 
+    // Recupera o tema salvo; na primeira visita, respeita a preferência do sistema operacional.
     useEffect(() => {
         const storedTheme = localStorage.getItem("theme");
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -14,6 +16,7 @@ export default function Header() {
         document.documentElement.classList.toggle("dark", isDark);
     }, []);
 
+    // Aplica a classe global e persiste a escolha feita no controle do cabeçalho.
     useEffect(() => {
         document.documentElement.classList.toggle("dark", darkMode);
         localStorage.setItem("theme", darkMode ? "dark" : "light");

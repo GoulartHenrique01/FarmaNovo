@@ -1,3 +1,4 @@
+// Modelo das datas e informações clínicas registradas em uma receita.
 export class Receita {
 
     constructor(
@@ -13,6 +14,7 @@ export class Receita {
     }
     }
 
+// Receita opcional recebida pelo formulário quando o modo é edição.
 export interface ReceitaFormProps{
     receitaExistente?:Receita
 }

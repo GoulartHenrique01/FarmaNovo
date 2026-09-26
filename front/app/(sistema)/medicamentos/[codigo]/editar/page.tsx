@@ -7,15 +7,19 @@ import MedicamentoForm from "../../components/MedicamentoForm";
 import { useEffect, useState } from "react";
 import { Medicamento } from "@/app/types/medicamentos";
 
+// Busca o medicamento indicado na URL e abre o formulário com seus dados.
 export default function EditarMedicamentos() {
 
+    // Código identificador recebido pela rota dinâmica.
     const router = useRouter();
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
 
+    // Enquanto os dados não chegam, mantém a tela em estado de carregamento.
     const [medicamento, setMedicamento] = useState<Medicamento | null>(null);
 
+    // Carrega o medicamento ao entrar na página e retorna à listagem se houver falha.
     useEffect(() => {
         axios.get<Medicamento>(`http://localhost:8080/medicamentos/${codigo}`)
             .then((resposta) => setMedicamento(resposta.data))

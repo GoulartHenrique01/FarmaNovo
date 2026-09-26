@@ -7,15 +7,19 @@ import PacienteForm from "../../components/PacienteForm";
 import { useEffect, useState } from "react";
 import { Paciente } from "@/app/types/pacientes";
 
+// Busca o paciente indicado na URL e abre o formulário com seus dados.
 export default function EditarPaciente(){
     
     const router = useRouter();
+    // Código identificador recebido pela rota dinâmica.
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
 
+    // Enquanto os dados não chegam, mantém a tela em estado de carregamento.
     const [paciente, setPaciente] = useState<Paciente | null>(null);
 
+    // Carrega o paciente ao entrar na página e retorna à listagem se houver falha.
     useEffect(() => {
         axios.get<Paciente>(`http://localhost:8080/pacientes/${codigo}`)
             .then((resposta) => setPaciente(resposta.data))
