@@ -4,6 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Medicamento } from "@/app/types/medicamentos";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Medicamentos() {
     const router = useRouter();
@@ -22,6 +23,12 @@ export default function Medicamentos() {
         } catch (error) {
             alert("Erro ao carregar medicamentos!");
         }
+    };
+
+    const excluir = async (medicamento: Medicamento) => {
+        if (!confirm(`Excluir o medicamento ${medicamento.nome}?`)) return;
+        try { await axios.delete(`http://localhost:8080/medicamentos/${medicamento.id}/excluir`); carregarDados(); }
+        catch { alert("Erro ao excluir medicamento"); }
     };
 
     return (
@@ -80,6 +87,7 @@ export default function Medicamentos() {
                 <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                     Precisa de Receita
                 </th>
+                <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Ações</th>
             </tr>
         </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -98,12 +106,16 @@ export default function Medicamentos() {
                                     {medicamento.precisaReceita ? "Sim" : "Não"}
                                 </span>
                             </td>
+                            <td className="px-5 py-4"><div className="flex flex-wrap gap-2">
+                                <Link href={`/medicamentos/${medicamento.id}/editar`} className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Editar</Link>
+                                <button onClick={() => excluir(medicamento)} className="rounded-md border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700">Deletar</button>
+                            </div></td>
                         </tr>
                     ))}
 
                     {medicamentos.length === 0 && (
                         <tr>
-                            <td colSpan={9} className="px-6 py-14 text-center text-sm text-slate-500">
+                            <td colSpan={10} className="px-6 py-14 text-center text-sm text-slate-500">
                                 Nenhum medicamento encontrado!
                             </td>
                         </tr>

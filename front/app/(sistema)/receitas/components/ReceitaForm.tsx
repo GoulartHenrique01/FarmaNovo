@@ -35,7 +35,7 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
     const hanlderSalvar = async (formData: FormData) => {
 
         if(receitaExistente){
-            var dadosRetorno = await axios.put<number>('http://localhost:8080/receitas'+receita.id, receita)
+            var dadosRetorno = await axios.put<number>('http://localhost:8080/receitas/' + receita.id, receita)
 
         if (dadosRetorno.status == 200) {
             alert("Receita salva com sucesso")

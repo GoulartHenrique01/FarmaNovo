@@ -13,3 +13,7 @@ export class Medicamento {
 
     }
 }
+
+export interface MedicamentoFormProps {
+    medicamentoExistente?: Medicamento;
+}

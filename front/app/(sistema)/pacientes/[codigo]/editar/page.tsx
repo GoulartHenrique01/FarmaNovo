@@ -1,14 +1,28 @@
 'use client'
 
+import axios from "axios";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import PacienteForm from "../../components/PacienteForm";
+import { useEffect, useState } from "react";
+import { Paciente } from "@/app/types/pacientes";
 
 export default function EditarPaciente(){
     
+    const router = useRouter();
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
+
+    const [paciente, setPaciente] = useState<Paciente | null>(null);
+
+    useEffect(() => {
+        axios.get<Paciente>(`http://localhost:8080/pacientes/${codigo}`)
+            .then((resposta) => setPaciente(resposta.data))
+            .catch(() => router.push("/pacientes"));
+    }, [codigo, router]);
+
+    if (!paciente) return <div className="p-8">Carregando dados...</div>;
 
     return(
         <div className="p-6">
@@ -30,7 +44,7 @@ export default function EditarPaciente(){
             </p>
         </div>
         <div>
-            <PacienteForm/>
+            <PacienteForm pacienteExistente={paciente}/>
         </div>
     </div>
 </div>

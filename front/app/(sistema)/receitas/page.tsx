@@ -3,6 +3,7 @@
 import { Receita } from "@/app/types/receitas";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Receitas() {
@@ -22,6 +23,12 @@ export default function Receitas() {
         } catch (error) {
             alert("Erro ao carregar receitas!");
         }
+    };
+
+    const excluir = async (receita: Receita) => {
+        if (!confirm(`Excluir a receita ${receita.id}?`)) return;
+        try { await axios.delete(`http://localhost:8080/receitas/${receita.id}/excluir`); carregarDados(); }
+        catch { alert("Erro ao excluir receita"); }
     };
 
     return (
@@ -71,6 +78,7 @@ export default function Receitas() {
                 <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                     Tipo
                 </th>
+                <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Ações</th>
             </tr>
         </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -82,6 +90,10 @@ export default function Receitas() {
                             <td className="px-5 py-4 text-sm font-medium text-slate-800">{receita.diagnostico}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{receita.observacoes}</td>
                             <td className="px-5 py-4 text-sm text-slate-600">{receita.tipo}</td>
+                            <td className="px-5 py-4"><div className="flex flex-wrap gap-2">
+                                <Link href={`/receitas/${receita.id}/editar`} className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Editar</Link>
+                                <button onClick={() => excluir(receita)} className="rounded-md border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700">Deletar</button>
+                            </div></td>
                             
                         </tr>
                     ))}
@@ -90,7 +102,7 @@ export default function Receitas() {
 
                     {receitas.length === 0 && (
                         <tr>
-                            <td colSpan={6} className="px-6 py-14 text-center text-sm text-slate-500">
+                            <td colSpan={7} className="px-6 py-14 text-center text-sm text-slate-500">
                                 Nenhuma receita encontrada!
                             </td>
                         </tr>

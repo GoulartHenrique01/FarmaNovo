@@ -2,6 +2,7 @@
 
 import { Paciente } from "@/app/types/pacientes";
 import axios from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -21,6 +22,27 @@ export default function Pacientes() {
             setPacientes(dados.data);
         } catch (error) {
             alert("Erro ao carregar pacientes!");
+        }
+    };
+
+    const excluir = async (paciente: Paciente) => {
+        if (!confirm(`Excluir o paciente ${paciente.nome}?`)) return;
+        try { await axios.delete(`http://localhost:8080/pacientes/${paciente.id}/excluir`); carregarDados(); }
+        catch { alert("Erro ao excluir paciente"); }
+    };
+
+    const alterarStatus = async (paciente: Paciente) => {
+        try {
+            await axios.put(`http://localhost:8080/pacientes/${paciente.id}`, {
+                ...paciente,
+                status: paciente.status === "ATIVO" ? "BLOQUEADO" : "ATIVO",
+            });
+            carregarDados();
+        } catch (error) {
+            const mensagem = axios.isAxiosError(error) && error.response?.data?.message
+                ? error.response.data.message
+                : "Erro ao atualizar status";
+            alert(mensagem);
         }
     };
 
@@ -80,6 +102,7 @@ export default function Pacientes() {
                 <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                     Status
                 </th>
+                <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Ações</th>
             </tr>
         </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -98,12 +121,17 @@ export default function Pacientes() {
                                     {paciente.status}
                                 </span>
                             </td>
+                            <td className="px-5 py-4"><div className="flex flex-wrap gap-2">
+                                <Link href={`/pacientes/${paciente.id}/editar`} className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Editar</Link>
+                                <button onClick={() => excluir(paciente)} className="rounded-md border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700">Deletar</button>
+                                <button onClick={() => alterarStatus(paciente)} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">{paciente.status === "ATIVO" ? "Bloquear" : "Desbloquear"}</button>
+                            </div></td>
                         </tr>
                     ))}
 
                     {pacientes.length === 0 && (
                         <tr>
-                            <td colSpan={9} className="px-6 py-14 text-center text-sm text-slate-500">
+                            <td colSpan={10} className="px-6 py-14 text-center text-sm text-slate-500">
                                 Nenhum paciente encontrado!
                             </td>
                         </tr>

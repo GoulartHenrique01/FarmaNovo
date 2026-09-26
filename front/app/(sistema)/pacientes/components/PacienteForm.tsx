@@ -1,8 +1,26 @@
-import Link from "next/link";
+"use client";
 
-export default function PacienteForm() {
+import { Paciente, PacienteFormProps } from "@/app/types/pacientes";
+import axios from "axios";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+export default function PacienteForm({ pacienteExistente }: PacienteFormProps) {
+  const router = useRouter();
+  const [paciente, setPaciente] = useState<Paciente>(pacienteExistente || new Paciente(null, "", "", "", "", "", "", "", "", "ATIVO"));
+  const atualizar = (campo: keyof Paciente, valor: string) => setPaciente((anterior) => ({ ...anterior, [campo]: valor }));
+  const salvar = async () => {
+    try {
+      if (pacienteExistente) await axios.put(`http://localhost:8080/pacientes/${paciente.id}`, paciente);
+      else await axios.post("http://localhost:8080/pacientes", paciente);
+      alert("Paciente salvo com sucesso");
+      router.push("/pacientes");
+    } catch (error) { alert("Erro ao salvar paciente"); }
+  };
+
   return (
-    <form className="max-w-2xl mx-auto">
+    <form action={salvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">
@@ -10,6 +28,9 @@ export default function PacienteForm() {
           </label>
           <input
             name="nome"
+            value={paciente.nome}
+            required
+            onChange={(e) => atualizar("nome", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -20,6 +41,9 @@ export default function PacienteForm() {
           </label>
           <input
             name="cpf"
+            value={paciente.cpf}
+            required
+            onChange={(e) => atualizar("cpf", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -31,6 +55,9 @@ export default function PacienteForm() {
           <input
             type="date"
             name="dataNascimento"
+            value={paciente.dataNascimento}
+            required
+            onChange={(e) => atualizar("dataNascimento", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -41,6 +68,9 @@ export default function PacienteForm() {
           </label>
           <input
             name="sexo"
+            value={paciente.sexo}
+            required
+            onChange={(e) => atualizar("sexo", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -51,6 +81,8 @@ export default function PacienteForm() {
           </label>
           <input
             name="telefone"
+            value={paciente.telefone}
+            onChange={(e) => atualizar("telefone", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -62,6 +94,9 @@ export default function PacienteForm() {
           <input
             type="email"
             name="email"
+            value={paciente.email}
+            required
+            onChange={(e) => atualizar("email", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -72,6 +107,8 @@ export default function PacienteForm() {
           </label>
           <input
             name="alergias"
+            value={paciente.alergias}
+            onChange={(e) => atualizar("alergias", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -82,6 +119,8 @@ export default function PacienteForm() {
           </label>
           <input
             name="observacoes"
+            value={paciente.observacoes}
+            onChange={(e) => atualizar("observacoes", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -92,6 +131,8 @@ export default function PacienteForm() {
           </label>
           <select
             name="status"
+            value={paciente.status}
+            onChange={(e) => atualizar("status", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           >
             <option value="ATIVO">ATIVO</option>

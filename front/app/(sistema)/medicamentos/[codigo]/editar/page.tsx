@@ -1,14 +1,28 @@
 'use client'
 
+import axios from "axios";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import MedicamentoForm from "../../components/MedicamentoForm";
+import { useEffect, useState } from "react";
+import { Medicamento } from "@/app/types/medicamentos";
 
 export default function EditarMedicamentos() {
 
+    const router = useRouter();
     const parametro = useParams();
 
     const codigo = Number(parametro.codigo);
+
+    const [medicamento, setMedicamento] = useState<Medicamento | null>(null);
+
+    useEffect(() => {
+        axios.get<Medicamento>(`http://localhost:8080/medicamentos/${codigo}`)
+            .then((resposta) => setMedicamento(resposta.data))
+            .catch(() => router.push("/medicamentos"));
+    }, [codigo, router]);
+
+    if (!medicamento) return <div className="p-8">Carregando dados...</div>;
 
     return (
         <div className="p-6">
@@ -30,7 +44,7 @@ export default function EditarMedicamentos() {
                     </p>
                 </div>
                 <div>
-                    <MedicamentoForm />
+                    <MedicamentoForm medicamentoExistente={medicamento} />
                 </div>
             </div>
         </div>

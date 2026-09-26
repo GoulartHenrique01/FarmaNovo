@@ -35,7 +35,7 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
     const hanlderSalvar = async (formData: FormData) => {
 
         if(usuarioExistente){
-            var dadosRetorno = await axios.put<number>('http://localhost:8080/usuarios'+usuario.id, usuario)
+            var dadosRetorno = await axios.put<number>('http://localhost:8080/usuarios/' + usuario.id, usuario)
 
         if (dadosRetorno.status == 200) {
             alert("Usuário salvo com sucesso")
@@ -54,9 +54,8 @@ export default function UsuarioForm({usuarioExistente}:UsuarioFormProps) {
             alert(dadosRetorno.data);
             return;
         }
-        router.push("/usuarios");
-
     }
+        router.push("/usuarios");
 }
 
     return (
