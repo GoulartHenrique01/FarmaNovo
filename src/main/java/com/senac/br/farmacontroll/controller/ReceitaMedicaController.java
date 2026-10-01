@@ -59,7 +59,8 @@ public class ReceitaMedicaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Método de criação de receitas", description = "Método responsável em efetuar a emissão de receitas médicas")
+    @Operation(summary = "Método de criação de receitas",
+            description = "Método responsável em efetuar a emissão de receitas médicas")
     public ResponseEntity<Receita> criar(@RequestBody Receita receita){
 
         var receitaBanco = receitaRepository.save(receita);

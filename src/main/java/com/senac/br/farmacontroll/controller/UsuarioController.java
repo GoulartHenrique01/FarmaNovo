@@ -95,8 +95,9 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}/excluir")
+    @Operation(summary = "Método de exclusão de usuarios",
+            description = "Método responsável pela exclusão de usuarios cadastrados no sistema")
     public ResponseEntity<Void> excluir(@PathVariable Long id){
-
         Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
         if (usuarioBanco!= null){
             usuarioBanco.setStatus(EnumStatusUsuario.EXCLUIDO);

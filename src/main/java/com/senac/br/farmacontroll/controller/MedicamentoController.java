@@ -1,9 +1,6 @@
 package com.senac.br.farmacontroll.controller;
 
-import com.senac.br.farmacontroll.DTOs.AtualizarStatusRequest;
-import com.senac.br.farmacontroll.entidade.EnumStatusUsuario;
 import com.senac.br.farmacontroll.entidade.Medicamento;
-import com.senac.br.farmacontroll.entidade.Usuario;
 import com.senac.br.farmacontroll.repository.MedicamentoRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,8 +74,9 @@ public class MedicamentoController {
     }
 
     @DeleteMapping("/{id}/excluir")
+    @Operation(summary = "Método de exclusão de medicamentos",
+            description = "Método responsável pela exclusão de medicamentos cadastrados no sistema")
     public ResponseEntity<Void> excluir(@PathVariable Long id){
-
         Medicamento medicamentoBanco = medicamentoRepository.findById(id).orElse(null);
         if (medicamentoBanco!= null){
             medicamentoRepository.deleteById(id);
