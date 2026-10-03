@@ -7,7 +7,8 @@ export class Receita {
         public dataValidade: string,
         public diagnostico: string,
         public observacoes: string,
-        public tipo: string
+        public tipo: string,
+        public status: string
     ) 
     {
         

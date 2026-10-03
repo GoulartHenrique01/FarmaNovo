@@ -5,12 +5,14 @@ export class Medicamento {
         public nome: string,
         public tipo: string,
         public dataValidade: string,
-        public dosagem: number,
+        public dosagem: string,
         public unidadeDosagem: string,
-        public quantidade: number,
+        public quantidade: string,
         public marca: string,
-        public precisaReceita: boolean
-    ) {
+        public precisaReceita: string,
+        public status: string
+    ) 
+    {
 
     }
 }

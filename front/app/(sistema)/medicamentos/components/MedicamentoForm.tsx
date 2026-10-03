@@ -7,25 +7,77 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 // Formulário reutilizável para cadastrar ou editar um medicamento.
-export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFormProps) {
-  // Navegação para a listagem após salvar.
+export default function MedicamentoForm({ medicamentoExistente}: MedicamentoFormProps) {
   const router = useRouter();
-  // Usa os dados existentes na edição ou valores iniciais no cadastro.
-  const [medicamento, setMedicamento] = useState<Medicamento>(medicamentoExistente || new Medicamento(null as unknown as number, "", "", "", 0, "", 0, "", false));
-  // Atualiza um campo do objeto; valores numéricos e checkbox são convertidos nos inputs.
-  const atualizar = (campo: keyof Medicamento, valor: string | number | boolean) => setMedicamento((anterior) => ({ ...anterior, [campo]: valor }));
+
+  const [medicamento, setMedicamento] = useState<Medicamento>(
+    medicamentoExistente ||
+      new Medicamento(
+        null as unknown as number, "", "", "", "", "", "", "", "NAO", ""
+)
+  );
+
+  const handlerChange = (
+    campo:
+      | "nome"
+      | "tipo"
+      | "dataValidade"
+      | "dosagem"
+      | "unidadeDosagem"
+      | "quantidade"
+      | "marca"
+      | "precisaReceita",
+    valor: string
+  ) => {
+    setMedicamento(
+      (valorAnterior) =>
+        new Medicamento(
+          valorAnterior.id,
+          campo === "nome" ? valor : valorAnterior.nome,
+          campo === "tipo" ? valor : valorAnterior.tipo,
+          campo === "dataValidade" ? valor : valorAnterior.dataValidade,
+          campo === "dosagem" ? valor : valorAnterior.dosagem,
+          campo === "unidadeDosagem" ? valor : valorAnterior.unidadeDosagem,
+          campo === "quantidade" ? valor : valorAnterior.quantidade,
+          campo === "marca" ? valor : valorAnterior.marca,
+          campo === "precisaReceita" ? valor : valorAnterior.precisaReceita,
+          valorAnterior.status
+        )
+    );
+  };
+
   // Envia POST para cadastro ou PUT para edição e apresenta o resultado da operação.
-  const salvar = async () => {
-    try {
-      if (medicamentoExistente) await axios.put(`http://localhost:8080/medicamentos/${medicamento.id}`, medicamento);
-      else await axios.post("http://localhost:8080/medicamentos", medicamento);
-      alert("Medicamento salvo com sucesso");
-      router.push("/medicamentos");
-    } catch (error) { alert("Erro ao salvar medicamento"); }
+  const handlerSalvar = async (formData : FormData) => {
+    if (medicamentoExistente) {
+      var dadosRetorno = await axios.put<number>(
+        "http://localhost:8080/medicamentos/" + medicamento.id,
+        medicamento
+      );
+
+      if (dadosRetorno.status == 200){
+        alert("Medicamento salvo com sucesso");
+      }else{
+        alert(dadosRetorno.data);
+        return;
+      }
+    }else{
+      var dadosRetorno = await axios.post<number>(
+        "http://localhost:8080/medicamentos", medicamento
+        );
+
+        if(dadosRetorno.status == 200){
+          alert("Medicamento salvo com sucesso");
+        }else{
+          alert(dadosRetorno.data);
+          return;
+        }
+    }
+
+    router.push("/medicamentos")
   };
 
   return (
-    <form action={salvar} className="max-w-2xl mx-auto">
+    <form action={handlerSalvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">
@@ -35,7 +87,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="nome"
             value={medicamento.nome}
             required
-            onChange={(e) => atualizar("nome", e.target.value)}
+            onChange={(e) => handlerChange("nome", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -48,7 +100,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="tipo"
             value={medicamento.tipo}
             required
-            onChange={(e) => atualizar("tipo", e.target.value)}
+            onChange={(e) => handlerChange("tipo", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -62,7 +114,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="dataValidade"
             value={medicamento.dataValidade}
             required
-            onChange={(e) => atualizar("dataValidade", e.target.value)}
+            onChange={(e) => handlerChange("dataValidade", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -77,7 +129,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="dosagem"
             value={medicamento.dosagem}
             required
-            onChange={(e) => atualizar("dosagem", Number(e.target.value))}
+            onChange={(e) => handlerChange("dosagem", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -90,7 +142,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="unidadeDosagem"
             value={medicamento.unidadeDosagem}
             required
-            onChange={(e) => atualizar("unidadeDosagem", e.target.value)}
+            onChange={(e) => handlerChange("unidadeDosagem", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -104,7 +156,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="quantidade"
             value={medicamento.quantidade}
             required
-            onChange={(e) => atualizar("quantidade", Number(e.target.value))}
+            onChange={(e) => handlerChange("quantidade", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -117,7 +169,7 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
             name="marca"
             value={medicamento.marca}
             required
-            onChange={(e) => atualizar("marca", e.target.value)}
+            onChange={(e) => handlerChange("marca", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
@@ -126,8 +178,10 @@ export default function MedicamentoForm({ medicamentoExistente }: MedicamentoFor
           <input
             type="checkbox"
             name="precisaReceita"
-            checked={medicamento.precisaReceita}
-            onChange={(e) => atualizar("precisaReceita", e.target.checked)}
+            value={medicamento.precisaReceita}
+            onChange={(e) =>
+              handlerChange("precisaReceita", e.target.checked ? "SIM" : "NAO")
+            }
             className="h-4 w-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500"
           />
           <label className="text-sm font-medium text-teal-700">
