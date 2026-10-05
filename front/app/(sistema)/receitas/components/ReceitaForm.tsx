@@ -5,6 +5,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Receitas from "../page";
 
 // Formulário reutilizável para cadastrar ou editar uma receita médica.
 export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
@@ -14,7 +15,7 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
     // Armazena os valores dos campos; na edição, parte dos dados já existentes.
     const [receita, setReceita] = useState<Receita>(
         receitaExistente || 
-        new Receita(null, "", "", "", "", "")
+        new Receita(null, "", "", "", "", "", "ATIVO")
     );
 
     // Atualiza o campo escolhido criando uma nova instância com os demais valores preservados.
@@ -22,49 +23,54 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
         campo: 'dataEmissao' | 'dataValidade' | 'diagnostico' | 'observacoes' | 'tipo',
         valor: string
     ) => {
-        setReceita(valorAnterior =>
+        setReceita(
+          (valorAnterior) =>
             new Receita(
                 valorAnterior.id,
                 campo === 'dataEmissao' ? valor : valorAnterior.dataEmissao,
                 campo === 'dataValidade' ? valor : valorAnterior.dataValidade,
                 campo === 'diagnostico' ? valor : valorAnterior.diagnostico,
                 campo === 'observacoes' ? valor : valorAnterior.observacoes,
-                campo === 'tipo' ? valor : valorAnterior.tipo
+                campo === 'tipo' ? valor : valorAnterior.tipo,
+                valorAnterior.status
             )
         );
     }
 
     // Envia PUT para editar ou POST para cadastrar e informa o resultado da operação.
     // Os dados enviados vêm do estado controlado pelos campos do formulário.
-    const hanlderSalvar = async (formData: FormData) => {
+    const handlerSalvar = async (formData: FormData) => {
+      if (receitaExistente){
+        var dadosRetorno = await axios.put<number>(
+          "http://localhost:8080/receitas/" + receita.id,
+          receita
+        );
 
-        if(receitaExistente){
-            var dadosRetorno = await axios.put<number>('http://localhost:8080/receitas/' + receita.id, receita)
-
-        if (dadosRetorno.status == 200) {
-            alert("Receita salva com sucesso")
-        } else {
-            alert(dadosRetorno.data);
-            return;
-        }
-            
+        if(dadosRetorno.status == 200){
+          alert("Receita salva com sucesso");
         }else{
-
-        var dadosRetorno = await axios.post<number>('http://localhost:8080/receitas', receita)
-
-        if (dadosRetorno.status == 200) {
-            alert("Receita salva com sucesso")
-        } else {
-            alert(dadosRetorno.data);
-            return;
+          alert(dadosRetorno.data);
+          return;
         }
-        router.push("/receitas");
+      }else{
+        var dadosRetorno = await axios.post<number>(
+          "http://localhost:8080/receitas",
+          receita
+        );
 
-    }
-}
+        if(dadosRetorno.status == 200){
+          alert("Receita salva com sucesso");
+        }else{
+          alert(dadosRetorno.data)
+          return;
+        }
+      }
+
+      router.push("/receitas")
+    };
 
   return (
-    <form action={hanlderSalvar} className="max-w-2xl mx-auto">
+    <form action={handlerSalvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">
