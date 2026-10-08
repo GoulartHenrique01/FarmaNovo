@@ -1,5 +1,7 @@
 package com.senac.br.farmacontroll.presentation;
 
+import com.senac.br.farmacontroll.application.DTOs.PacienteResponse;
+import com.senac.br.farmacontroll.application.services.PacienteService;
 import com.senac.br.farmacontroll.domain.entidade.EnumStatusPaciente;
 import com.senac.br.farmacontroll.domain.entidade.Paciente;
 import com.senac.br.farmacontroll.application.DTOs.AtualizarStatusPacienteRequest;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/pacientes")
 
@@ -20,10 +24,13 @@ public class PacienteController {
     @Autowired
     private PacienteRepository pacienteRepository;
 
+    @Autowired
+    private PacienteService pacienteService;
+
     @GetMapping
     @Operation(summary = "Método de consulta da lista de pacientes", description = "Método responsável em efetuar a consulta de todos os pacientes sem filtro!")
-    public ResponseEntity<?> listarTodos(){
-        return ResponseEntity.ok(pacienteRepository.findAll());
+    public ResponseEntity<List<PacienteResponse>> listarTodos(){
+        return ResponseEntity.ok(pacienteService.listarTodosPacientesTable());
     }
 
     @GetMapping("/{id}")
@@ -93,5 +100,4 @@ public class PacienteController {
         pacienteRepository.save(paciente);
         return ResponseEntity.ok().build();
     }
-
 }

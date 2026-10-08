@@ -1,5 +1,7 @@
 package com.senac.br.farmacontroll.presentation;
 
+import com.senac.br.farmacontroll.application.DTOs.MedicamentoResponse;
+import com.senac.br.farmacontroll.application.services.MedicamentoService;
 import com.senac.br.farmacontroll.domain.entidade.EnumStatusMedicamento;
 import com.senac.br.farmacontroll.domain.entidade.Medicamento;
 import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
@@ -10,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/medicamentos")
 @Tag(name = "Medicamentos", description = "Grupo de APIs Responsável por controlar a estrutura de criação e consulta de medicamentos cadastrados no sistema!")
@@ -17,13 +21,14 @@ public class MedicamentoController {
 
     @Autowired
     private MedicamentoRepository medicamentoRepository;
+    @Autowired
+    private MedicamentoService medicamentoService;
 
     @GetMapping
     @Operation(summary = "Método de consulta da lista de medicamentos",
             description = "Método responsável em efetuar a consulta de todos os medicamentos sem filtro!")
-    public ResponseEntity<?> listarTodos(){
-
-        return ResponseEntity.ok(medicamentoRepository.findAll());
+    public ResponseEntity<List<MedicamentoResponse>> listarTodos(){
+        return ResponseEntity.ok(medicamentoService.listarTodosMedicamentosTable());
     }
 
     @GetMapping("/{id}")

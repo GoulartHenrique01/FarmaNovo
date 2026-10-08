@@ -18,7 +18,7 @@ public class Medicamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     private String nome;
     private String tipo;
     private LocalDate dataValidade;

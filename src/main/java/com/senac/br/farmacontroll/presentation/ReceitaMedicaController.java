@@ -1,5 +1,7 @@
 package com.senac.br.farmacontroll.presentation;
 
+import com.senac.br.farmacontroll.application.DTOs.ReceitaResponse;
+import com.senac.br.farmacontroll.application.services.ReceitaService;
 import com.senac.br.farmacontroll.domain.entidade.EnumStatusReceita;
 import com.senac.br.farmacontroll.domain.entidade.Receita;
 import com.senac.br.farmacontroll.domain.repository.ReceitaRepository;
@@ -10,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/receitas")
 @Tag(name = "Receitas", description = "Grupo de APIs Responsável por controlar a estrutura de criação e consulta de receitas emitidas no sistema!")    
@@ -17,11 +21,13 @@ public class ReceitaMedicaController {
 
     @Autowired
     private ReceitaRepository receitaRepository;
+    @Autowired
+    private ReceitaService receitaService;
 
     @GetMapping
     @Operation(summary = "Método de consulta da lista de receitas", description = "Método responsável em efetuar a consulta de todos as receitas sem filtro!")
-    public ResponseEntity<?> listarTodos(){
-        return ResponseEntity.ok(receitaRepository.findAll());
+    public ResponseEntity<List<ReceitaResponse>> listarTodos(){
+        return ResponseEntity.ok(receitaService.listarTodosReceitasTable());
     }
 
 
