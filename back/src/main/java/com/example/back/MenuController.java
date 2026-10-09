@@ -1,4 +1,4 @@
-package br.com.senac.back;
+package com.example.back;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,7 +15,7 @@ public class MenuController {
     @FXML
     public void abrirCadastro(ActionEvent event) throws IOException {
         FXMLLoader loader =
-                new FXMLLoader(getClass().getResource("/br/com/senac/back/cadastro-usuario-view.fxml"));
+                new FXMLLoader(getClass().getResource("/com/example/back/cadastro-usuario-view.fxml"));
 
         Scene scene = new Scene(loader.load());
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

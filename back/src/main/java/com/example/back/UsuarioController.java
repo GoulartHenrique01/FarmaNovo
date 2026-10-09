@@ -1,4 +1,4 @@
-package br.com.senac.back;
+package com.example.back;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,7 +34,7 @@ public class UsuarioController {
     @FXML
     public void voltar(ActionEvent event) throws IOException {
         FXMLLoader loader =
-                new FXMLLoader(getClass().getResource("/br/com/senac/back/menu-view.fxml"));
+                new FXMLLoader(getClass().getResource("/com/example/back/menu-view.fxml"));
 
         Scene scene = new Scene(loader.load());
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
