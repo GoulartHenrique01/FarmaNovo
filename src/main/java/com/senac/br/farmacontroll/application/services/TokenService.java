@@ -19,7 +19,7 @@ public class TokenService {
     /*Esse TokenService existe para resolver um problema específico: depois que o usuário faz login,
     como a API vai saber que ele está autenticado nas próximas requisições?
     A resposta é: usando um token JWT.*/
-    @Value("${spring.secret}")
+    @Value("${spring.secretkey}")
     private String secret;
 
     @Value("${spring.expiracao}")

@@ -1,6 +1,8 @@
 package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.AtualizarStatusRequest;
+import com.senac.br.farmacontroll.application.DTOs.CriarAdminRequest;
+import com.senac.br.farmacontroll.application.DTOs.CriarAdminResponse;
 import com.senac.br.farmacontroll.application.DTOs.UsuarioResponse;
 import com.senac.br.farmacontroll.application.services.UsuarioService;
 import com.senac.br.farmacontroll.domain.entidade.EnumStatusUsuario;
@@ -48,6 +50,19 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioBanco);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<CriarAdminResponse> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){
+
+        try{
+            CriarAdminResponse respostaSalvar = usuarioService.criarAdmin(criarAdminRequest);
+            return ResponseEntity.ok(respostaSalvar);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 
     /*Acesso -> saida -> Nome -> Entrada*/
