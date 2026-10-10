@@ -1,4 +1,4 @@
-package com.example.back;
+package com.senac.br.back;
 
 import javafx.application.Application;
 

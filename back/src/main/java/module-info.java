@@ -5,6 +5,6 @@ module com.example.back {
     requires javafx.graphics;
 
 
-    opens com.example.back to javafx.fxml;
-    exports com.example.back;
+    opens com.senac.br.back to javafx.fxml;
+    exports com.senac.br.back;
 }

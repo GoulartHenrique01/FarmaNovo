@@ -1,5 +1,7 @@
 package com.senac.br.farmacontroll.presentation;
 
+import com.senac.br.farmacontroll.application.DTOs.CriarMedicamentoRequest;
+import com.senac.br.farmacontroll.application.DTOs.CriarMedicamentoResponse;
 import com.senac.br.farmacontroll.application.DTOs.MedicamentoResponse;
 import com.senac.br.farmacontroll.application.services.MedicamentoService;
 import com.senac.br.farmacontroll.domain.entidade.EnumStatusMedicamento;
@@ -7,6 +9,7 @@ import com.senac.br.farmacontroll.domain.entidade.Medicamento;
 import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +55,15 @@ public class MedicamentoController {
 
         return ResponseEntity.ok(medicamentoBanco);
     }
+
+    @PostMapping("/tipo")
+    public ResponseEntity<CriarMedicamentoResponse> criarTipo(@RequestBody CriarMedicamentoRequest criarMedicamentoRequest){
+        try {
+            CriarMedicamentoResponse respostaSalvar = medicamentoService.criarTipo(criarMedicamentoRequest);
+            return ResponseEntity.ok(respostaSalvar);
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+    }}
 
     @PutMapping("/{id}")
     @Operation(summary = "Método de edição de medicamentos",

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.senac.br.back.MedicamentoController">
+
+    <children>
+        <Button layoutX="24.0" layoutY="354.0" mnemonicParsing="false" onAction="#voltar" text="Voltar" />
+        <Button layoutX="501.0" layoutY="354.0" mnemonicParsing="false" onAction="#salvarMedicamento" text="Salvar" />
+        <Label layoutX="192.0" layoutY="97.0" prefHeight="17.0" prefWidth="31.0" text="Tipo" />
+        <Label layoutX="122.0" layoutY="149.0" text="Precisa de Receita?" />
+        <TextField fx:id="txtTipo" layoutX="240.0" layoutY="93.0" prefHeight="25.0" prefWidth="101.0" />
+        <TextField fx:id="txtPrecisa" layoutX="240.0" layoutY="145.0" prefHeight="17.0" prefWidth="101.0" />
+    </children>
+</AnchorPane>

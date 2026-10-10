@@ -1,10 +1,10 @@
 package com.senac.br.farmacontroll.application.services;
 
-import com.senac.br.farmacontroll.application.DTOs.LoginRequest;
-import com.senac.br.farmacontroll.application.DTOs.LoginResponse;
-import com.senac.br.farmacontroll.application.DTOs.UsuarioResponse;
+import com.senac.br.farmacontroll.application.DTOs.*;
+import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +18,8 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Value("${spring.secretkey}")
+    private String secret;
 
     public LoginResponse validarUsuarioAutenticadoRetornaToken(LoginRequest request) {
 
@@ -36,5 +38,18 @@ public class UsuarioService {
                 .stream()
                 .map(UsuarioResponse::new)
                 .toList());
+    }
+
+    public CriarAdminResponse criarAdmin(CriarAdminRequest criarAdminRequest) {
+
+        if(!criarAdminRequest.secretKey().equals(secret)){
+            return new CriarAdminResponse(0L,"Usuario Salvo com sucesso!");
+
+        }
+
+        Usuario usuarioAdminSalvar = new Usuario(criarAdminRequest);
+        usuarioRepository.save(usuarioAdminSalvar);
+
+        return new CriarAdminResponse(usuarioAdminSalvar.getId(),"Usuario Salvo com sucesso!");
     }
 }
