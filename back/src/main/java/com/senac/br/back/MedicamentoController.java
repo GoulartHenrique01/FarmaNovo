@@ -16,24 +16,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MedicamentoController {
+    @FXML
 
     @FXML
-    private TextField txtTipo;
-
-    @FXML
-    private TextField txtPrecisa;
 
     @FXML
     public void salvarMedicamento(ActionEvent event) throws Exception {
         //Validar Dados
 
         String jsonRequest = String.format("{ " +
-                "\"tipo\": \"%s\"" +
-                "\"precisaReceita\": \"%s\""+
-                "}", txtTipo.getText(),
-                txtPrecisa.getText());
 
-        int respostaApi = executaMetodoAPI("http://localhost:8080/medicamentos/tipo",jsonRequest,"POST");
 
 
         if(respostaApi ==200){
