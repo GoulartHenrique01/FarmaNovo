@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,16 +16,22 @@ import java.net.URL;
 
 public class MedicamentoController {
     @FXML
+    private TextField txtTipo;
 
     @FXML
+    private TextField txtPrecisa;
 
     @FXML
     public void salvarMedicamento(ActionEvent event) throws Exception {
         //Validar Dados
 
-        String jsonRequest = String.format("{ " +
+        String jsonRequest = String.format("{\n" +
+                " \"tipo\": \" %s\",\n" +
+                "\"precisaReceita\": \"%s\",\n"+
+                "}", txtTipo.getText(),
+        txtPrecisa.getText());
 
-
+        int respostaApi = executaMetodoAPI("http://localhost:8080/medicamentos/tipo",jsonRequest,"POST");
 
         if(respostaApi ==200){
             showMessage(Alert.AlertType.INFORMATION,"Medicamento salvo com sucesso!");
