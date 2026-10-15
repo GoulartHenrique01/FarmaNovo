@@ -7,7 +7,6 @@ import com.senac.br.farmacontroll.domain.entidade.Medicamento;
 import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
