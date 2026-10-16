@@ -47,7 +47,7 @@ public class UsuarioService {
 
         }
 
-        Usuario usuarioAdminSalvar = new Usuario(criarAdminRequest);
+        Usuario usuarioAdminSalvar = new Usuario();
         usuarioRepository.save(usuarioAdminSalvar);
 
         return new CriarAdminResponse(usuarioAdminSalvar.getId(),"Usuario Salvo com sucesso!");
