@@ -1,11 +1,8 @@
 package com.senac.br.farmacontroll.presentation;
 
-import com.senac.br.farmacontroll.application.DTOs.AtualizarStatusRequest;
-import com.senac.br.farmacontroll.application.DTOs.CriarAdminRequest;
-import com.senac.br.farmacontroll.application.DTOs.CriarAdminResponse;
-import com.senac.br.farmacontroll.application.DTOs.UsuarioResponse;
+import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.application.services.UsuarioService;
-import com.senac.br.farmacontroll.domain.entidade.EnumStatusUsuario;
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,8 +41,8 @@ public class UsuarioController {
     @GetMapping("/{id}")
     @Operation(summary = "Método de busca de usuários!",
             description = "Método responsável em efetuar a busca de um usuario especifico utilizando o ID!")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
+    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id){
+        UsuarioResponse usuarioBanco = usuarioService.buscarPorId(id);
         if (usuarioBanco!=null){
             return ResponseEntity.ok(usuarioBanco);
         }
@@ -70,21 +67,24 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Método de criação de usuários!",
             description = "Método responsável em efetuar a criação de novos usuários!")
-    public ResponseEntity<Usuario> criar(@RequestBody Usuario usuario){
+    public ResponseEntity<?> criar(@RequestBody UsuarioRequest usuario){
 
-        var usuarioBanco = usuarioRepository.save(usuario);
+        try {
+        UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario);
 
         return ResponseEntity.ok(usuarioBanco);
+    }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 
     /* Quando o cliente precisa atualizar apenas alguns atributos (ex: mudar apenas o e-mail de um usuário)*/
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> atualizarStatus(@PathVariable Long id, @RequestBody AtualizarStatusRequest statusRequest){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-        if (usuarioBanco!= null){
-            usuarioBanco.setStatus(statusRequest.status());
-            usuarioRepository.save(usuarioBanco);
+        var atualizarUsuario = usuarioService.atualizarStatus(statusRequest.status(),id);
+
+        if (atualizarUsuario){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

@@ -1,6 +1,8 @@
 package com.senac.br.farmacontroll.domain.entidade;
 
 import com.senac.br.farmacontroll.application.DTOs.CriarAdminRequest;
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
+import com.senac.br.farmacontroll.application.DTOs.UsuarioRequest;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,5 +35,13 @@ public class Usuario {
         this.setEmail(criarAdminRequest.email());
         this.setRole("ROLE_ADMIN");
 
+    }
+
+    public Usuario(UsuarioRequest usuario) {
+        this.setCpf(new CPF(usuario.cpf()));
+        this.setNome(usuario.nome());
+        this.setSenha(usuario.senha());
+        this.setEmail(usuario.email());
+        this.setRole("ROLE_USER");
     }
 }
