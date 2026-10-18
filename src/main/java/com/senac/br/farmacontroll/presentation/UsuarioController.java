@@ -41,12 +41,15 @@ public class UsuarioController {
     @GetMapping("/{id}")
     @Operation(summary = "Método de busca de usuários!",
             description = "Método responsável em efetuar a busca de um usuario especifico utilizando o ID!")
+
     public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id){
+
         UsuarioResponse usuarioBanco = usuarioService.buscarPorId(id);
-        if (usuarioBanco!=null){
-            return ResponseEntity.ok(usuarioBanco);
+        if(usuarioBanco!= null ){
+            return  ResponseEntity.ok(usuarioBanco);
         }
-        return ResponseEntity.notFound().build();
+
+        return  ResponseEntity.notFound().build();
     }
 
     @PostMapping("/admin")
@@ -70,7 +73,7 @@ public class UsuarioController {
     public ResponseEntity<?> criar(@RequestBody UsuarioRequest usuario){
 
         try {
-        UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario);
+        UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario, 0L);
 
         return ResponseEntity.ok(usuarioBanco);
     }catch (Exception e){

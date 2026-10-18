@@ -2,7 +2,7 @@ package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.PacienteResponse;
 import com.senac.br.farmacontroll.application.services.PacienteService;
-import com.senac.br.farmacontroll.domain.entidade.EnumStatusPaciente;
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusPaciente;
 import com.senac.br.farmacontroll.domain.entidade.Paciente;
 import com.senac.br.farmacontroll.application.DTOs.AtualizarStatusPacienteRequest;
 import com.senac.br.farmacontroll.domain.repository.PacienteRepository;

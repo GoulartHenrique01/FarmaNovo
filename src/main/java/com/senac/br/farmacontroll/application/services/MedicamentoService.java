@@ -25,11 +25,12 @@ public class MedicamentoService {
     }
 
     public CriarMedicamentoResponse criarTipo(CriarMedicamentoRequest criarMedicamentoRequest){
-
         Medicamento medicamentoTipoSalvar = new Medicamento(criarMedicamentoRequest);
         medicamentoRepository.save(medicamentoTipoSalvar);
 
-        return new CriarMedicamentoResponse(medicamentoTipoSalvar.getId(),"Medicamento Salvo com sucesso!");
+        return new CriarMedicamentoResponse(
+                medicamentoTipoSalvar.getId(),
+                medicamentoTipoSalvar.getTipo());
     }
 }
 

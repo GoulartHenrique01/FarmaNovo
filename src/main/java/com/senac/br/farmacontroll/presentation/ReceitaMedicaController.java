@@ -2,7 +2,7 @@ package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.ReceitaResponse;
 import com.senac.br.farmacontroll.application.services.ReceitaService;
-import com.senac.br.farmacontroll.domain.entidade.EnumStatusReceita;
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusReceita;
 import com.senac.br.farmacontroll.domain.entidade.Receita;
 import com.senac.br.farmacontroll.domain.repository.ReceitaRepository;
 import org.springframework.beans.factory.annotation.Autowired;

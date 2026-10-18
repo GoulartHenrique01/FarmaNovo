@@ -4,6 +4,7 @@ import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
+import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -55,29 +56,43 @@ public class UsuarioService {
         return new CriarAdminResponse(usuarioAdminSalvar.getId(),"Usuario Salvo com sucesso!");
     }
 
-    public UsuarioResponse salvarUsuario(UsuarioRequest usuario) {
-        Usuario usuarioBanco = new Usuario(usuario);
+    public UsuarioResponse salvarUsuario(UsuarioRequest usuario, Long id) {
+        //Novo Usuario
+        if (id == 0L){
+            Usuario usuarioBanco = new Usuario(usuario);
 
-        usuarioRepository.save(usuarioBanco);
-
-        return new UsuarioResponse(usuarioBanco);
+            return new UsuarioResponse(usuarioBanco);
+            //Usuario Existente
+        }else{
+            Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
+            if (usuarioBanco!= null){
+                usuarioBanco.setNome(usuario.nome());
+                usuarioBanco.setCpf(new CPF(usuario.cpf()));
+                usuarioBanco.setEmail(usuario.email());
+                usuarioBanco.setSenha(usuario.senha());
+                usuarioRepository.save(usuarioBanco);
+                return  new UsuarioResponse(usuarioBanco);
+            }
+        }
+        return null;
     }
 
     public UsuarioResponse buscarPorId(Long id) {
 
         var usuario = usuarioRepository.findById(id).orElse(null);
-        if (usuario == null){
+        if(usuario == null){
             return null;
         }
-
-        return new UsuarioResponse(usuarioRepository.findById(id).orElse(null));
+        return new UsuarioResponse(usuario);
     }
 
-    public boolean atualizarStatus(EnumStatusUsuario status) {
+    public boolean atualizarStatus(EnumStatusUsuario status, Long id) {
         Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
         if (usuarioBanco!= null){
-            usuarioBanco.setStatus(statusRequest.status());
+            usuarioBanco.setStatus(status);
             usuarioRepository.save(usuarioBanco);
-            return ResponseEntity.ok().build();
+          return true;
+    }
+        return false;
     }
 }

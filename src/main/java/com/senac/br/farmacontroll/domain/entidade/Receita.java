@@ -1,10 +1,8 @@
 package com.senac.br.farmacontroll.domain.entidade;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusReceita;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,5 +23,7 @@ public class Receita {
     private String diagnostico;
     private String observacoes;
     private String tipo;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 50)
     private EnumStatusReceita status;
 }

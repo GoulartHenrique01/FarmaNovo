@@ -1,4 +1,4 @@
-package com.senac.br.farmacontroll.domain.entidade;
+package com.senac.br.farmacontroll.application.DTOs;
 
 public enum EnumStatusPaciente{
     ATIVO,

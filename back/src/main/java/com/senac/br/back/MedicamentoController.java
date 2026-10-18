@@ -27,7 +27,7 @@ public class MedicamentoController {
 
         String jsonRequest = String.format("{\n" +
                 " \"tipo\": \" %s\",\n" +
-                "\"precisaReceita\": \"%s\",\n"+
+                "\"precisaReceita\": \"%s\"\n"+
                 "}", txtTipo.getText(),
         txtPrecisa.getText());
 

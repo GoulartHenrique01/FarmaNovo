@@ -25,8 +25,15 @@ public class Usuario {
     private String senha;
     private String email;
     private String role = "ROLE_USER";
-
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
+
+    public void setEmail(String email) {
+        if(!email.isEmpty() && !email.contains("@")){
+            throw new IllegalArgumentException("Email Invalido!");
+        }
+        this.email = email;
+    }
+
 
     public Usuario(CriarAdminRequest criarAdminRequest) {
         this.setCpf(new CPF(criarAdminRequest.cpf()));

@@ -1,6 +1,7 @@
 package com.senac.br.farmacontroll.domain.entidade;
 
 import com.senac.br.farmacontroll.application.DTOs.CriarMedicamentoRequest;
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusMedicamento;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

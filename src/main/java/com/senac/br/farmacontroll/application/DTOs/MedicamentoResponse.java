@@ -1,6 +1,5 @@
 package com.senac.br.farmacontroll.application.DTOs;
 
-import com.senac.br.farmacontroll.domain.entidade.EnumStatusMedicamento;
 import com.senac.br.farmacontroll.domain.entidade.Medicamento;
 
 import java.time.LocalDate;
