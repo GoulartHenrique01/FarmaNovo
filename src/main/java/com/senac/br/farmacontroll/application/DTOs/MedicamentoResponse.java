@@ -12,7 +12,7 @@ public record MedicamentoResponse(Long id, String nome, String tipo, LocalDate d
                 medicamentoEntidade.getId(),
                 medicamentoEntidade.getNome(),
                 medicamentoEntidade.getTipo(),
-                medicamentoEntidade.getDataValidade(),
+                medicamentoEntidade.getDataValidade().getValor(),
                 medicamentoEntidade.getDosagem(),
                 medicamentoEntidade.getUnidadeDosagem(),
                 medicamentoEntidade.getQuantidade(),

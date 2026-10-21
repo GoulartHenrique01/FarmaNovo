@@ -2,10 +2,8 @@ package com.senac.br.farmacontroll.domain.entidade;
 
 import com.senac.br.farmacontroll.application.DTOs.CriarMedicamentoRequest;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusMedicamento;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.senac.br.farmacontroll.domain.valueObject.DataValidade;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +21,10 @@ public class Medicamento {
     private Long id;
     private String nome;
     private String tipo;
-    private LocalDate dataValidade;
+
+    @Embedded
+    private DataValidade dataValidade;
+
     private double dosagem;
     private String unidadeDosagem;
     private int quantidade;

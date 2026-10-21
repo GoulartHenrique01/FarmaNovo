@@ -1,14 +1,12 @@
 package com.senac.br.farmacontroll.presentation;
 
-import com.senac.br.farmacontroll.application.DTOs.CriarMedicamentoRequest;
-import com.senac.br.farmacontroll.application.DTOs.CriarMedicamentoResponse;
-import com.senac.br.farmacontroll.application.DTOs.MedicamentoResponse;
+import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.application.services.MedicamentoService;
-import com.senac.br.farmacontroll.application.DTOs.EnumStatusMedicamento;
 import com.senac.br.farmacontroll.domain.entidade.Medicamento;
 import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +35,8 @@ public class MedicamentoController {
     @GetMapping("/{id}")
     @Operation(summary = "Método de consulta de um medicamento!",
             description = "Método responsável em efetuar a consulta de um medicamento específico, buscando pelo ID")
-    public ResponseEntity<Medicamento> buscarPorId(@PathVariable Long id){
-        Medicamento medicamentoBanco = medicamentoRepository.findById(id).orElse(null);
+    public ResponseEntity<MedicamentoResponse> buscarPorId(@PathVariable Long id){
+        MedicamentoResponse medicamentoBanco = medicamentoService.buscarPorId(id);
         if (medicamentoBanco!=null){
             return ResponseEntity.ok(medicamentoBanco);
         }
@@ -49,47 +47,36 @@ public class MedicamentoController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Método de criação de medicamentos para listar no sistema",
             description = "Método responsável em efetuar a criação de todos os medicamentos que serão passados em receitas!")
-    public ResponseEntity<?> criar(@RequestBody Medicamento medicamento){
+    public ResponseEntity<?> criar(@RequestBody MedicamentoRequest medicamento){
+        try {
+            MedicamentoResponse medicamentoBanco = medicamentoService.salvarMedicamento(medicamento, 0L);
 
-        var medicamentoBanco = medicamentoRepository.save(medicamento);
-
-        return ResponseEntity.ok(medicamentoBanco);
+            return ResponseEntity.ok(medicamentoBanco);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/tipo")
-    public ResponseEntity<?> criarTipo(@RequestBody CriarMedicamentoRequest criarMedicamentoRequest){
+    public ResponseEntity<CriarMedicamentoResponse> criarTipo(@RequestBody CriarMedicamentoRequest criarMedicamentoRequest){
         try {
             CriarMedicamentoResponse respostaSalvar = medicamentoService.criarTipo(criarMedicamentoRequest);
             return ResponseEntity.ok(respostaSalvar);
         } catch (RuntimeException e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("erro", String.valueOf(e.getMessage())));
+           return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Método de edição de medicamentos",
             description = "Método responsável pela edição de medicamentos cadastrados no sistema")
-    public ResponseEntity<Medicamento> atualizar(@PathVariable Long id, @RequestBody Medicamento medicamento){
+    public ResponseEntity<?> atualizar(@PathVariable Long id,
+                                                 @RequestBody MedicamentoRequest medicamento){
         try {
-            Medicamento medicamentoBanco = medicamentoRepository.findById(id).orElse(null);
-            if (medicamentoBanco!= null){
-                medicamentoBanco.setStatus(medicamento.getStatus());
-                medicamentoBanco.setNome(medicamento.getNome());
-                medicamentoBanco.setTipo(medicamento.getTipo());
-                medicamentoBanco.setDataValidade(medicamento.getDataValidade());
-                medicamentoBanco.setDosagem(medicamento.getDosagem());
-                medicamentoBanco.setUnidadeDosagem(medicamento.getUnidadeDosagem());
-                medicamentoBanco.setQuantidade(medicamento.getQuantidade());
-                medicamentoBanco.setMarca(medicamento.getMarca());
-                medicamentoBanco.setPrecisaReceita(medicamento.getPrecisaReceita());
-                medicamentoRepository.save(medicamentoBanco);
-                return ResponseEntity.ok().build();
-            }
-            return ResponseEntity.notFound().build();
-
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            MedicamentoResponse medicamentoBanco = medicamentoService.salvarMedicamento(medicamento,id);
+            return ResponseEntity.ok(medicamentoBanco);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

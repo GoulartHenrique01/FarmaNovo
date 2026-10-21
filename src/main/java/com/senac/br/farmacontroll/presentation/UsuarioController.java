@@ -98,25 +98,17 @@ public class UsuarioController {
     caso algum campo não seja incluído no corpo da requisição, ele pode ser resolvido para null ou valor padrão*/
     @PutMapping("/{id}")
     @Operation(summary = "Método de edição de usuarios",
-    description = "Método responsável pela edição de usuarios cadastrados no sistema")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario){
+            description = "Método responsável pela edição de usuarios cadastrados no sistema")
+    public ResponseEntity<?> atualizar(@PathVariable Long id,
+                                       @RequestBody UsuarioRequest usuario){
         try {
-            Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-            if (usuarioBanco!= null){
-                usuarioBanco.setStatus(usuario.getStatus());
-                usuarioBanco.setNome(usuario.getNome());
-                usuarioBanco.setCpf(usuario.getCpf());
-                usuarioBanco.setEmail(usuario.getEmail());
-                usuarioBanco.setSenha(usuario.getSenha());
-                usuarioRepository.save(usuarioBanco);
-                return ResponseEntity.ok().build();
-            }
-            return ResponseEntity.notFound().build();
-
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario,id);
+            return ResponseEntity.ok(usuarioBanco);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @DeleteMapping("/{id}/excluir")
     @Operation(summary = "Método de exclusão de usuarios",
