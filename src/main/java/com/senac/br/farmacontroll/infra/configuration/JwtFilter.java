@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter{
 
         String method = request.getMethod();
 
-        if if(uri.startsWith("/swagger-ui")
+        if(uri.startsWith("/swagger-ui")
                 || uri.startsWith("/v2/api-docs")
                 || uri.startsWith("/v3/api-docs")
                 || uri.startsWith("/swagger-resources")
@@ -50,11 +50,13 @@ public class JwtFilter extends OncePerRequestFilter{
             String token = authHeader.replace("Bearer ", "");
 
             try {
-                var jwtValidador = tokenService.verificarToken(token);
+                var usuarioLogado = tokenService.verificarToken(token);
 
                 //Object Principal = Permissões compartilhadas do usuario entre todo o sistema
                 var user = new UsernamePasswordAuthenticationToken(
-                        jwtValidador.getSubject(),null, List.of()
+                        usuarioLogado,
+                        null,
+                        usuarioLogado.authorities()
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(user);

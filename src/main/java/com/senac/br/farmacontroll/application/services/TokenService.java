@@ -7,7 +7,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.senac.br.farmacontroll.application.DTOs.LoginRequest;
 import com.senac.br.farmacontroll.application.DTOs.UsuarioLogado;
-import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.entidade.Token;
 import com.senac.br.farmacontroll.domain.repository.TokenRepository;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;

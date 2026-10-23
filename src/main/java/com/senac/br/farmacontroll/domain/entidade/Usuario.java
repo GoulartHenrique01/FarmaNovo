@@ -36,6 +36,11 @@ public class Usuario implements UserDetails {
     private String role = "ROLE_USER";
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
+    //EAGER carrega a lista de registros instantaneamente
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    private Empresa empresa;
+
     //DDD
     public void setEmail(String email) {
         if(!email.isEmpty() && !email.contains("@")){
@@ -51,7 +56,6 @@ public class Usuario implements UserDetails {
         this.setSenha(criarAdminRequest.senha());
         this.setEmail(criarAdminRequest.email());
         this.setRole("ROLE_ADMIN");
-
     }
 
     public Usuario(UsuarioRequest usuario) {
@@ -60,10 +64,6 @@ public class Usuario implements UserDetails {
         this.setSenha(usuario.senha());
         this.setEmail(usuario.email());
         this.setRole("ROLE_USER");
-    }
-
-    public UsuarioLogado getUsuarioLogado(){
-        return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     @Override

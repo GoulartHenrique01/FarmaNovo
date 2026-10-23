@@ -3,7 +3,7 @@ package com.senac.br.farmacontroll.application.DTOs;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 
-public record UsuarioLogado(Long id, String email, CPF cpf,
+public record UsuarioLogado(Long id, String email, CPF cpf, Long empresa_id,
                             java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities) {
 
     public UsuarioLogado(Usuario usuario){
@@ -11,6 +11,7 @@ public record UsuarioLogado(Long id, String email, CPF cpf,
                 usuario.getId(),
                 usuario.getEmail(),
                 usuario.getCpf(),
+                usuario.getEmpresa()!=null? usuario.getEmpresa().getId(): null,
                 usuario.getAuthorities()
         );
     }
