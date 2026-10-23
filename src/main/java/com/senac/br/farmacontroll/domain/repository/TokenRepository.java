@@ -1,6 +1,7 @@
 package com.senac.br.farmacontroll.domain.repository;
 
-import org.apache.el.parser.Token;
+
+import com.senac.br.farmacontroll.domain.entidade.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
