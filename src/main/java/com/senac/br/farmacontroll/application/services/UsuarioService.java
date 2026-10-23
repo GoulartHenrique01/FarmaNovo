@@ -45,7 +45,7 @@ public class UsuarioService {
                     .map(UsuarioResponse::new)
                     .toList());
         }
-        return (usuarioRepository.getusuarioByEmpresa_Id(usuarioLogado.empresa_id())
+        return (usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
                 .stream()
                 .map(UsuarioResponse::new)
                 .toList());
