@@ -23,7 +23,5 @@ public class Receita {
     private String diagnostico;
     private String observacoes;
     private String tipo;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 50)
     private EnumStatusReceita status;
 }

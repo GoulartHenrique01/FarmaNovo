@@ -6,10 +6,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter{
@@ -28,17 +32,12 @@ public class JwtFilter extends OncePerRequestFilter{
 
         String method = request.getMethod();
 
-        if (uri.startsWith("/swagger-ui")
+        if if(uri.startsWith("/swagger-ui")
                 || uri.startsWith("/v2/api-docs")
                 || uri.startsWith("/v3/api-docs")
                 || uri.startsWith("/swagger-resources")
-                || uri.startsWith("/webjars")
+                || uri.startsWith("webjars")
                 || uri.startsWith("/auth/login")
-                || uri.startsWith("/auth/register")
-                || uri.startsWith("/auth/login/esqueci-senha")
-                || uri.startsWith("/auth/login/recuperar-senha")
-                || (uri.equals("/usuarios") && method.equals("POST")) // cadastro de usuário precisa ser público
-                || uri.startsWith("/")
         ){
             filterChain.doFilter(request,response);
             return;
@@ -52,7 +51,13 @@ public class JwtFilter extends OncePerRequestFilter{
 
             try {
                 var jwtValidador = tokenService.verificarToken(token);
-                System.out.println(jwtValidador.getSubject());
+
+                //Object Principal = Permissões compartilhadas do usuario entre todo o sistema
+                var user = new UsernamePasswordAuthenticationToken(
+                        jwtValidador.getSubject(),null, List.of()
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(user);
 
             }catch (Exception e){
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

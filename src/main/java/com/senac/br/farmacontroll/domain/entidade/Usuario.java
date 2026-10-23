@@ -2,18 +2,27 @@ package com.senac.br.farmacontroll.domain.entidade;
 
 import com.senac.br.farmacontroll.application.DTOs.CriarAdminRequest;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
+import com.senac.br.farmacontroll.application.DTOs.UsuarioLogado;
 import com.senac.br.farmacontroll.application.DTOs.UsuarioRequest;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +36,7 @@ public class Usuario {
     private String role = "ROLE_USER";
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
+    //DDD
     public void setEmail(String email) {
         if(!email.isEmpty() && !email.contains("@")){
             throw new IllegalArgumentException("Email Invalido!");
@@ -50,5 +60,24 @@ public class Usuario {
         this.setSenha(usuario.senha());
         this.setEmail(usuario.email());
         this.setRole("ROLE_USER");
+    }
+
+    public UsuarioLogado getUsuarioLogado(){
+        return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role));
+    }
+
+    @Override
+    public @Nullable String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
     }
 }

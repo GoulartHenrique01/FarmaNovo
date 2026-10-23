@@ -1,5 +1,7 @@
 package com.senac.br.farmacontroll.presentation;
 
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
+import com.senac.br.farmacontroll.application.DTOs.ReceitaRequest;
 import com.senac.br.farmacontroll.application.DTOs.ReceitaResponse;
 import com.senac.br.farmacontroll.application.services.ReceitaService;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusReceita;
@@ -45,23 +47,12 @@ public class ReceitaMedicaController {
     @PutMapping("/{id}")
     @Operation(summary = "Método de edição de usuarios",
             description = "Método responsável pela edição de usuarios cadastrados no sistema")
-    public ResponseEntity<Receita> atualizar(@PathVariable Long id, @RequestBody Receita receita){
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ReceitaRequest receita){
         try {
-            Receita receitaBanco = receitaRepository.findById(id).orElse(null);
-            if (receitaBanco!= null){
-                receitaBanco.setStatus(receita.getStatus());
-                receitaBanco.setDataEmissao(receita.getDataEmissao());
-                receitaBanco.setDataValidade(receita.getDataValidade());
-                receitaBanco.setDiagnostico(receita.getDiagnostico());
-                receitaBanco.setObservacoes(receita.getObservacoes());
-                receitaBanco.setTipo(receita.getTipo());
-                receitaRepository.save(receitaBanco);
-                return ResponseEntity.ok().build();
-            }
-            return ResponseEntity.notFound().build();
-
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            ReceitaResponse receitaBanco = receitaService.salvarReceita(receita, id);
+            return ResponseEntity.ok(receitaBanco);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -69,19 +60,21 @@ public class ReceitaMedicaController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Método de criação de receitas",
             description = "Método responsável em efetuar a emissão de receitas médicas")
-    public ResponseEntity<Receita> criar(@RequestBody Receita receita){
+    public ResponseEntity<?> criar(@RequestBody ReceitaRequest receita){
+        try {
+            ReceitaResponse receitaBanco = receitaService.salvarReceita(receita, 0L);
 
-        var receitaBanco = receitaRepository.save(receita);
-
-        return ResponseEntity.ok(receitaBanco);
+            return ResponseEntity.ok(receitaBanco);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}/excluir")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        Receita receitaBanco = receitaRepository.findById(id).orElse(null);
-        if (receitaBanco!= null) {
-            receitaBanco.setStatus(EnumStatusReceita.EXCLUIDO);
-            receitaRepository.save(receitaBanco);
+        var atualizarReceita = receitaService.atualizarStatus(EnumStatusReceita.EXCLUIDO, id);
+
+        if (atualizarReceita){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

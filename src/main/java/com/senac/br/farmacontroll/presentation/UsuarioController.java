@@ -3,8 +3,6 @@ package com.senac.br.farmacontroll.presentation;
 import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.application.services.UsuarioService;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
-import com.senac.br.farmacontroll.domain.entidade.Usuario;
-import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +18,6 @@ import java.util.List;
 /*A @Tag é uma anotação do Swagger/OpenAPI usada para agrupar e organizar os endpoints da sua API na documentação do Swagger UI.*/
 @Tag(name = "Usuario", description = "Grupo de APIs Responsável por controlar a estrutura de criação e consulta de usuários do sistema!")
 public class UsuarioController {
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
 
 
     @Autowired
@@ -111,15 +106,13 @@ public class UsuarioController {
 
 
     @DeleteMapping("/{id}/excluir")
-    @Operation(summary = "Método de exclusão de usuarios",
-            description = "Método responsável pela exclusão de usuarios cadastrados no sistema")
     public ResponseEntity<Void> excluir(@PathVariable Long id){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-        if (usuarioBanco!= null){
-            usuarioBanco.setStatus(EnumStatusUsuario.EXCLUIDO);
-            usuarioRepository.save(usuarioBanco);
+
+        var atualizarUsuario = usuarioService.atualizarStatus(EnumStatusUsuario.EXCLUIDO,id);
+
+        if(atualizarUsuario){
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.notFound().build();
+        return  ResponseEntity.notFound().build();
     }
 }
