@@ -1,5 +1,6 @@
 package com.senac.br.farmacontroll.domain.entidade;
 
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,8 @@ public class Empresa {
     private String nomeFantasia;
 
     private String cnpj;
+
+    private EnumStatusEmpresa status = EnumStatusEmpresa.ATIVO;
 
     //OneToMany private sempre será uma LIST
     @OneToMany(mappedBy = "empresa")
