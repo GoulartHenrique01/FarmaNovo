@@ -5,7 +5,7 @@ import UsuarioForm from "../../components/UsuarioForm";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Usuario } from "@/app/types/usuario";
-import axios from "axios";
+import { consultaUsuarioPorId } from "@/app/services/usuarioService";
 
 // Obtém o usuário pelo código da rota e entrega os dados ao formulário de edição.
 export default function EditarUsuario() {
@@ -29,10 +29,10 @@ export default function EditarUsuario() {
     // Se a busca for concluída, prepara o formulário; se não, volta à listagem.
     const buscarDados = async () => {
 
-        const valorUsuarioBack = await axios.get<Usuario>('http://localhost:8080/usuarios/' + codigo);
+        const valorUsuarioBack = await consultaUsuarioPorId(codigo);
 
-        if (valorUsuarioBack.status == 200) {
-            setUsuario(valorUsuarioBack.data);
+        if (valorUsuarioBack) {
+            setUsuario(valorUsuarioBack);
         } else {
             router.push("/usuarios")
         }

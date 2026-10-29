@@ -1,7 +1,7 @@
 "use client";
 
+import { atualizarUsuario, salvarUsuario } from "@/app/services/usuarioService";
 import { Usuario, UsuarioFormProps } from "@/app/types/usuario";
-import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -39,28 +39,22 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
   const hanlderSalvar = async (formData: FormData) => {
     if (usuarioExistente) {
       // Atualiza o usuário identificado pelo seu ID.
-      var dadosRetorno = await axios.put<number>(
-        "http://localhost:8080/usuarios/" + usuario.id,
-        usuario
-      );
+      var dadosRetorno = await atualizarUsuario(usuario);
 
-      if (dadosRetorno.status == 200) {
+      if (dadosRetorno) {
         alert("Usuário salvo com sucesso");
       } else {
-        alert(dadosRetorno.data);
+        alert(dadosRetorno);
         return;
       }
     } else {
       // Cria um novo usuário na API.
-      var dadosRetorno = await axios.post<number>(
-        "http://localhost:8080/usuarios",
-        usuario
-      );
+      var dadosRetorno = await salvarUsuario(usuario);
 
-      if (dadosRetorno.status == 200) {
+      if (dadosRetorno) {
         alert("Usuário salvo com sucesso");
       } else {
-        alert(dadosRetorno.data);
+        alert(dadosRetorno);
         return;
       }
     }

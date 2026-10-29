@@ -28,7 +28,22 @@ public class SecurityConfiguration {
                                 "/webjars/**",
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**"
-                        ).permitAll()
+                        ).permitAll().requestMatchers("/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers("/empresas/**").hasRole("ADMIN")
+                        .requestMatchers("/receitas/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers("/medicamentos/**")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "FARMACEUTICO",
+                                "ATENDENTE"
+                        )
+
+                        .requestMatchers("/pacientes/**")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "FARMACEUTICO",
+                                "ATENDENTE"
+                        )
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
