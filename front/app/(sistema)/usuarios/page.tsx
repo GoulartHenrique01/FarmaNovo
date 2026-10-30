@@ -18,37 +18,43 @@ export default function Usuarios() {
   }, []);
 
   // Busca os usuários na API e atualiza a tabela; informa ao usuário em caso de falha.
-  const carregarDados = async () => {
+  const carregarDados = async ()=>{
+
     try {
-      const dados = await buscarListaUsuarios();
+        const dados = await buscarListaUsuarios();
 
-      setUsuarios(dados);
+        setUsuarios( dados);
+
     } catch (error) {
-      alert("Erro ao carregar usuarios!");
+        alert("Erro ao carregar dados!")
     }
-  };
+   
 
-  // Exclui o registro selecionado e recarrega a lista para refletir a alteração.
-  const handlerDeletarUsuario = async (usuario: Usuario) => {
-    var dadosRetorno = await deletarUsuario(usuario.id || 0);
+}
 
-    if (dadosRetorno == 200) {
-      alert("Usuário excluido com sucesso");
-    } else {
-      alert("Erro ao excluir usuario");
-      return;
+const handlerDeletarUsuario = async(usuario:Usuario) =>{
+
+    var dadosRetorno = await  deletarUsuario(usuario.id || 0);
+   
+    if(dadosRetorno==200){
+        alert("Excluido com sucesso!");
+    }else{
+        alert("Erro ao excluir usuário!");
+
+        return;
     }
+
     carregarDados();
-  };
 
-  // Troca o status entre ATIVO e BLOQUEADO
-  const handleAlterarStatusUsuario = async (usuario: Usuario) => {
-    
+}
+
+const handleAlterarStatusUsuario = async(usuario:Usuario) =>{
+
     await atualizarStatusUsuario(usuario);
 
-    // Atualiza a lista com o novo status retornado pela API.
     carregarDados();
-  };
+
+}
 
   // Renderiza a tabela e as ações disponíveis para cada usuário.
   return (

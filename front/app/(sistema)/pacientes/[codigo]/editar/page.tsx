@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import PacienteForm from "../../components/PacienteForm";
 import { useEffect, useState } from "react";
-import { Paciente } from "@/app/types/pacientes";
+import { Paciente } from "@/app/types/farmaceuticos";
 
 // Busca o paciente indicado na URL e abre o formulário com seus dados.
 export default function EditarPaciente(){

@@ -1,10 +1,10 @@
 "use client";
 
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Medicamento } from "@/app/types/medicamentos";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { buscarListaMedicamentos, deletarMedicamento } from "@/app/services/medicamentoService";
 
 export default function Medicamentos() {
   const router = useRouter();
@@ -28,11 +28,9 @@ export default function Medicamentos() {
   // Busca a lista atualizada na API.
   const carregarDados = async () => {
     try {
-      const dados = await axios.get<Medicamento[]>(
-        "http://localhost:8080/medicamentos",
-      );
+      const dados = await buscarListaMedicamentos();
 
-      setMedicamentos(dados.data);
+      setMedicamentos(dados);
     } catch (error) {
       alert("Erro ao carregar medicamentos!");
     }
@@ -40,14 +38,12 @@ export default function Medicamentos() {
 
   // Solicita confirmação antes da exclusão e atualiza a listagem ao concluir.
   const handlerDeletarMedicamento = async (medicamento: Medicamento) => {
-    var dadosRetorno = await axios.delete(
-      "http://localhost:8080/medicamentos/" + medicamento.id+ "/excluir"
-    );
+    var dadosRetorno = await deletarMedicamento(medicamento.id || 0);
 
-    if(dadosRetorno.status == 200){
+    if(dadosRetorno == 200){
       alert("Medicamento excluido com sucesso");
     }else{
-      alert(dadosRetorno.data);
+      alert("Erro ao excluir medicamento");
       return;
     }
     carregarDados();

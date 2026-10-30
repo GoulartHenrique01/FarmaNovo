@@ -36,7 +36,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
 
   // Persiste os dados: PUT quando há usuário existente e POST durante um novo cadastro.
   // O FormData é fornecido pelo atributo action do formulário; os valores são lidos do estado controlado.
-  const hanlderSalvar = async (formData: FormData) => {
+  const handlerSalvar = async (formData: FormData) => {
     if (usuarioExistente) {
       // Atualiza o usuário identificado pelo seu ID.
       var dadosRetorno = await atualizarUsuario(usuario);
@@ -64,7 +64,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
 
   // Cada input abaixo é controlado pelo estado e obrigatório para o envio.
   return (
-    <form action={hanlderSalvar} className="max-w-2xl mx-auto">
+    <form action={handlerSalvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">

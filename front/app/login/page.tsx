@@ -31,7 +31,7 @@ export default function Login() {
 
     return (
         <>
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-emerald-50 to-teal-100 p-4">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-white via-emerald-50 to-teal-100 p-4">
                 <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-emerald-100/50 p-8">
                     <div className="mb-8 text-center">
                         <h1 className="text-2xl font-bold text-teal-800">
@@ -64,7 +64,7 @@ export default function Login() {
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-teal-700 to-emerald-600 hover:from-teal-800 hover:to-emerald-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition-all duration-200"
+                            className="w-full bg-linear-to-r from-teal-700 to-emerald-600 hover:from-teal-800 hover:to-emerald-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition-all duration-200"
                         >
                             Entrar
                         </button>

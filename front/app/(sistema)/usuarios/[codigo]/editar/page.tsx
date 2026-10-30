@@ -27,13 +27,12 @@ export default function EditarUsuario() {
     }, []);
 
     // Se a busca for concluída, prepara o formulário; se não, volta à listagem.
-    const buscarDados = async () => {
+    const buscarDados =async() =>{
 
         const valorUsuarioBack = await consultaUsuarioPorId(codigo);
-
-        if (valorUsuarioBack) {
+        if(valorUsuarioBack){
             setUsuario(valorUsuarioBack);
-        } else {
+        }else{
             router.push("/usuarios")
         }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Paciente, PacienteFormProps } from "@/app/types/pacientes";
+import { Paciente, PacienteFormProps } from "@/app/types/farmaceuticos";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

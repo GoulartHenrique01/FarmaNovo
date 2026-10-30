@@ -1,7 +1,7 @@
 "use client";
 
+import { atualizarMedicamento, salvarMedicamento } from "@/app/services/medicamentoService";
 import { Medicamento, MedicamentoFormProps } from "@/app/types/medicamentos";
-import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -49,26 +49,20 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
   // Envia POST para cadastro ou PUT para edição e apresenta o resultado da operação.
   const handlerSalvar = async (formData : FormData) => {
     if (medicamentoExistente) {
-      var dadosRetorno = await axios.put<number>(
-        "http://localhost:8080/medicamentos/" + medicamento.id,
-        medicamento
-      );
+      var dadosRetorno = await atualizarMedicamento(medicamento);
 
-      if (dadosRetorno.status == 200){
+      if (dadosRetorno == 200){
         alert("Medicamento salvo com sucesso");
       }else{
-        alert(dadosRetorno.data);
+        alert(dadosRetorno);
         return;
       }
     }else{
-      var dadosRetorno = await axios.post<number>(
-        "http://localhost:8080/medicamentos", medicamento
-        );
-
-        if(dadosRetorno.status == 200){
+      var dadosRetorno = await salvarMedicamento(medicamento);
+        if(dadosRetorno == 200){
           alert("Medicamento salvo com sucesso");
         }else{
-          alert(dadosRetorno.data);
+          alert(dadosRetorno);
           return;
         }
     }

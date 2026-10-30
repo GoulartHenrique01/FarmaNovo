@@ -1,15 +1,12 @@
-// Modelo que reúne os dados pessoais e o status de um paciente.
-export class Paciente {
+// Modelo que reúne os dados pessoais e o status de um Farmaceutico.
+export class Farmaceutico {
     constructor(
         public id: number | null,
         public nome: string,
         public cpf: string,
-        public dataNascimento: string,
-        public sexo: string,
         public telefone: string,
         public email: string,
-        public alergias: string,
-        public observacoes: string,
+        public senha: string,
         public status: string
     )
     {
@@ -18,6 +15,6 @@ export class Paciente {
   }
 
 // Propriedade opcional que permite reutilizar o formulário para edição.
-export interface PacienteFormProps {
-        pacienteExistente?: Paciente;
+export interface FarmaceuticoFormProps {
+  farmaceuticoExistente?: Farmaceutico;
 }
