@@ -1,6 +1,6 @@
 'use client'
 
-import axios from "axios";
+import { consultaMedicamentoPorId } from "@/app/services/medicamentoService";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import MedicamentoForm from "../../components/MedicamentoForm";
@@ -21,10 +21,10 @@ export default function EditarMedicamentos() {
 
     // Carrega o medicamento ao entrar na página e retorna à listagem se houver falha.
     useEffect(() => {
-        axios.get<Medicamento>(`http://localhost:8080/medicamentos/${codigo}`)
-            .then((resposta) => setMedicamento({
-                ...resposta.data,
-                dataValidade: resposta.data.dataValidade?.slice(0, 10) ?? "",
+        consultaMedicamentoPorId(codigo)
+            .then((dados) => setMedicamento({
+                ...dados,
+                dataValidade: dados.dataValidade?.slice(0, 10) ?? "",
             }))
             .catch(() => router.push("/medicamentos"));
     }, [codigo, router]);

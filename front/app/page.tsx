@@ -748,7 +748,7 @@ export default function Page() {
                 </div>
 
                 <div className="mock-field">
-                  <label>Paciente</label>
+                  <label>Farmacêutico</label>
                   <div className="value">Marina Alves de Souza</div>
                 </div>
                 <div className="mock-field">
@@ -847,7 +847,7 @@ export default function Page() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12h6M9 16h6M9 8h1" /><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" /><path d="M14 3v5h5" /></svg>
                 </div>
                 <h3>Cadastro de receitas</h3>
-                <p>Registre receitas médicas em minutos, com paciente, prescritor e medicamentos organizados no sistema.</p>
+                <p>Registre receitas médicas em minutos, com dados do farmacêutico e dos medicamentos organizados no sistema.</p>
               </div>
 
               <div className="feature-card">
@@ -855,7 +855,7 @@ export default function Page() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
                 </div>
                 <h3>Consulta rápida</h3>
-                <p>Encontre qualquer receita pelo nome do paciente, do medicamento ou do médico, sem revirar arquivos.</p>
+                <p>Encontre qualquer receita pelo nome do farmacêutico, do medicamento ou do médico, sem revirar arquivos.</p>
               </div>
 
               <div className="feature-card">
@@ -905,7 +905,7 @@ export default function Page() {
               <div className="step">
                 <span className="step-num">01</span>
                 <h3>Cadastre a receita</h3>
-                <p>Insira os dados do paciente, do médico e dos medicamentos prescritos diretamente no sistema.</p>
+                <p>Insira os dados do farmacêutico, do médico e dos medicamentos prescritos diretamente no sistema.</p>
               </div>
               <div className="step">
                 <span className="step-num">02</span>

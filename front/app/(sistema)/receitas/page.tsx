@@ -1,7 +1,7 @@
 "use client";
 
 import { Receita } from "@/app/types/receitas";
-import axios from "axios";
+import { buscarListaReceitas, deletarReceita } from "@/app/services/receitaService";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,37 +12,37 @@ export default function Receitas() {
   // Registros que serão exibidos na tabela de receitas.
   const [receitas, setReceitas] = useState<Receita[]>([]);
 
-  // Carrega as receitas assim que a listagem é montada.
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
   // Busca a lista atualizada na API.
   const carregarDados = async () => {
     try {
-      const dados = await axios.get<Receita[]>(
-        "http://localhost:8080/receitas"
-      );
-
-      setReceitas(dados.data);
-    } catch (error) {
+      setReceitas(await buscarListaReceitas());
+    } catch {
       alert("Erro ao carregar receitas!");
     }
   };
 
+  // Carrega as receitas assim que a listagem é montada.
+  useEffect(() => {
+    buscarListaReceitas()
+      .then(setReceitas)
+      .catch(() => alert("Erro ao carregar receitas!"));
+  }, []);
+
   // Solicita confirmação antes da exclusão e atualiza a listagem ao concluir.
   const handlerDeletarReceita = async (receita: Receita) => {
-    var dadosRetorno = await axios.delete(
-      "http://localhost:8080/receitas/" + receita.id + "/excluir"
-    );
+    if (!confirm(`Excluir a receita ${receita.id}?`)) return;
 
-    if (dadosRetorno.status == 200) {
-      alert("Receita excluida com sucesso");
-    } else {
-      alert(dadosRetorno.data);
-      return;
+    try {
+      const status = await deletarReceita(receita.id || 0);
+      if (status !== 200) {
+        alert("Erro ao excluir receita!");
+        return;
+      }
+      alert("Receita excluída com sucesso!");
+      await carregarDados();
+    } catch {
+      alert("Erro ao excluir receita!");
     }
-    carregarDados();
   };
 
   // Exibe as receitas cadastradas e as ações disponíveis em cada linha.

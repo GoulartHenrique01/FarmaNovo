@@ -21,8 +21,8 @@ export default function Sidebar() {
         <Link href="/receitas" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-teal-700 hover:bg-teal-50 hover:text-teal-900 transition-colors">
             Receitas
         </Link>
-        <Link href="/pacientes" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-teal-700 hover:bg-teal-50 hover:text-teal-900 transition-colors">
-            Pacientes
+        <Link href="/farmaceuticos" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-teal-700 hover:bg-teal-50 hover:text-teal-900 transition-colors">
+            Farmacêuticos
         </Link>
     </nav>
 </aside>

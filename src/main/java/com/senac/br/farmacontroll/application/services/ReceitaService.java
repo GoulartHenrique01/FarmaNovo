@@ -28,6 +28,13 @@ public class ReceitaService {
     public ReceitaResponse salvarReceita(ReceitaRequest receita, Long id){
         if (id == 0L){
             Receita receitaBanco = new Receita();
+            receitaBanco.setDataEmissao(receita.dataEmissao());
+            receitaBanco.setDataValidade(receita.dataValidade());
+            receitaBanco.setDiagnostico(receita.diagnostico());
+            receitaBanco.setObservacoes(receita.observacoes());
+            receitaBanco.setTipo(receita.tipo());
+            receitaBanco.setStatus(EnumStatusReceita.ATIVO);
+            receitaRepository.save(receitaBanco);
 
             return new ReceitaResponse(receitaBanco);
         }else{
@@ -55,4 +62,3 @@ public class ReceitaService {
         return false;
     }
 }
-

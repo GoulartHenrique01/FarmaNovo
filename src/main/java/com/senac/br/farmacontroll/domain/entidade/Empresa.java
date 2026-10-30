@@ -24,6 +24,8 @@ public class Empresa {
 
     private String cnpj;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)")
     private EnumStatusEmpresa status = EnumStatusEmpresa.ATIVO;
 
     //OneToMany private sempre será uma LIST

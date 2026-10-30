@@ -35,6 +35,16 @@ public class MedicamentoService {
     public MedicamentoResponse salvarMedicamento(MedicamentoRequest medicamento, Long id){
         if(id == 0L){
             Medicamento medicamentoBanco = new Medicamento();
+            medicamentoBanco.setNome(medicamento.nome());
+            medicamentoBanco.setTipo(medicamento.tipo());
+            medicamentoBanco.setDataValidade(new DataValidade(medicamento.dataValidade()));
+            medicamentoBanco.setDosagem(medicamento.dosagem());
+            medicamentoBanco.setUnidadeDosagem(medicamento.unidadeDosagem());
+            medicamentoBanco.setQuantidade(medicamento.quantidade());
+            medicamentoBanco.setMarca(medicamento.marca());
+            medicamentoBanco.setPrecisaReceita(medicamento.precisaReceita());
+            medicamentoBanco.setStatus(EnumStatusMedicamento.ATIVO);
+            medicamentoRepository.save(medicamentoBanco);
 
             return new MedicamentoResponse(medicamentoBanco);
         }else{
@@ -74,4 +84,3 @@ public class MedicamentoService {
         return false;
     }
 }
-

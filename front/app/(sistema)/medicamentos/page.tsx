@@ -20,33 +20,39 @@ export default function Medicamentos() {
   // Dados que alimentam a tabela de estoque.
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
 
-  // Carrega os medicamentos assim que a listagem é montada.
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
   // Busca a lista atualizada na API.
   const carregarDados = async () => {
     try {
       const dados = await buscarListaMedicamentos();
 
       setMedicamentos(dados);
-    } catch (error) {
+    } catch {
       alert("Erro ao carregar medicamentos!");
     }
   };
 
+  // Carrega os medicamentos assim que a listagem é montada.
+  useEffect(() => {
+    buscarListaMedicamentos()
+      .then(setMedicamentos)
+      .catch(() => alert("Erro ao carregar medicamentos!"));
+  }, []);
+
   // Solicita confirmação antes da exclusão e atualiza a listagem ao concluir.
   const handlerDeletarMedicamento = async (medicamento: Medicamento) => {
-    var dadosRetorno = await deletarMedicamento(medicamento.id || 0);
+    if (!confirm(`Excluir o medicamento ${medicamento.nome}?`)) return;
 
-    if(dadosRetorno == 200){
-      alert("Medicamento excluido com sucesso");
-    }else{
-      alert("Erro ao excluir medicamento");
-      return;
+    try {
+      const status = await deletarMedicamento(medicamento.id || 0);
+      if (status !== 200) {
+        alert("Erro ao excluir medicamento!");
+        return;
+      }
+      alert("Medicamento excluído com sucesso!");
+      await carregarDados();
+    } catch {
+      alert("Erro ao excluir medicamento!");
     }
-    carregarDados();
   };
 
 
@@ -109,6 +115,9 @@ export default function Medicamentos() {
                     Precisa de Receita
                   </th>
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
+                    Status
+                  </th>
+                  <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
                     Ações
                   </th>
                 </tr>
@@ -153,19 +162,19 @@ export default function Medicamentos() {
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-600">
-                      {medicamento.status}
-                    </td>
-
-                    <td className="px-5 py-4 text-sm text-slate-600">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          medicamento.precisaReceita
+                          medicamento.precisaReceita === "SIM"
                             ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
                             : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
                         }`}
                       >
-                        {medicamento.precisaReceita ? "Sim" : "Não"}
+                        {medicamento.precisaReceita === "SIM" ? "Sim" : "Não"}
                       </span>
+                    </td>
+
+                    <td className="px-5 py-4 text-sm text-slate-600">
+                      {medicamento.status}
                     </td>
 
                     <td className="px-5 py-4">
@@ -191,7 +200,7 @@ export default function Medicamentos() {
                 {medicamentos.length === 0 && (
                   <tr>
                     <td
-                      colSpan={10}
+                      colSpan={11}
                       className="px-6 py-14 text-center text-sm text-slate-500"
                     >
                       Nenhum medicamento encontrado!

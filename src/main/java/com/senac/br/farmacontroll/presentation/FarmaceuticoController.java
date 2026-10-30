@@ -1,11 +1,13 @@
 package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.AtualizarStatusFarmaceuticoRequest;
+import com.senac.br.farmacontroll.application.DTOs.FarmaceuticoRequest;
 import com.senac.br.farmacontroll.application.DTOs.FarmaceuticoResponse;
 import com.senac.br.farmacontroll.application.services.FarmaceuticoService;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusFarmaceutico;
 import com.senac.br.farmacontroll.domain.entidade.Farmaceutico;
 import com.senac.br.farmacontroll.domain.repository.FarmaceuticoRepository;
+import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,10 +38,10 @@ public class FarmaceuticoController {
     @GetMapping("/{id}")
     @Operation(summary = "Método de busca de farmaceuticos!",
             description = "Método responsável em efetuar a busca de um farmaceutico especifico utilizando o ID!")
-    public ResponseEntity<Farmaceutico> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<FarmaceuticoResponse> buscarPorId(@PathVariable Long id){
         Farmaceutico farmaceuticoBanco = farmaceuticoRepository.findById(id).orElse(null);
         if (farmaceuticoBanco!=null){
-            return ResponseEntity.ok(farmaceuticoBanco);
+            return ResponseEntity.ok(new FarmaceuticoResponse(farmaceuticoBanco));
         }
         return ResponseEntity.notFound().build();
     }
@@ -48,22 +50,36 @@ public class FarmaceuticoController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Método de cadastro de Farmaceutico",
             description = "Método responsável em efetuar o cadastro de Farmaceutico!")
-    public ResponseEntity<Farmaceutico> criar(@RequestBody Farmaceutico farmaceutico){
-
-        var farmaceuticoBanco = farmaceuticoRepository.save(farmaceutico);
-        return ResponseEntity.ok(farmaceuticoBanco);
+    public ResponseEntity<?> criar(@RequestBody FarmaceuticoRequest farmaceutico){
+        try {
+            Farmaceutico farmaceuticoBanco = new Farmaceutico(farmaceutico);
+            farmaceuticoBanco.setStatus(EnumStatusFarmaceutico.ATIVO);
+            return ResponseEntity.ok(new FarmaceuticoResponse(farmaceuticoRepository.save(farmaceuticoBanco)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Método de edição de usuarios",
-            description = "Método responsável pela edição de usuarios cadastrados no sistema")
-    public ResponseEntity<Farmaceutico> atualizar(@PathVariable Long id, @RequestBody Farmaceutico farmaceutico){
-        try {
-            Farmaceutico farmaceuticoBanco = farmaceuticoRepository.findById(id).orElse(null);
+    @Operation(summary = "Método de edição de farmacêuticos",
+            description = "Método responsável pela edição de farmacêuticos cadastrados no sistema")
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody FarmaceuticoRequest farmaceutico){
+        Farmaceutico farmaceuticoBanco = farmaceuticoRepository.findById(id).orElse(null);
+        if (farmaceuticoBanco == null) {
             return ResponseEntity.notFound().build();
+        }
 
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+        try {
+            farmaceuticoBanco.setNome(farmaceutico.nome());
+            farmaceuticoBanco.setCpf(new CPF(farmaceutico.cpf()));
+            farmaceuticoBanco.setTelefone(farmaceutico.telefone());
+            farmaceuticoBanco.setEmail(farmaceutico.email());
+            if (farmaceutico.senha() != null && !farmaceutico.senha().isBlank()) {
+                farmaceuticoBanco.setSenha(farmaceutico.senha());
+            }
+            return ResponseEntity.ok(new FarmaceuticoResponse(farmaceuticoRepository.save(farmaceuticoBanco)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

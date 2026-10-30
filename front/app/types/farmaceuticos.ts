@@ -9,9 +9,7 @@ export class Farmaceutico {
         public senha: string,
         public status: string
     )
-    {
-
-    }
+    {}
   }
 
 // Propriedade opcional que permite reutilizar o formulário para edição.

@@ -34,6 +34,8 @@ public class Usuario implements UserDetails {
     private String senha;
     private String email;
     private String role = "ROLE_USER";
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)")
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
     //EAGER carrega a lista de registros instantaneamente
@@ -68,7 +70,10 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role));
+        String roleUsuario = this.role == null || this.role.isBlank()
+                ? "ROLE_USER"
+                : this.role;
+        return List.of(new SimpleGrantedAuthority(roleUsuario));
     }
 
     @Override

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import ReceitaForm from "../../components/ReceitaForm";
 import { useEffect, useState } from "react";
 import { Receita } from "@/app/types/receitas";
-import axios from "axios";
+import { consultaReceitaPorId } from "@/app/services/receitaService";
 
 // Busca a receita indicada na URL e abre o formulário com seus dados.
 export default function EditarReceita(){
@@ -22,23 +22,14 @@ export default function EditarReceita(){
 
     // Carrega os dados da receita ao abrir a página de edição.
     useEffect(() => {
-
-        buscarDados();
-
-    }, []);
-
-    // Busca a receita; se ela não puder ser carregada, retorna à listagem.
-    const buscarDados = async () => {
-
-        const valorUsuarioBack = await axios.get<Receita>('http://localhost:8080/receitas/' + codigo);
-
-        if (valorUsuarioBack.status == 200) {
-            setReceita(valorUsuarioBack.data);
-        } else {
-            router.push("/receitas")
-        }
-
-    }
+        consultaReceitaPorId(codigo)
+            .then((dados) => setReceita({
+                ...dados,
+                dataEmissao: dados.dataEmissao?.slice(0, 10) ?? "",
+                dataValidade: dados.dataValidade?.slice(0, 10) ?? "",
+            }))
+            .catch(() => router.push("/receitas"));
+    }, [codigo, router]);
 
     if (!receita) return (<div className="p-8">Carregando Dados...</div>)
 

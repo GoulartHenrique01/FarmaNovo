@@ -25,6 +25,8 @@ public class Farmaceutico {
     private String telefone;
     private String email;
     private String senha;
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)")
     private EnumStatusFarmaceutico status;
     private String role = "ROLE_FARMACEUTICO";
 
@@ -34,6 +36,7 @@ public class Farmaceutico {
         this.setSenha(farmaceutico.senha());
         this.setEmail(farmaceutico.email());
         this.setCpf(new CPF(farmaceutico.cpf()));
+        this.setTelefone(farmaceutico.telefone());
         this.setRole("ROLE_FARMACEUTICO");
     }
 }

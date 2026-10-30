@@ -12,9 +12,7 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
 
   const [medicamento, setMedicamento] = useState<Medicamento>(
     medicamentoExistente ||
-      new Medicamento(
-        null as unknown as number, "", "", "", "", "", "", "", "NAO", ""
-)
+      new Medicamento(null, "", "", "", 0, "", 0, "", "NAO", "ATIVO")
   );
 
   const handlerChange = (
@@ -36,9 +34,9 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
           campo === "nome" ? valor : valorAnterior.nome,
           campo === "tipo" ? valor : valorAnterior.tipo,
           campo === "dataValidade" ? valor : valorAnterior.dataValidade,
-          campo === "dosagem" ? valor : valorAnterior.dosagem,
+          campo === "dosagem" ? Number(valor) : valorAnterior.dosagem,
           campo === "unidadeDosagem" ? valor : valorAnterior.unidadeDosagem,
-          campo === "quantidade" ? valor : valorAnterior.quantidade,
+          campo === "quantidade" ? Number(valor) : valorAnterior.quantidade,
           campo === "marca" ? valor : valorAnterior.marca,
           campo === "precisaReceita" ? valor : valorAnterior.precisaReceita,
           valorAnterior.status
@@ -47,27 +45,22 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
   };
 
   // Envia POST para cadastro ou PUT para edição e apresenta o resultado da operação.
-  const handlerSalvar = async (formData : FormData) => {
-    if (medicamentoExistente) {
-      var dadosRetorno = await atualizarMedicamento(medicamento);
+  const handlerSalvar = async () => {
+    try {
+      const status = medicamentoExistente
+        ? await atualizarMedicamento(medicamento)
+        : await salvarMedicamento(medicamento);
 
-      if (dadosRetorno == 200){
-        alert("Medicamento salvo com sucesso");
-      }else{
-        alert(dadosRetorno);
+      if (status !== 200) {
+        alert("Erro ao salvar medicamento!");
         return;
       }
-    }else{
-      var dadosRetorno = await salvarMedicamento(medicamento);
-        if(dadosRetorno == 200){
-          alert("Medicamento salvo com sucesso");
-        }else{
-          alert(dadosRetorno);
-          return;
-        }
-    }
 
-    router.push("/medicamentos")
+      alert("Medicamento salvo com sucesso!");
+      router.push("/medicamentos");
+    } catch {
+      alert("Erro ao salvar medicamento. Verifique os dados informados.");
+    }
   };
 
   return (
@@ -121,7 +114,7 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
             type="number"
             step="0.01"
             name="dosagem"
-            value={medicamento.dosagem}
+            value={medicamento.dosagem || ""}
             required
             onChange={(e) => handlerChange("dosagem", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
@@ -148,7 +141,7 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
           <input
             type="number"
             name="quantidade"
-            value={medicamento.quantidade}
+            value={medicamento.quantidade || ""}
             required
             onChange={(e) => handlerChange("quantidade", e.target.value)}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
@@ -172,7 +165,7 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
           <input
             type="checkbox"
             name="precisaReceita"
-            value={medicamento.precisaReceita}
+            checked={medicamento.precisaReceita === "SIM"}
             onChange={(e) =>
               handlerChange("precisaReceita", e.target.checked ? "SIM" : "NAO")
             }

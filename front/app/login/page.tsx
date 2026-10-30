@@ -3,7 +3,6 @@
 import { useRouter } from "@/node_modules/next/navigation";
 import axios from "axios";
 import { LoginResponse } from "../types/auth";
-import Cookies from "js-cookie";
 
 export default function Login() {
     const router = useRouter();
@@ -15,11 +14,12 @@ export default function Login() {
         const emailTela = formData.get("email")?.toString() ?? ""
         const senhaTela = formData.get("senha")?.toString() ?? ""
 
-        var loginResposta = await axios.post<LoginResponse>("http://localhost:8080/auth/login",
+        const loginResposta = await axios.post<LoginResponse>("http://localhost:8080/auth/login",
             { email: emailTela, senha: senhaTela })
 
         if (loginResposta.status == 200) {
-            Cookies.set('token', loginResposta.data.token,{secure: true, expires: 7});
+            const secure = window.location.protocol === "https:" ? "; Secure" : "";
+            document.cookie = `token=${encodeURIComponent(loginResposta.data.token)}; Path=/; Max-Age=3600; SameSite=Lax${secure}`;
             router.push("/home")
         }else{
             alert("Login ou senha Invalido!")

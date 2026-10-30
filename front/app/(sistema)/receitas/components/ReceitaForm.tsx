@@ -1,11 +1,10 @@
 'use client'
 
 import { Receita, ReceitaFormProps } from "@/app/types/receitas";
-import axios from "axios";
+import { atualizarReceita, salvarReceita } from "@/app/services/receitaService";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Receitas from "../page";
 
 // Formulário reutilizável para cadastrar ou editar uma receita médica.
 export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
@@ -39,34 +38,22 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
 
     // Envia PUT para editar ou POST para cadastrar e informa o resultado da operação.
     // Os dados enviados vêm do estado controlado pelos campos do formulário.
-    const handlerSalvar = async (formData: FormData) => {
-      if (receitaExistente){
-        var dadosRetorno = await axios.put<number>(
-          "http://localhost:8080/receitas/" + receita.id,
-          receita
-        );
+    const handlerSalvar = async () => {
+      try {
+        const status = receitaExistente
+          ? await atualizarReceita(receita)
+          : await salvarReceita(receita);
 
-        if(dadosRetorno.status == 200){
-          alert("Receita salva com sucesso");
-        }else{
-          alert(dadosRetorno.data);
+        if (status !== 200) {
+          alert("Erro ao salvar receita!");
           return;
         }
-      }else{
-        var dadosRetorno = await axios.post<number>(
-          "http://localhost:8080/receitas",
-          receita
-        );
 
-        if(dadosRetorno.status == 200){
-          alert("Receita salva com sucesso");
-        }else{
-          alert(dadosRetorno.data)
-          return;
-        }
+        alert("Receita salva com sucesso!");
+        router.push("/receitas");
+      } catch {
+        alert("Erro ao salvar receita. Verifique os dados informados.");
       }
-
-      router.push("/receitas")
     };
 
   return (

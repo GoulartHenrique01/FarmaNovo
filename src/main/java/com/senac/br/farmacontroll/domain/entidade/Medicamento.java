@@ -30,6 +30,8 @@ public class Medicamento {
     private int quantidade;
     private String marca;
     private String precisaReceita;
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)")
     private EnumStatusMedicamento status;
 
 

@@ -1,23 +1,22 @@
-'use client'
+'use client';
 
-import axios from "axios"
-import Cookies from "js-cookie";
-
+import axios from "axios";
 
 const api = axios.create({
-    baseURL:'http://localhost:8080'
+    baseURL: "http://localhost:8080",
 });
 
+api.interceptors.request.use((config) => {
+    const token = document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith("token="))
+        ?.slice("token=".length);
 
-api.interceptors.request.use(
-    (config) => {
-        const token = Cookies.get("token");
-
-        if(token){
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
+    if (token) {
+        config.headers.Authorization = `Bearer ${decodeURIComponent(token)}`;
     }
-    );
+
+    return config;
+});
 
 export default api;
