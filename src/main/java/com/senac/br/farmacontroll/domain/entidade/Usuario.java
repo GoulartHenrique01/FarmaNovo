@@ -34,7 +34,6 @@ public class Usuario implements UserDetails {
     private String senha;
     private String email;
     private String role = "ROLE_FARMACEUTICO";
-    @Enumerated
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
     //EAGER carrega a lista de registros instantaneamente
