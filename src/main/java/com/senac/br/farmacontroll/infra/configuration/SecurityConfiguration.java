@@ -3,6 +3,7 @@ package com.senac.br.farmacontroll.infra.configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,7 +29,9 @@ public class SecurityConfiguration {
                                 "/webjars/**",
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**"
-                        ).permitAll().requestMatchers("/usuarios/**").hasRole("ADMIN")
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/admin").permitAll()
+                        .requestMatchers("/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/empresas/**").hasRole("ADMIN")
                         .requestMatchers("/receitas/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers("/medicamentos/**")

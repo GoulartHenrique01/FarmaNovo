@@ -54,9 +54,9 @@ public class UsuarioService {
 
     public CriarAdminResponse criarAdmin(CriarAdminRequest criarAdminRequest) {
 
-        if(!criarAdminRequest.secretKey().equals(secret)){
-            return new CriarAdminResponse(0L,"Usuario Salvo com sucesso!");
-
+        if (criarAdminRequest.secretKey() == null
+                || !secret.equals(criarAdminRequest.secretKey())) {
+            throw new IllegalArgumentException("Chave de cadastro inválida.");
         }
 
         Usuario usuarioAdminSalvar = new Usuario(criarAdminRequest);
