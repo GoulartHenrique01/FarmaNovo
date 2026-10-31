@@ -76,6 +76,7 @@ public class UsuarioService {
         //Novo Usuario
         if (id == 0L){
             Usuario usuarioBanco = new Usuario(usuario);
+            usuarioRepository.save(usuarioBanco);
 
             return new UsuarioResponse(usuarioBanco);
             //Usuario Existente
