@@ -25,9 +25,7 @@ public class Farmaceutico {
     private String telefone;
     private String email;
     private String senha;
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(255)")
-    private EnumStatusFarmaceutico status;
+    private EnumStatusFarmaceutico status =  EnumStatusFarmaceutico.ATIVO;
     private String role = "ROLE_FARMACEUTICO";
 
 

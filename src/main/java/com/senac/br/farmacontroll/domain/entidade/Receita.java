@@ -23,7 +23,5 @@ public class Receita {
     private String diagnostico;
     private String observacoes;
     private String tipo;
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(255)")
-    private EnumStatusReceita status;
+    private EnumStatusReceita status = EnumStatusReceita.ATIVO;
 }

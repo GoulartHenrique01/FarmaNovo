@@ -47,6 +47,7 @@ public class UsuarioService {
         }
         return (usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
                 .stream()
+                //Chama o construtor para construir o usuario response
                 .map(UsuarioResponse::new)
                 .toList());
     }
@@ -92,7 +93,7 @@ public class UsuarioService {
         return null;
     }
 
-    public UsuarioResponse buscarPorId(Long id) {
+    public UsuarioResponse buscarPorId(Long id){
 
         var usuario = usuarioRepository.findById(id).orElse(null);
         if(usuario == null){
@@ -109,5 +110,17 @@ public class UsuarioService {
           return true;
     }
         return false;
+    }
+
+    public UsuarioResponse BuscarUsuarioLogado() {
+        try {
+            var usuarioLogado = getUsuarioLogado();
+            return usuarioRepository.findById(usuarioLogado.id()).
+                    stream()
+                    .map(UsuarioResponse::new)
+                    .findFirst().orElse(null);
+        }catch (Exception e){
+            throw new RuntimeException("Erro ao buscar usuario logado");
+        }
     }
 }

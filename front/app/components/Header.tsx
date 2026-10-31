@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { store } from "../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/slices/authSlice";
+import { RootState } from "../redux/store";
 
 export default function Header() {
+
+    const usuario = useSelector((state: RootState) => state.auth.usuario);
+    const dispatch = useDispatch();
+
     // Guarda a preferência de tema aplicada ao documento.
     const [darkMode, setDarkMode] = useState(false);
 
@@ -34,7 +42,7 @@ export default function Header() {
                         </div>
                     </div>
                     <span className={`text-sm font-semibold sm:text-base ${darkMode ? "text-slate-100" : "text-gray-700"}`}>
-                        Usuário Henrique Goulart
+                        {usuario?.nome.toLocaleUpperCase()|| 'Usuario não identificado!'}
                     </span>
                 </div>
 
@@ -47,7 +55,12 @@ export default function Header() {
                         {darkMode ? "Modo claro" : "Modo dark"}
                     </button>
 
-                    <button className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 ${darkMode ? "border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 focus:ring-red-400" : "border-red-200 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 hover:text-red-700 focus:ring-red-200"}`}>
+                    <button 
+                    onClick={()=>{
+                        dispatch(logout());
+                    }
+                    }
+                    className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 ${darkMode ? "border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 focus:ring-red-400" : "border-red-200 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 hover:text-red-700 focus:ring-red-200"}`}>
                         Sair
                     </button>
                 </div>

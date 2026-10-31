@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Provider } from "react-redux";
+import StoreProvider from "./redux/StoreProvider";
 
 // Registra as fontes disponibilizadas pelo Next.js para uso global no CSS.
 const geistSans = Geist({
@@ -26,7 +28,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className= "h-full"
     >
-      <body>{children}</body>
+      {/* Tudo que esta dentro do body, é acessivel pelo contexto */}
+      <body>
+        <StoreProvider>
+        {children}
+        </StoreProvider>
+      </body>
     </html>
   );
 }
