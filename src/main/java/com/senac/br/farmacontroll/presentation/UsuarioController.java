@@ -23,14 +23,16 @@ public class UsuarioController {
     @Autowired
     UsuarioService usuarioService;
 
-    @GetMapping
-    /*Esse @Operation também é do Swagger/OpenAPI, mas ele serve para documentar uma operação específica da API,
-    enquanto o @Tag organiza o controller em um grupo.*/
-    @Operation(summary = "Método de consulta de lista de usuários!",
-            description = "Método responsável em efetuar a consulta de todos os usuários sem filtro!")
-    public ResponseEntity<List<UsuarioResponse>> listarTodos(){
+    @PostMapping("/admin")
+    public ResponseEntity<CriarAdminResponse> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){
 
-        return ResponseEntity.ok(usuarioService.listarTodosUsuariosTable());
+        try{
+            CriarAdminResponse respostaSalvar = usuarioService.criarAdmin(criarAdminRequest);
+            return ResponseEntity.ok(respostaSalvar);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -47,17 +49,14 @@ public class UsuarioController {
         return  ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/admin")
-    public ResponseEntity<CriarAdminResponse> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){
+    @GetMapping
+    /*Esse @Operation também é do Swagger/OpenAPI, mas ele serve para documentar uma operação específica da API,
+    enquanto o @Tag organiza o controller em um grupo.*/
+    @Operation(summary = "Método de consulta de lista de usuários!",
+            description = "Método responsável em efetuar a consulta de todos os usuários sem filtro!")
+    public ResponseEntity<List<UsuarioResponse>> listarTodos(){
 
-        try{
-            CriarAdminResponse respostaSalvar = usuarioService.criarAdmin(criarAdminRequest);
-            return ResponseEntity.ok(respostaSalvar);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
-
+        return ResponseEntity.ok(usuarioService.listarTodosUsuariosTable());
     }
 
     /*Acesso -> saida -> Nome -> Entrada*/
@@ -69,7 +68,6 @@ public class UsuarioController {
 
         try {
         UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario, 0L);
-
         return ResponseEntity.ok(usuarioBanco);
     }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -79,6 +77,8 @@ public class UsuarioController {
 
     /* Quando o cliente precisa atualizar apenas alguns atributos (ex: mudar apenas o e-mail de um usuário)*/
     @PatchMapping("/{id}/status")
+    @Operation(summary = "Método de edição do Status!",
+            description = "Método responsável em editar o Status do Usuario!")
     public ResponseEntity<Void> atualizarStatus(@PathVariable Long id, @RequestBody AtualizarStatusRequest statusRequest){
         var atualizarUsuario = usuarioService.atualizarStatus(statusRequest.status(),id);
 
