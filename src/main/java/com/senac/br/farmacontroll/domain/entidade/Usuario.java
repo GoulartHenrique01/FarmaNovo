@@ -33,7 +33,7 @@ public class Usuario implements UserDetails {
     private CPF cpf;
     private String senha;
     private String email;
-    private String role = "ROLE_FARMACEUTICO";
+    private String role = "ROLE_USER";
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
     //EAGER carrega a lista de registros instantaneamente

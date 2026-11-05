@@ -10,12 +10,13 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 public class UsuarioController {
 
@@ -32,45 +33,41 @@ public class UsuarioController {
     private PasswordField txtSenha;
 
     @FXML
-    public void salvarUsuario(ActionEvent event) {
-        String jsonRequest = "{\n"
-                + "  \"nome\": " + jsonString(txtNome.getText()) + ",\n"
-                + "  \"email\": " + jsonString(txtEmail.getText()) + ",\n"
-                + "  \"senha\": " + jsonString(txtSenha.getText()) + ",\n"
-                + "  \"cpf\": " + jsonString(txtCpf.getText()) + ",\n"
-                + "  \"secretKey\": " + jsonString("sakjbhaskjcdhaiubshLKVAShfbdw68asd65d") + "\n"
-                + "}";
+    public void salvarUsuario(ActionEvent event) throws Exception {
 
-        ApiResponse respostaApi;
-        try {
-            respostaApi = executaMetodoAPI(
-                    "http://localhost:8080/usuarios/admin", jsonRequest, "POST");
-        } catch (IOException e) {
-            showMessage(Alert.AlertType.ERROR,
-                    "Não foi possível conectar à API para salvar o usuário: " + e.getMessage());
-            return;
+
+        //Validar Dados
+
+        String jsonRequest = String.format("{\n" +
+                        "  \"nome\": \"%s\",\n" +
+                        "  \"email\": \"%s\",\n" +
+                        "  \"senha\": \"%s\",\n" +
+                        "  \"cpf\": \"%s\",\n" +
+                        "  \"secretKey\": \"%s\"\n" +
+                        "}", txtNome.getText(),
+                txtEmail.getText(),
+                txtSenha.getText(),
+                txtCpf.getText(),
+                "sakjbhaskjcdhaiubshLKVAShfbdw68asd65d");
+
+        int respostaApi = executaMetodoAPI("http://localhost:8080/usuarios/admin",jsonRequest,"POST");
+
+
+        if(respostaApi ==200){
+            showMessage(Alert.AlertType.INFORMATION,"Usuario salv com sucesso!");
+            voltar(event);
+
+        }else {
+            showMessage(Alert.AlertType.ERROR,"Erro ao salvar usuário!");
         }
 
-        if (respostaApi.statusCode() == HttpURLConnection.HTTP_OK) {
-            showMessage(Alert.AlertType.INFORMATION, "Usuário salvo com sucesso!");
-            try {
-                voltar(event);
-            } catch (IOException e) {
-                showMessage(Alert.AlertType.ERROR,
-                        "Usuário salvo, mas não foi possível voltar ao menu: " + e.getMessage());
-            }
-        } else {
-            String detalhe = respostaApi.body().isBlank() ? "" : "\n" + respostaApi.body();
-            showMessage(Alert.AlertType.ERROR,
-                    "Erro ao salvar usuário (HTTP " + respostaApi.statusCode() + ")." + detalhe);
-        }
     }
 
 
     @FXML
     public void voltar(ActionEvent event) throws IOException {
         FXMLLoader loader =
-                new FXMLLoader(getClass().getResource("/com/senac/br/back/menu-view.fxml"));
+                new FXMLLoader(getClass().getResource("/com/example/back/menu-view.fxml"));
 
         Scene scene = new Scene(loader.load());
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -78,60 +75,37 @@ public class UsuarioController {
 
     }
 
-    private ApiResponse executaMetodoAPI(String url, String json, String protocoloHttp)
-            throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-        try {
-            connection.setRequestMethod(protocoloHttp);
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(10000);
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    private int executaMetodoAPI(String url,String json,String protocoloHttp)
+            throws Exception {
 
-            try (OutputStream os = connection.getOutputStream()) {
-                os.write(json.getBytes(StandardCharsets.UTF_8));
+
+        URL urlAPI = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) urlAPI.openConnection();
+        connection.setRequestMethod(protocoloHttp);
+        connection.setDoOutput(true);
+
+
+        if(!json.isEmpty()){
+            connection.setRequestProperty("Content-Type","application/json");
+
+            try (OutputStream os = connection.getOutputStream()){
+                os.write(json.getBytes());
             }
 
-            int statusCode = connection.getResponseCode();
-            InputStream responseStream = statusCode >= HttpURLConnection.HTTP_BAD_REQUEST
-                    ? connection.getErrorStream()
-                    : connection.getInputStream();
-            String body = "";
-            if (responseStream != null) {
-                try (responseStream) {
-                    body = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8).trim();
-                }
-            }
-            return new ApiResponse(statusCode, body);
-        } finally {
-            connection.disconnect();
         }
-    }
 
-    private String jsonString(String value) {
-        StringBuilder json = new StringBuilder("\"");
-        for (char character : value.toCharArray()) {
-            switch (character) {
-                case '"' -> json.append("\\\"");
-                case '\\' -> json.append("\\\\");
-                case '\b' -> json.append("\\b");
-                case '\f' -> json.append("\\f");
-                case '\n' -> json.append("\\n");
-                case '\r' -> json.append("\\r");
-                case '\t' -> json.append("\\t");
-                default -> {
-                    if (character < 0x20) {
-                        json.append(String.format("\\u%04x", (int) character));
-                    } else {
-                        json.append(character);
-                    }
-                }
-            }
-        }
-        return json.append('"').toString();
-    }
+//        var  br = new BufferedReader(new InputStreamReader((connection.getInputStream())));
+//       var sb = new StringBuilder();
+//        String output;
+//        while ((output = br.readLine()) != null) {
+//            sb.append(output);
+//        }
+//
+//        var retornoBody = sb.toString();
 
-    private record ApiResponse(int statusCode, String body) {
+        return connection.getResponseCode();
+
+
     }
     private void showMessage(Alert.AlertType type, String msg){
         Alert alerta =new Alert(type);
@@ -140,5 +114,4 @@ public class UsuarioController {
         alerta.setContentText(msg);
         alerta.showAndWait();
     }
-
 }
