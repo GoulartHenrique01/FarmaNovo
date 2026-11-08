@@ -21,6 +21,7 @@ public class ReceitaService {
 
         return (receitaRepository.findAll()
                 .stream()
+                .filter(receita -> receita.getStatus() != EnumStatusReceita.EXCLUIDO)
                 .map(ReceitaResponse::new)
                 .toList());
     }

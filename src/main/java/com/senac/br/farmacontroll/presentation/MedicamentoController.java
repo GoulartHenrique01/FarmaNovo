@@ -74,6 +74,9 @@ public class MedicamentoController {
                                                  @RequestBody MedicamentoRequest medicamento){
         try {
             MedicamentoResponse medicamentoBanco = medicamentoService.salvarMedicamento(medicamento,id);
+            if (medicamentoBanco == null) {
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok(medicamentoBanco);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());

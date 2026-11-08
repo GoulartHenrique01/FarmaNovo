@@ -37,6 +37,7 @@ public class JwtFilter extends OncePerRequestFilter{
                 || uri.startsWith("webjars")
                 || uri.startsWith("/auth/login")
                 || (uri.equals("/usuarios/admin") && "POST".equals(method))
+                || (uri.equals("/empresas") && "POST".equals(method))
         ){
             filterChain.doFilter(request,response);
             return;

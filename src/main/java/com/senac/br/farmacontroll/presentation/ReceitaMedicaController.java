@@ -50,6 +50,9 @@ public class ReceitaMedicaController {
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ReceitaRequest receita){
         try {
             ReceitaResponse receitaBanco = receitaService.salvarReceita(receita, id);
+            if (receitaBanco == null) {
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok(receitaBanco);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());

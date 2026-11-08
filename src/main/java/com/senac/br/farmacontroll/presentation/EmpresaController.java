@@ -3,6 +3,7 @@ package com.senac.br.farmacontroll.presentation;
 import com.senac.br.farmacontroll.application.DTOs.EmpresaRequest;
 import com.senac.br.farmacontroll.application.DTOs.EmpresaResponse;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa;
+import com.senac.br.farmacontroll.application.DTOs.UsuarioRequest;
 import com.senac.br.farmacontroll.application.services.EmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +47,23 @@ public class EmpresaController {
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody EmpresaRequest empresa){
         try {
             EmpresaResponse empresaBanco = empresaService.salvarEmpresa(empresa, id);
+            if (empresaBanco == null) {
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok(empresaBanco);
         }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/administrador")
+    public ResponseEntity<?> criarAdministrador(
+            @PathVariable Long id,
+            @RequestBody UsuarioRequest administrador
+    ) {
+        try {
+            return ResponseEntity.ok(empresaService.criarAdministrador(id, administrador));
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

@@ -1,5 +1,8 @@
 package com.senac.br.farmacontroll.domain.valueObject;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class CPF {
 
     private String cpf;

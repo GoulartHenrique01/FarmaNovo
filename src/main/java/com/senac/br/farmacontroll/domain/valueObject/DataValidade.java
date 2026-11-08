@@ -1,12 +1,16 @@
 package com.senac.br.farmacontroll.domain.valueObject;
 
-import org.springframework.cglib.core.Local;
+import jakarta.persistence.Embeddable;
 
 import java.time.LocalDate;
 
+@Embeddable
 public class DataValidade {
 
     private LocalDate valor;
+
+    public DataValidade() {
+    }
 
     public DataValidade(LocalDate valor){
         if (valor == null){

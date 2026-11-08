@@ -3,7 +3,7 @@
 import Link from "next/link";
 import UsuarioForm from "../../components/UsuarioForm";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Usuario } from "@/app/types/usuario";
 import { consultaUsuarioPorId } from "@/app/services/usuarioService";
 
@@ -19,24 +19,26 @@ export default function EditarUsuario() {
     // Mantém a tela em estado de carregamento até a API responder.
     const [usuario, setUsuario] = useState<Usuario | null>(null)
 
-    // Busca os dados do usuário ao abrir a tela de edição.
-    useEffect(() => {
-
-        buscarDados();
-
-    }, []);
-
     // Se a busca for concluída, prepara o formulário; se não, volta à listagem.
-    const buscarDados =async() =>{
-
-        const valorUsuarioBack = await consultaUsuarioPorId(codigo);
-        if(valorUsuarioBack){
-            setUsuario(valorUsuarioBack);
-        }else{
+    const buscarDados = useCallback(async () => {
+        try {
+            const valorUsuarioBack = await consultaUsuarioPorId(codigo);
+            if (valorUsuarioBack) {
+                setUsuario(valorUsuarioBack);
+            } else {
+                router.push("/usuarios");
+            }
+        } catch {
             router.push("/usuarios")
         }
+    }, [codigo, router]);
 
-    }
+    // Busca os dados do usuário ao abrir a tela de edição.
+    useEffect(() => {
+        // The component updates only after the asynchronous API response arrives.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        void buscarDados();
+    }, [buscarDados]);
 
     if (!usuario) return (<div className="p-8">Carregando Dados...</div>)
 

@@ -2,11 +2,14 @@ package com.senac.br.farmacontroll.application.services;
 
 import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
+import com.senac.br.farmacontroll.domain.entidade.Empresa;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
+import com.senac.br.farmacontroll.domain.repository.EmpresaRepository;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private EmpresaRepository empresaRepository;
 
     @Value("${spring.secretkey}")
     private String secret;
@@ -39,17 +45,25 @@ public class UsuarioService {
 
         var usuarioLogado = getUsuarioLogado();
 
-        if(usuarioLogado.empresa_id() == null){
+        if (isEmpresaAdmin(usuarioLogado)) {
+            return usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
+                    .stream()
+                    .filter(usuario -> EnumStatusUsuario.EXCLUIDO != usuario.getStatus())
+                    .filter(usuario -> usuario.getEmpresa() != null
+                            && usuarioLogado.empresa_id().equals(usuario.getEmpresa().getId()))
+                    .filter(usuario -> "ROLE_USER".equals(usuario.getRole()))
+                    .map(UsuarioResponse::new)
+                    .toList();
+        }
+
+        if (isAdmin(usuarioLogado) && usuarioLogado.empresa_id() == null) {
             return (usuarioRepository.findAll()
                     .stream()
+                    .filter(usuario -> usuario.getStatus() != EnumStatusUsuario.EXCLUIDO)
                     .map(UsuarioResponse::new)
                     .toList());
         }
-        return (usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
-                .stream()
-                //Chama o construtor para construir o usuario response
-                .map(UsuarioResponse::new)
-                .toList());
+        throw new AccessDeniedException("Usuário sem permissão para gerenciar usuários.");
     }
 
     public CriarAdminResponse criarAdmin(CriarAdminRequest criarAdminRequest) {
@@ -75,18 +89,37 @@ public class UsuarioService {
 
         //Novo Usuario
         if (id == 0L){
-            Usuario usuarioBanco = new Usuario(usuario);
+            if (usuarioRepository.existsByEmail(usuario.email())) {
+                throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
+            }
+            Usuario usuarioBanco;
+            if (isEmpresaAdmin(usuarioLogado)) {
+                Empresa empresa = empresaRepository.findById(usuarioLogado.empresa_id())
+                        .orElseThrow(() -> new AccessDeniedException(
+                                "Empresa do usuário autenticado não encontrada."));
+                usuarioBanco = new Usuario(usuario, empresa);
+            } else if (isAdmin(usuarioLogado) && usuarioLogado.empresa_id() == null) {
+                usuarioBanco = new Usuario(usuario);
+            } else {
+                throw new AccessDeniedException("Usuário sem permissão para cadastrar usuários.");
+            }
             usuarioRepository.save(usuarioBanco);
 
             return new UsuarioResponse(usuarioBanco);
             //Usuario Existente
         }else{
             Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-            if (usuarioBanco!= null){
+            if (usuarioBanco != null && usuarioDentroDoEscopo(usuarioBanco, usuarioLogado)) {
+                if (!usuarioBanco.getEmail().equals(usuario.email())
+                        && usuarioRepository.existsByEmailAndIdNot(usuario.email(), id)) {
+                    throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
+                }
                 usuarioBanco.setNome(usuario.nome());
                 usuarioBanco.setCpf(new CPF(usuario.cpf()));
                 usuarioBanco.setEmail(usuario.email());
-                usuarioBanco.setSenha(usuario.senha());
+                if (usuario.senha() != null && !usuario.senha().isBlank()) {
+                    usuarioBanco.setSenha(usuario.senha());
+                }
                 usuarioRepository.save(usuarioBanco);
                 return  new UsuarioResponse(usuarioBanco);
             }
@@ -96,21 +129,45 @@ public class UsuarioService {
 
     public UsuarioResponse buscarPorId(Long id){
 
+        var usuarioLogado = getUsuarioLogado();
         var usuario = usuarioRepository.findById(id).orElse(null);
-        if(usuario == null){
+        if (usuario == null || !usuarioDentroDoEscopo(usuario, usuarioLogado)) {
             return null;
         }
         return new UsuarioResponse(usuario);
     }
 
     public boolean atualizarStatus(EnumStatusUsuario status, Long id) {
+        var usuarioLogado = getUsuarioLogado();
         Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-        if (usuarioBanco!= null){
+        if (usuarioBanco != null && usuarioDentroDoEscopo(usuarioBanco, usuarioLogado)) {
             usuarioBanco.setStatus(status);
             usuarioRepository.save(usuarioBanco);
-          return true;
-    }
+            return true;
+        }
         return false;
+    }
+
+    private boolean usuarioDentroDoEscopo(Usuario usuario, UsuarioLogado usuarioLogado) {
+        if (isAdmin(usuarioLogado) && usuarioLogado.empresa_id() == null) {
+            return true;
+        }
+
+        return isEmpresaAdmin(usuarioLogado)
+                && usuario.getEmpresa() != null
+                && usuario.getEmpresa().getId().equals(usuarioLogado.empresa_id())
+                && "ROLE_USER".equals(usuario.getRole());
+    }
+
+    private boolean isAdmin(UsuarioLogado usuarioLogado) {
+        return usuarioLogado.authorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private boolean isEmpresaAdmin(UsuarioLogado usuarioLogado) {
+        return usuarioLogado.empresa_id() != null
+                && usuarioLogado.authorities().stream()
+                .anyMatch(authority -> "ROLE_EMPRESA_ADMIN".equals(authority.getAuthority()));
     }
 
     public UsuarioResponse BuscarUsuarioLogado() {

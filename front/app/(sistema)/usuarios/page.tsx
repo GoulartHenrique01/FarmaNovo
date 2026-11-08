@@ -4,7 +4,7 @@ import { atualizarStatusUsuario, buscarListaUsuarios, deletarUsuario } from "@/a
 import { Usuario } from "@/app/types/usuario";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Usuarios() {
   const router = useRouter();
@@ -12,29 +12,26 @@ export default function Usuarios() {
   // Dados exibidos na tabela de usuários.
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
-  // Carrega a listagem uma vez quando a tela é montada.
-  useEffect(() => {
-    carregarDados();
+  // Busca os usuários na API e atualiza a tabela; informa ao usuário em caso de falha.
+  const carregarDados = useCallback(async () => {
+    try {
+      const dados = await buscarListaUsuarios();
+      setUsuarios(dados);
+    } catch {
+      alert("Erro ao carregar dados!");
+    }
   }, []);
 
-  // Busca os usuários na API e atualiza a tabela; informa ao usuário em caso de falha.
-  const carregarDados = async ()=>{
+  // Carrega a listagem uma vez quando a tela é montada.
+  useEffect(() => {
+    // The component updates only after the asynchronous API response arrives.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void carregarDados();
+  }, [carregarDados]);
 
-    try {
-        const dados = await buscarListaUsuarios();
+  const handlerDeletarUsuario = async (usuario: Usuario) => {
 
-        setUsuarios( dados);
-
-    } catch (error) {
-        alert("Erro ao carregar dados!")
-    }
-   
-
-}
-
-const handlerDeletarUsuario = async(usuario:Usuario) =>{
-
-    var dadosRetorno = await  deletarUsuario(usuario.id || 0);
+    const dadosRetorno = await deletarUsuario(usuario.id || 0);
    
     if(dadosRetorno==200){
         alert("Excluido com sucesso!");
@@ -44,7 +41,7 @@ const handlerDeletarUsuario = async(usuario:Usuario) =>{
         return;
     }
 
-    carregarDados();
+    await carregarDados();
 
 }
 
@@ -52,7 +49,7 @@ const handleAlterarStatusUsuario = async(usuario:Usuario) =>{
 
     await atualizarStatusUsuario(usuario);
 
-    carregarDados();
+    await carregarDados();
 
 }
 

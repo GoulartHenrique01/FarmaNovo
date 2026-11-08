@@ -36,10 +36,10 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
 
   // Persiste os dados: PUT quando há usuário existente e POST durante um novo cadastro.
   // O FormData é fornecido pelo atributo action do formulário; os valores são lidos do estado controlado.
-  const handlerSalvar = async (formData: FormData) => {
+  const handlerSalvar = async () => {
     if (usuarioExistente) {
       // Atualiza o usuário identificado pelo seu ID.
-      var dadosRetorno = await atualizarUsuario(usuario);
+      const dadosRetorno = await atualizarUsuario(usuario);
 
       if (dadosRetorno) {
         alert("Usuário salvo com sucesso");
@@ -49,7 +49,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
       }
     } else {
       // Cria um novo usuário na API.
-      var dadosRetorno = await salvarUsuario(usuario);
+      const dadosRetorno = await salvarUsuario(usuario);
 
       if (dadosRetorno) {
         alert("Usuário salvo com sucesso");
@@ -62,7 +62,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
     router.push("/usuarios");
   };
 
-  // Cada input abaixo é controlado pelo estado e obrigatório para o envio.
+  // Cada input abaixo é controlado pelo estado; senha só é obrigatória no cadastro.
   return (
     <form action={handlerSalvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
@@ -113,9 +113,10 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
           <input
             name="senha"
             type="password"
-            value={usuario.senha}
-            required
+            value={usuario.senha || ""}
+            required={!usuarioExistente}
             onChange={(e) => handlerChange("senha", e.target.value)}
+            placeholder={usuarioExistente ? "Deixe em branco para manter a senha atual" : ""}
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>

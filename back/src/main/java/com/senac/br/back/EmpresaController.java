@@ -66,7 +66,7 @@ public class EmpresaController {
     public void voltar(ActionEvent event) throws IOException {
 
         FXMLLoader loader =
-                new FXMLLoader(getClass().getResource("/com/example/back/menu-view.fxml"));
+                new FXMLLoader(getClass().getResource("/com/senac/br/back/menu-view.fxml"));
 
         Scene scene = new Scene(loader.load());
 

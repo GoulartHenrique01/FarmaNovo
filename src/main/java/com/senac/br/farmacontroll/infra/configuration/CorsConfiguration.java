@@ -19,7 +19,7 @@ public class CorsConfiguration implements WebMvcConfigurer {
                         "OPTIONS",
                         "PATCH",
                         "HEAD"
-                );
+                )
+                .allowedHeaders("Authorization", "Content-Type");
     }
 }
-

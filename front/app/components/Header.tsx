@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { store } from "../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { RootState } from "../redux/store";
@@ -20,6 +19,8 @@ export default function Header() {
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         const isDark = storedTheme ? storedTheme === "dark" : prefersDark;
 
+        // The persisted browser preference is the initial source of truth.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDarkMode(isDark);
         document.documentElement.classList.toggle("dark", isDark);
     }, []);

@@ -98,6 +98,9 @@ public class UsuarioController {
                                        @RequestBody UsuarioRequest usuario){
         try {
             UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario,id);
+            if (usuarioBanco == null) {
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok(usuarioBanco);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());

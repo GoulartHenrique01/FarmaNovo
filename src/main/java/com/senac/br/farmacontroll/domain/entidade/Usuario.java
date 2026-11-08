@@ -66,6 +66,11 @@ public class Usuario implements UserDetails {
         this.setRole("ROLE_USER");
     }
 
+    public Usuario(UsuarioRequest usuario, Empresa empresa) {
+        this(usuario);
+        this.setEmpresa(empresa);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String roleUsuario = this.role == null || this.role.isBlank()

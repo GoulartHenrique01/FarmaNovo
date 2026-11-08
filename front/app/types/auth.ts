@@ -7,5 +7,5 @@ export interface LoginResponse{
 
 export interface AuthState{
     usuario: Usuario|null,
-    token: String
+    token: string
 }

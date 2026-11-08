@@ -1,11 +1,12 @@
 'use client'
 
-import { useRouter } from "@/node_modules/next/navigation";
+import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/slices/authSlice";
 import { buscarUsuarioLogado } from "../services/usuarioService";
 import { loginBack } from "../services/authService";
+import Link from "next/link";
 
 export default function Login(){
     const router = useRouter();
@@ -13,16 +14,15 @@ export default function Login(){
 
     const handleLogin = async(formData:FormData) =>{
         try {
-            debugger;
             const emailTela = formData.get("email")?.toString() ?? "";
             const senhaTela = formData.get("senha")?.toString() ?? "";
 
-            var loginResposta = await loginBack(emailTela, senhaTela);
+            const loginResposta = await loginBack(emailTela, senhaTela);
 
             if(loginResposta!=null){
                 Cookies.set('token', loginResposta.token,{secure: true, expires: 7});
 
-                var usuarioLogado = await buscarUsuarioLogado();
+                const usuarioLogado = await buscarUsuarioLogado();
                 
                 dispatch(login(
                     {
@@ -35,7 +35,7 @@ export default function Login(){
             }else{
                 alert("Login ou senha Invalido!")
             }
-        } catch (error) {
+        } catch {
             alert("Login ou senha Invalido!")
         }
     }
@@ -83,6 +83,12 @@ export default function Login(){
                         Entrar
                     </button>
                 </form>
+                <p className="text-center text-sm text-slate-400">
+                    Sua empresa ainda não tem acesso?{" "}
+                    <Link href="/cadastro-empresa" className="text-blue-400 hover:text-blue-300">
+                        Cadastre-se
+                    </Link>
+                </p>
             </div>
         </div>
     );

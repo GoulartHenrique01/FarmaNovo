@@ -1,7 +1,6 @@
 import { AuthState } from "@/app/types/auth";
 import { Usuario } from "@/app/types/usuario";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
 import Cookies from "js-cookie";
 
 const usuarioRecover = Cookies.get('usuario');

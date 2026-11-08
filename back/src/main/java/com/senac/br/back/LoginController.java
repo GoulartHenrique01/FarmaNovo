@@ -6,17 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import javax.swing.*;
 import java.io.IOException;
 
 public class LoginController {
 
-    private String key = "asiudhakjshdkjahsdk09oq";
-
+    private String key = "asdasdasdasd";
 
     @FXML
     private TextField txtKey;

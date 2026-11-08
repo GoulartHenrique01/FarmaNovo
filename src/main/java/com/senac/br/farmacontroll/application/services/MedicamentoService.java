@@ -19,6 +19,7 @@ public class MedicamentoService {
 
         return (medicamentoRepository.findAll()
                 .stream()
+                .filter(medicamento -> medicamento.getStatus() != EnumStatusMedicamento.EXCLUIDO)
                 .map(MedicamentoResponse::new)
                 .toList());
     }
@@ -49,7 +50,7 @@ public class MedicamentoService {
             return new MedicamentoResponse(medicamentoBanco);
         }else{
             Medicamento medicamentoBanco = medicamentoRepository.findById(id).orElse(null);
-            if (medicamento!= null){
+            if (medicamentoBanco != null){
                 medicamentoBanco.setNome(medicamento.nome());
                 medicamentoBanco.setTipo(medicamento.tipo());
                 medicamentoBanco.setDataValidade(new DataValidade(medicamento.dataValidade()));

@@ -31,7 +31,8 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuarios/admin").permitAll()
-                        .requestMatchers("/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/empresas").permitAll()
+                        .requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "EMPRESA_ADMIN")
                         .requestMatchers("/empresas/**").hasRole("ADMIN")
                         .requestMatchers("/receitas/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers("/medicamentos/**")
