@@ -32,20 +32,20 @@ public class SecurityConfiguration {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuarios/admin").permitAll()
                         .requestMatchers(HttpMethod.POST, "/empresas").permitAll()
-                        .requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "EMPRESA_ADMIN")
+                        .requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/empresas/**").hasRole("ADMIN")
-                        .requestMatchers("/receitas/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers("/receitas/**").hasAnyRole("ADMIN", "FARMACEUTICO", "USER")
                         .requestMatchers("/medicamentos/**")
                         .hasAnyRole(
                                 "ADMIN",
-                                "FARMACEUTICO",
+                                "USER",
                                 "ATENDENTE"
                         )
 
                         .requestMatchers("/pacientes/**")
                         .hasAnyRole(
                                 "ADMIN",
-                                "FARMACEUTICO",
+                                "USER",
                                 "ATENDENTE"
                         )
                         .anyRequest().authenticated()

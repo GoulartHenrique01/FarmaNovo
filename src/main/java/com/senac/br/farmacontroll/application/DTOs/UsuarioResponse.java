@@ -2,7 +2,7 @@ package com.senac.br.farmacontroll.application.DTOs;
 
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 
-public record UsuarioResponse(Long id, String nome, String cpf, String email, EnumStatusUsuario status) {
+public record UsuarioResponse(Long id, String nome, String cpf, String email, EnumStatusUsuario status, String Role) {
 
     public UsuarioResponse(Usuario usuarioEntidade){
 
@@ -11,7 +11,8 @@ public record UsuarioResponse(Long id, String nome, String cpf, String email, En
                 usuarioEntidade.getNome(),
                 usuarioEntidade.getCpf() == null ? null : usuarioEntidade.getCpf().toString(),
                 usuarioEntidade.getEmail(),
-                usuarioEntidade.getStatus()
+                usuarioEntidade.getStatus(),
+                usuarioEntidade.getRole()
         );
     }
 }
