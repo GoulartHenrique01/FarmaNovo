@@ -69,7 +69,7 @@ public class UsuarioController {
         try {
         UsuarioResponse usuarioBanco = usuarioService.salvarUsuario(usuario, 0L);
         return ResponseEntity.ok(usuarioBanco);
-    }catch (Exception e){
+    }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -102,7 +102,7 @@ public class UsuarioController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(usuarioBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

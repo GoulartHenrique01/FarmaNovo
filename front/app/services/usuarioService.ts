@@ -1,12 +1,13 @@
 
 import { Usuario } from "../types/usuario";
+import { IdentidadeAutenticada } from "../types/auth";
 import api from "./api";
 
 
 
 export async function buscarListaUsuarios() : Promise<Usuario[]> {
 
-    const dados = await api.get<Usuario[]>("http://localhost:8080/usuarios");
+    const dados = await api.get<Usuario[]>("/usuarios");
 
     if(dados.status == 200){
         return dados.data;
@@ -19,7 +20,7 @@ export async function buscarListaUsuarios() : Promise<Usuario[]> {
 
 export async function deletarUsuario(id:number) : Promise<number>{
 
- const dados = await api.delete('http://localhost:8080/usuarios/'+id+'/excluir');
+ const dados = await api.delete('/usuarios/'+id+'/excluir');
     return dados.status;
 }
 
@@ -30,7 +31,7 @@ export async function atualizarStatusUsuario(usuario:Usuario) :Promise<void>{
     };
 
     const dadosRetorno = await api.patch(
-        'http://localhost:8080/usuarios/'+usuario.id+'/status',
+        '/usuarios/'+usuario.id+'/status',
         novoStatus
     );
 
@@ -44,25 +45,27 @@ export async function atualizarStatusUsuario(usuario:Usuario) :Promise<void>{
 }
 
 export async function consultaUsuarioPorId(id:number):Promise<Usuario>{
-    const valorUsuarioBack = await api.get<Usuario>('http://localhost:8080/usuarios/'+id);
+    const valorUsuarioBack = await api.get<Usuario>('/usuarios/'+id);
     return valorUsuarioBack.data;
 
 }
 
-export async function  atualizarUsuario (usuario:Usuario): Promise<number>{
-    const dadosRetorno = await api.put<number>(
-        'http://localhost:8080/usuarios/'+usuario.id,
+export async function  atualizarUsuario (usuario:Usuario): Promise<Usuario>{
+    const dadosRetorno = await api.put<Usuario>(
+        '/usuarios/'+usuario.id,
         usuario
     );
     return dadosRetorno.data;
 }
 
 
-export async function  salvarUsuario (usuario:Usuario): Promise<number>{
-    const dadosRetorno = await api.post<number>('http://localhost:8080/usuarios',usuario);
+export async function  salvarUsuario (usuario:Usuario): Promise<Usuario>{
+    const dadosRetorno = await api.post<Usuario>('/usuarios',usuario);
     return dadosRetorno.data;
 }
 
-export async function buscarUsuarioLogado() : Promise<Usuario>{
-    return(await api.get<Usuario>('/usuarios/buscarusuariologado')).data;
+// No login o token ainda não está na store, por isso pode ser informado explicitamente.
+export async function buscarIdentidadeAutenticada(token?: string) : Promise<IdentidadeAutenticada>{
+    return (await api.get<IdentidadeAutenticada>('/auth/me',
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined)).data;
 }

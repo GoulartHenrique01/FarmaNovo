@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,36 +28,96 @@ public class UsuarioService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Value("${spring.secretkey}")
     private String secret;
 
     public LoginResponse validarUsuarioAutenticadoRetornaToken(LoginRequest request) {
-
-        if (usuarioRepository.existsUsuarioByEmailAndSenha(request.email(), request.senha())) {
-
-            var token = tokenService.gerarToken(request);
-            //Gerar o token
-            return new LoginResponse(token);
+        if (request == null || request.email() == null || request.email().isBlank()
+                || request.senha() == null || request.senha().isBlank()) {
+            return null;
         }
-        return null;
+        String email = request.email().trim().toLowerCase();
+        var empresa = empresaRepository.findByEmailIgnoreCase(email)
+                .filter(cadastro -> cadastro.getStatus() == EnumStatusEmpresa.ATIVO)
+                .filter(cadastro -> senhaCorreta(request.senha(), cadastro.getSenha()));
+        if (empresa.isPresent()) {
+            return new LoginResponse(tokenService.gerarToken(empresa.get()));
+        }
+
+        var contaLegadaDaEmpresa = usuarioRepository.findByEmailIgnoreCase(email)
+                .filter(cadastro -> "ROLE_EMPRESA_ADMIN".equals(cadastro.getRole()))
+                .filter(cadastro -> cadastro.getStatus() == EnumStatusUsuario.ATIVO)
+                .filter(cadastro -> cadastro.getEmpresa() != null
+                        && cadastro.getEmpresa().getEmail() == null
+                        && cadastro.getEmpresa().getStatus() == EnumStatusEmpresa.ATIVO)
+                .filter(cadastro -> senhaCorreta(request.senha(), cadastro.getSenha()));
+        if (contaLegadaDaEmpresa.isPresent()) {
+            return new LoginResponse(tokenService.gerarToken(contaLegadaDaEmpresa.get()));
+        }
+
+        return usuarioRepository.findByEmailIgnoreCase(email)
+                .filter(cadastro -> cadastro.getStatus() == EnumStatusUsuario.ATIVO)
+                .filter(cadastro -> "ROLE_ADMIN".equals(cadastro.getRole())
+                        || "ROLE_USER".equals(cadastro.getRole()))
+                .filter(cadastro -> cadastro.getEmpresa() == null
+                        || cadastro.getEmpresa().getStatus() == EnumStatusEmpresa.ATIVO)
+                .filter(cadastro -> senhaCorreta(request.senha(), cadastro.getSenha()))
+                .map(cadastro -> {
+                    converterSenhaLegadaParaHash(cadastro, request.senha());
+                    return new LoginResponse(tokenService.gerarToken(cadastro));
+                })
+                .orElse(null);
+    }
+
+    private boolean senhaCorreta(String senhaInformada, String senhaArmazenada) {
+        if (senhaArmazenada == null) {
+            return false;
+        }
+        if (ehHashBcrypt(senhaArmazenada)) {
+            return passwordEncoder.matches(senhaInformada, senhaArmazenada);
+        }
+        return senhaInformada.equals(senhaArmazenada);
+    }
+
+    // Senha antiga em texto puro é convertida para BCrypt no primeiro login bem-sucedido.
+    private void converterSenhaLegadaParaHash(Usuario usuario, String senhaInformada) {
+        if (!ehHashBcrypt(usuario.getSenha())) {
+            usuario.setSenha(passwordEncoder.encode(senhaInformada));
+            usuarioRepository.save(usuario);
+        }
+    }
+
+    private boolean ehHashBcrypt(String senha) {
+        return senha != null && senha.matches("^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
     }
 
     public List<UsuarioResponse> listarTodosUsuariosTable(){
 
         var usuarioLogado = getUsuarioLogado();
 
-        if (isEmpresaAdmin(usuarioLogado)) {
-            return usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresa_id())
+        if (isEmpresa(usuarioLogado)) {
+            return usuarioRepository.getUsuariosByEmpresa_Id(usuarioLogado.empresaId())
                     .stream()
                     .filter(usuario -> EnumStatusUsuario.EXCLUIDO != usuario.getStatus())
                     .filter(usuario -> usuario.getEmpresa() != null
-                            && usuarioLogado.empresa_id().equals(usuario.getEmpresa().getId()))
+                            && usuarioLogado.empresaId().equals(usuario.getEmpresa().getId()))
                     .filter(usuario -> "ROLE_USER".equals(usuario.getRole()))
                     .map(UsuarioResponse::new)
                     .toList();
         }
 
-        if (isAdmin(usuarioLogado) && usuarioLogado.empresa_id() == null) {
+        if (!isEmpresa(usuarioLogado) && !isAdmin(usuarioLogado)
+                && usuarioLogado.usuarioId() != null) {
+            return usuarioRepository.findById(usuarioLogado.usuarioId())
+                    .filter(usuario -> usuario.getStatus() != EnumStatusUsuario.EXCLUIDO)
+                    .map(usuario -> List.of(new UsuarioResponse(usuario)))
+                    .orElseGet(List::of);
+        }
+
+        if (isAdmin(usuarioLogado) && usuarioLogado.empresaId() == null) {
             return (usuarioRepository.findAll()
                     .stream()
                     .filter(usuario -> usuario.getStatus() != EnumStatusUsuario.EXCLUIDO)
@@ -74,35 +135,51 @@ public class UsuarioService {
         }
 
         Usuario usuarioAdminSalvar = new Usuario(criarAdminRequest);
+        usuarioAdminSalvar.setSenha(passwordEncoder.encode(criarAdminRequest.senha()));
         usuarioRepository.save(usuarioAdminSalvar);
 
         return new CriarAdminResponse(usuarioAdminSalvar.getId(),"Usuario Salvo com sucesso!");
     }
 
     public UsuarioLogado getUsuarioLogado(){
-        return (UsuarioLogado) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof UsuarioLogado usuarioLogado)) {
+            throw new AccessDeniedException("Usuário não autenticado.");
+        }
+        return usuarioLogado;
     }
 
     public UsuarioResponse salvarUsuario(UsuarioRequest usuario, Long id) {
 
         var usuarioLogado = getUsuarioLogado();
+        if (usuario == null || usuario.nome() == null || usuario.nome().isBlank()
+                || usuario.email() == null || usuario.email().isBlank()
+                || usuario.cpf() == null || usuario.cpf().isBlank()
+                || (id == 0L && (usuario.senha() == null || usuario.senha().isBlank()))) {
+            throw new IllegalArgumentException("Informe os dados obrigatórios do usuário.");
+        }
 
         //Novo Usuario
         if (id == 0L){
-            if (usuarioRepository.existsByEmail(usuario.email())) {
+            String email = usuario.email().trim().toLowerCase();
+            if (usuarioRepository.existsByEmail(email)
+                    || empresaRepository.existsByEmail(email)) {
                 throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
             }
             Usuario usuarioBanco;
-            if (isEmpresaAdmin(usuarioLogado)) {
-                Empresa empresa = empresaRepository.findById(usuarioLogado.empresa_id())
+            if (isEmpresa(usuarioLogado)) {
+                Empresa empresa = empresaRepository.findById(usuarioLogado.empresaId())
                         .orElseThrow(() -> new AccessDeniedException(
                                 "Empresa do usuário autenticado não encontrada."));
                 usuarioBanco = new Usuario(usuario, empresa);
-            } else if (isAdmin(usuarioLogado) && usuarioLogado.empresa_id() == null) {
+            } else if (isAdmin(usuarioLogado) && usuarioLogado.empresaId() == null) {
                 usuarioBanco = new Usuario(usuario);
             } else {
                 throw new AccessDeniedException("Usuário sem permissão para cadastrar usuários.");
             }
+            usuarioBanco.setEmail(email);
+            usuarioBanco.setSenha(passwordEncoder.encode(usuario.senha()));
             usuarioRepository.save(usuarioBanco);
 
             return new UsuarioResponse(usuarioBanco);
@@ -110,15 +187,17 @@ public class UsuarioService {
         }else{
             Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
             if (usuarioBanco != null && usuarioDentroDoEscopo(usuarioBanco, usuarioLogado)) {
-                if (!usuarioBanco.getEmail().equals(usuario.email())
-                        && usuarioRepository.existsByEmailAndIdNot(usuario.email(), id)) {
-                    throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
-                }
                 usuarioBanco.setNome(usuario.nome());
                 usuarioBanco.setCpf(new CPF(usuario.cpf()));
-                usuarioBanco.setEmail(usuario.email());
+                String email = usuario.email().trim().toLowerCase();
+                if (!usuarioBanco.getEmail().equalsIgnoreCase(email)
+                        && (usuarioRepository.existsByEmailAndIdNot(email, id)
+                        || empresaRepository.existsByEmail(email))) {
+                    throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
+                }
+                usuarioBanco.setEmail(email);
                 if (usuario.senha() != null && !usuario.senha().isBlank()) {
-                    usuarioBanco.setSenha(usuario.senha());
+                    usuarioBanco.setSenha(passwordEncoder.encode(usuario.senha()));
                 }
                 usuarioRepository.save(usuarioBanco);
                 return  new UsuarioResponse(usuarioBanco);
@@ -139,6 +218,9 @@ public class UsuarioService {
 
     public boolean atualizarStatus(EnumStatusUsuario status, Long id) {
         var usuarioLogado = getUsuarioLogado();
+        if (!isEmpresa(usuarioLogado) && !isAdmin(usuarioLogado)) {
+            throw new AccessDeniedException("Usuários não podem alterar status de contas.");
+        }
         Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
         if (usuarioBanco != null && usuarioDentroDoEscopo(usuarioBanco, usuarioLogado)) {
             usuarioBanco.setStatus(status);
@@ -149,13 +231,19 @@ public class UsuarioService {
     }
 
     private boolean usuarioDentroDoEscopo(Usuario usuario, UsuarioLogado usuarioLogado) {
-        if (isAdmin(usuarioLogado) && usuarioLogado.empresa_id() == null) {
+        if (isAdmin(usuarioLogado) && usuarioLogado.empresaId() == null) {
             return true;
         }
 
-        return isEmpresaAdmin(usuarioLogado)
+        if (!isEmpresa(usuarioLogado) && !isAdmin(usuarioLogado)
+                && usuarioLogado.usuarioId() != null
+                && usuarioLogado.usuarioId().equals(usuario.getId())) {
+            return true;
+        }
+
+        return isEmpresa(usuarioLogado)
                 && usuario.getEmpresa() != null
-                && usuario.getEmpresa().getId().equals(usuarioLogado.empresa_id())
+                && usuario.getEmpresa().getId().equals(usuarioLogado.empresaId())
                 && "ROLE_USER".equals(usuario.getRole());
     }
 
@@ -164,21 +252,21 @@ public class UsuarioService {
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
-    private boolean isEmpresaAdmin(UsuarioLogado usuarioLogado) {
-        return usuarioLogado.empresa_id() != null
-                && usuarioLogado.authorities().stream()
-                .anyMatch(authority -> "ROLE_EMPRESA_ADMIN".equals(authority.getAuthority()));
+    private boolean isEmpresa(UsuarioLogado usuarioLogado) {
+        return usuarioLogado.usuarioId() == null && usuarioLogado.empresaId() != null;
     }
 
     public UsuarioResponse BuscarUsuarioLogado() {
-        try {
-            var usuarioLogado = getUsuarioLogado();
-            return usuarioRepository.findById(usuarioLogado.id()).
-                    stream()
-                    .map(UsuarioResponse::new)
-                    .findFirst().orElse(null);
-        }catch (Exception e){
-            throw new RuntimeException("Erro ao buscar usuario logado");
+        var usuarioLogado = getUsuarioLogado();
+        if (usuarioLogado.usuarioId() == null) {
+            return null;
         }
+        return usuarioRepository.findById(usuarioLogado.usuarioId())
+                .map(UsuarioResponse::new)
+                .orElse(null);
+    }
+
+    public IdentidadeResponse buscarIdentidadeAutenticada() {
+        return new IdentidadeResponse(getUsuarioLogado());
     }
 }

@@ -4,7 +4,6 @@ export interface CadastroEmpresaRequest {
     razaoSocial: string;
     nomeFantasia: string;
     cnpj: string;
-    secretKey: string;
     administradorNome: string;
     administradorEmail: string;
     administradorSenha: string;

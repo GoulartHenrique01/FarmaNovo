@@ -5,6 +5,7 @@ import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.PasswordResetTokenRepository;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,9 @@ public class PasswordResetService {
 
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public String gerarTokenRecuperacao(String email){
 
@@ -68,7 +72,7 @@ public class PasswordResetService {
 
         Usuario usuario = passwordResetToken.getUsuario();
 
-        usuario.setSenha(novaSenha);
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
 
         usuarioRepository.save(usuario);
 

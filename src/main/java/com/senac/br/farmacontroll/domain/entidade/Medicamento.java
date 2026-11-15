@@ -32,6 +32,10 @@ public class Medicamento {
     private String precisaReceita;
     private EnumStatusMedicamento status = EnumStatusMedicamento.ATIVO;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id", nullable = false)
+    private Empresa empresa;
+
 
 
     public Medicamento(CriarMedicamentoRequest criarMedicamentoRequest){

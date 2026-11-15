@@ -1,13 +1,14 @@
 package com.senac.br.farmacontroll.application.services;
 
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.senac.br.farmacontroll.application.DTOs.LoginRequest;
 import com.senac.br.farmacontroll.application.DTOs.UsuarioLogado;
+import com.senac.br.farmacontroll.domain.entidade.Empresa;
 import com.senac.br.farmacontroll.domain.entidade.Token;
+import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.TokenRepository;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,6 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    /*Esse TokenService existe para resolver um problema específico: depois que o usuário faz login,
-    como a API vai saber que ele está autenticado nas próximas requisições?
-    A resposta é: usando um token JWT.*/
     @Value("${spring.secretkey}")
     private String secret;
 
@@ -39,50 +37,67 @@ public class TokenService {
     @Autowired
     private TokenRepository tokenRepository;
 
-
     public String gerarToken(LoginRequest loginRequestDto) {
+        Usuario usuario = usuarioRepository.findByEmail(loginRequestDto.email())
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        return gerarToken(usuario);
+    }
 
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-
-        var usuario = usuarioRepository
-                .findByEmail(loginRequestDto.email())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Usuário não encontrado")
-                );
-
-        String token = JWT.create()
-                .withIssuer(emissor)
-                .withSubject(usuario.getEmail())
-                .withExpiresAt(this.gerarDataExpiracao())
-                .sign(algorithm);
-
+    public String gerarToken(Usuario usuario) {
+        String token = criarToken(usuario.getEmail());
         tokenRepository.save(new Token(token, usuario));
-
         return token;
     }
 
-    public UsuarioLogado verificarToken(String token) throws JWTVerificationException {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-
-        JWTVerifier verificador = JWT.require(algorithm).withIssuer(emissor).build();
-
-        verificador.verify(token);
-
-        var tokenBanco = tokenRepository.findTokenByToken(token).orElse(null);
-
-        if (tokenBanco==null){
-            throw new IllegalArgumentException("Token Inválido");
-        }
-
-        return new UsuarioLogado(tokenBanco.getUsuario());
-
+    public String gerarToken(Empresa empresa) {
+        String token = criarToken(empresa.getEmail());
+        tokenRepository.save(new Token(token, empresa));
+        return token;
     }
 
-    private Instant gerarDataExpiracao(){
-        var dataAtual = LocalDateTime.now();
-        dataAtual = dataAtual.plusMinutes(expiracao);
+    private String criarToken(String email) {
+        return JWT.create()
+                .withIssuer(emissor)
+                .withSubject(email)
+                .withExpiresAt(gerarDataExpiracao())
+                .sign(Algorithm.HMAC256(secret));
+    }
 
-        return dataAtual.toInstant(ZoneOffset.of("-03:00"));
+    public UsuarioLogado verificarToken(String token) throws JWTVerificationException {
+        JWTVerifier verificador = JWT.require(Algorithm.HMAC256(secret))
+                .withIssuer(emissor)
+                .build();
+        var jwt = verificador.verify(token);
+        Token tokenBanco = tokenRepository.findTokenByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido."));
 
+        if (tokenBanco.getEmpresa() != null && tokenBanco.getUsuario() == null) {
+            Empresa empresa = tokenBanco.getEmpresa();
+            if (!jwt.getSubject().equals(empresa.getEmail())
+                    || empresa.getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa.ATIVO) {
+                throw new IllegalArgumentException("Empresa do token inválida ou inativa.");
+            }
+            return new UsuarioLogado(empresa);
+        }
+
+        Usuario usuario = tokenBanco.getUsuario();
+        if (usuario == null || !jwt.getSubject().equals(usuario.getEmail())
+                || usuario.getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario.ATIVO) {
+            throw new IllegalArgumentException("Usuário do token inválido ou inativo.");
+        }
+        if (usuario.getEmpresa() != null
+                && usuario.getEmpresa().getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa.ATIVO) {
+            throw new IllegalArgumentException("Empresa do usuário inválida ou inativa.");
+        }
+        if ("ROLE_EMPRESA_ADMIN".equals(usuario.getRole()) && usuario.getEmpresa() != null) {
+            return new UsuarioLogado(usuario.getEmpresa());
+        }
+        return new UsuarioLogado(usuario);
+    }
+
+    private Instant gerarDataExpiracao() {
+        return LocalDateTime.now()
+                .plusMinutes(expiracao)
+                .toInstant(ZoneOffset.of("-03:00"));
     }
 }

@@ -3,7 +3,7 @@ import api from "./api";
 
 type ReceitaRequest = Pick<
     Receita,
-    "dataEmissao" | "dataValidade" | "diagnostico" | "observacoes" | "tipo"
+    "dataEmissao" | "dataValidade" | "diagnostico" | "observacoes" | "tipo" | "pacienteId"
 >;
 
 export async function buscarListaReceitas(): Promise<Receita[]> {
@@ -38,5 +38,6 @@ function requestReceita(receita: Receita): ReceitaRequest {
         diagnostico: receita.diagnostico,
         observacoes: receita.observacoes,
         tipo: receita.tipo,
+        pacienteId: receita.pacienteId,
     };
 }

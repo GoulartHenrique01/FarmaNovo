@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import axios from "axios";
 import { cadastrarEmpresa } from "../services/empresaService";
 
 export default function CadastroEmpresa() {
@@ -16,16 +17,20 @@ export default function CadastroEmpresa() {
                 razaoSocial: String(formData.get("razaoSocial") ?? ""),
                 nomeFantasia: String(formData.get("nomeFantasia") ?? ""),
                 cnpj: String(formData.get("cnpj") ?? ""),
-                secretKey: String(formData.get("secretKey") ?? ""),
                 administradorNome: String(formData.get("administradorNome") ?? ""),
                 administradorEmail: String(formData.get("administradorEmail") ?? ""),
                 administradorSenha: String(formData.get("administradorSenha") ?? ""),
                 administradorCpf: String(formData.get("administradorCpf") ?? ""),
             });
-            alert("Empresa cadastrada. Agora você pode entrar com o e-mail e a senha do administrador.");
+            alert("Empresa cadastrada. Agora você pode entrar com o e-mail e a senha informados.");
             router.push("/login");
-        } catch {
-            setErro("Não foi possível cadastrar a empresa. Verifique os dados, a chave de cadastro e se o e-mail já está em uso.");
+        } catch (error: unknown) {
+            const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+            setErro(
+                typeof resposta === "string" && resposta.trim()
+                    ? resposta
+                    : "Não foi possível cadastrar a empresa. Verifique os dados e tente novamente."
+            );
         }
     };
 
@@ -35,7 +40,7 @@ export default function CadastroEmpresa() {
                 <header className="text-center space-y-2">
                     <h1 className="text-2xl font-bold tracking-tight text-white">Cadastrar empresa</h1>
                     <p className="text-sm text-slate-400">
-                        Crie a empresa e sua conta de administrador para acessar o sistema.
+                        Crie a empresa e suas credenciais de acesso ao sistema.
                     </p>
                 </header>
 
@@ -52,12 +57,8 @@ export default function CadastroEmpresa() {
                         CNPJ
                         <input name="cnpj" required className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white" />
                     </label>
-                    <label className="space-y-2 text-sm text-slate-300">
-                        Chave de cadastro
-                        <input name="secretKey" type="password" required className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white" />
-                    </label>
                     <div className="sm:col-span-2 border-t border-slate-800 pt-4">
-                        <h2 className="font-semibold text-white">Administrador da empresa</h2>
+                        <h2 className="font-semibold text-white">Contato da empresa e acesso</h2>
                     </div>
                     <label className="space-y-2 text-sm text-slate-300">
                         Nome

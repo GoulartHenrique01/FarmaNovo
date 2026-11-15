@@ -1,18 +1,21 @@
 'use client'
 
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/slices/authSlice";
-import { buscarUsuarioLogado } from "../services/usuarioService";
+import { buscarIdentidadeAutenticada } from "../services/usuarioService";
 import { loginBack } from "../services/authService";
 import Link from "next/link";
+import axios from "axios";
+import { useState } from "react";
 
 export default function Login(){
     const router = useRouter();
     const dispatch = useDispatch();
+    const [erro, setErro] = useState("");
 
     const handleLogin = async(formData:FormData) =>{
+        setErro("");
         try {
             const emailTela = formData.get("email")?.toString() ?? "";
             const senhaTela = formData.get("senha")?.toString() ?? "";
@@ -20,23 +23,21 @@ export default function Login(){
             const loginResposta = await loginBack(emailTela, senhaTela);
 
             if(loginResposta!=null){
-                Cookies.set('token', loginResposta.token,{secure: true, expires: 7});
-
-                const usuarioLogado = await buscarUsuarioLogado();
-                
-                dispatch(login(
-                    {
-                    token: loginResposta.token, 
-                    usuario: {...usuarioLogado}
-                    }
-                    ));
+                const identidade = await buscarIdentidadeAutenticada(loginResposta.token);
+                dispatch(login({
+                    token: loginResposta.token,
+                    usuario: identidade
+                }));
 
                 router.push("/home")
             }else{
-                alert("Login ou senha Invalido!")
+                setErro("E-mail ou senha inválidos.");
             }
-        } catch {
-            alert("Login ou senha Invalido!")
+        } catch (error: unknown) {
+            const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+            setErro(typeof resposta === "string" && resposta.trim()
+                ? resposta
+                : "Não foi possível conectar ao servidor. Verifique se a API está em execução.");
         }
     }
 
@@ -82,6 +83,7 @@ export default function Login(){
                     >
                         Entrar
                     </button>
+                    {erro && <p role="alert" className="text-sm text-red-400">{erro}</p>}
                 </form>
                 <p className="text-center text-sm text-slate-400">
                     Sua empresa ainda não tem acesso?{" "}

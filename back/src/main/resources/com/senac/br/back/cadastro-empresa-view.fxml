@@ -3,11 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.senac.br.back.EmpresaController">
+<AnchorPane prefHeight="460.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.senac.br.back.EmpresaController">
 
     <children>
-        <Button layoutX="24.0" layoutY="354.0" mnemonicParsing="false" onAction="#voltar" text="Voltar" />
-        <Button layoutX="501.0" layoutY="354.0" mnemonicParsing="false" onAction="#salvarEmpresa" text="Salvar" />
+        <Button layoutX="24.0" layoutY="410.0" mnemonicParsing="false" onAction="#voltar" text="Voltar" />
+        <Button layoutX="501.0" layoutY="410.0" mnemonicParsing="false" onAction="#salvarEmpresa" text="Salvar" />
         <Label layoutX="78.0" layoutY="56.0" text="CNPJ" />
         <Label layoutX="78.0" layoutY="97.0" text="Nome Fantasia" />
         <Label layoutX="78.0" layoutY="137.0" text="Razão Social" />
@@ -15,5 +15,13 @@
         <TextField fx:id="txtNomeFantasia" layoutX="166.0" layoutY="93.0" />
         <TextField fx:id="txtRazaoSocial" layoutX="166.0" layoutY="133.0" />
 
+        <Label layoutX="78.0" layoutY="177.0" text="Responsável" />
+        <Label layoutX="78.0" layoutY="217.0" text="CPF Responsável" />
+        <Label layoutX="78.0" layoutY="257.0" text="E-mail de acesso" />
+        <Label layoutX="78.0" layoutY="297.0" text="Senha de acesso" />
+        <TextField fx:id="txtAdministradorNome" layoutX="190.0" layoutY="173.0" />
+        <TextField fx:id="txtAdministradorCpf" layoutX="190.0" layoutY="213.0" />
+        <TextField fx:id="txtAdministradorEmail" layoutX="190.0" layoutY="253.0" />
+        <PasswordField fx:id="txtAdministradorSenha" layoutX="190.0" layoutY="293.0" />
     </children>
 </AnchorPane>

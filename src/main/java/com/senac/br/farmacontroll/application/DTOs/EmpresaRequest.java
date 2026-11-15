@@ -4,7 +4,6 @@ public record EmpresaRequest(
         String razaoSocial,
         String nomeFantasia,
         String cnpj,
-        String secretKey,
         String administradorNome,
         String administradorEmail,
         String administradorSenha,

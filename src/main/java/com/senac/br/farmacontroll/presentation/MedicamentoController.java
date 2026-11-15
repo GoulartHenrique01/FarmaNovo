@@ -2,26 +2,20 @@ package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.application.services.MedicamentoService;
-import com.senac.br.farmacontroll.domain.entidade.Medicamento;
-import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/medicamentos")
 @Tag(name = "Medicamentos", description = "Grupo de APIs Responsável por controlar a estrutura de criação e consulta de medicamentos cadastrados no sistema!")
 public class MedicamentoController {
 
-    @Autowired
-    private MedicamentoRepository medicamentoRepository;
     @Autowired
     private MedicamentoService medicamentoService;
 
@@ -52,18 +46,18 @@ public class MedicamentoController {
             MedicamentoResponse medicamentoBanco = medicamentoService.salvarMedicamento(medicamento, 0L);
 
             return ResponseEntity.ok(medicamentoBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/tipo")
-    public ResponseEntity<CriarMedicamentoResponse> criarTipo(@RequestBody CriarMedicamentoRequest criarMedicamentoRequest){
+    public ResponseEntity<?> criarTipo(@RequestBody CriarMedicamentoRequest criarMedicamentoRequest){
         try {
             CriarMedicamentoResponse respostaSalvar = medicamentoService.criarTipo(criarMedicamentoRequest);
             return ResponseEntity.ok(respostaSalvar);
-        } catch (RuntimeException e) {
-           return ResponseEntity.badRequest().build();
+        } catch (IllegalArgumentException e) {
+           return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -78,7 +72,7 @@ public class MedicamentoController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(medicamentoBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -87,10 +81,7 @@ public class MedicamentoController {
     @Operation(summary = "Método de exclusão de medicamentos",
             description = "Método responsável pela exclusão de medicamentos cadastrados no sistema")
     public ResponseEntity<Void> excluir(@PathVariable Long id){
-        Medicamento medicamentoBanco = medicamentoRepository.findById(id).orElse(null);
-        if (medicamentoBanco!= null){
-            medicamentoBanco.setStatus(EnumStatusMedicamento.EXCLUIDO);
-            medicamentoRepository.save(medicamentoBanco);
+        if (medicamentoService.excluir(id)){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

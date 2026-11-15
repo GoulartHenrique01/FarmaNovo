@@ -8,6 +8,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -19,12 +21,18 @@ public class SecurityConfiguration {
     private JwtFilter jwtFilter;
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
         return http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login",
+                                "/endereco/**",
                                 "/swagger-ui/**",
                                 "/webjars/**",
                                 "/swagger-resources/**",
@@ -32,22 +40,6 @@ public class SecurityConfiguration {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuarios/admin").permitAll()
                         .requestMatchers(HttpMethod.POST, "/empresas").permitAll()
-                        .requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/empresas/**").hasRole("ADMIN")
-                        .requestMatchers("/receitas/**").hasAnyRole("ADMIN", "FARMACEUTICO", "USER")
-                        .requestMatchers("/medicamentos/**")
-                        .hasAnyRole(
-                                "ADMIN",
-                                "USER",
-                                "ATENDENTE"
-                        )
-
-                        .requestMatchers("/pacientes/**")
-                        .hasAnyRole(
-                                "ADMIN",
-                                "USER",
-                                "ATENDENTE"
-                        )
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

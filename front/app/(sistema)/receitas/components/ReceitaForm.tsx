@@ -2,24 +2,56 @@
 
 import { Receita, ReceitaFormProps } from "@/app/types/receitas";
 import { atualizarReceita, salvarReceita } from "@/app/services/receitaService";
+import { buscarListaPacientes } from "@/app/services/pacienteService";
+import { Paciente } from "@/app/types/pacientes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 // Formulário reutilizável para cadastrar ou editar uma receita médica.
 export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
   // Permite voltar à listagem ao concluir o fluxo de gravação.
   const router = useRouter();
+  const identidade = useSelector((state: RootState) => state.auth.usuario);
+  const usuarioAutenticado = identidade !== null
+    && identidade.usuarioId !== null
+    && identidade.empresaId !== null
+    && identidade.role === "ROLE_USER";
 
     // Armazena os valores dos campos; na edição, parte dos dados já existentes.
     const [receita, setReceita] = useState<Receita>(
         receitaExistente || 
         new Receita(null, "", "", "", "", "", "ATIVO")
     );
+    const [pacientes, setPacientes] = useState<Paciente[]>([]);
+    const [erroPacientes, setErroPacientes] = useState("");
+
+    useEffect(() => {
+      if (!usuarioAutenticado) return;
+
+      let componenteMontado = true;
+      buscarListaPacientes()
+        .then((dados) => {
+          if (componenteMontado) {
+            setPacientes(dados.filter((paciente) => paciente.status === "ATIVO"));
+          }
+        })
+        .catch(() => {
+          if (componenteMontado) {
+            setErroPacientes("Não foi possível carregar seus pacientes.");
+          }
+        });
+
+      return () => {
+        componenteMontado = false;
+      };
+    }, [usuarioAutenticado]);
 
     // Atualiza o campo escolhido criando uma nova instância com os demais valores preservados.
     const handlerChange = (
-        campo: 'dataEmissao' | 'dataValidade' | 'diagnostico' | 'observacoes' | 'tipo',
+        campo: 'dataEmissao' | 'dataValidade' | 'diagnostico' | 'observacoes' | 'tipo' | 'pacienteId',
         valor: string
     ) => {
         setReceita(
@@ -31,7 +63,11 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
                 campo === 'diagnostico' ? valor : valorAnterior.diagnostico,
                 campo === 'observacoes' ? valor : valorAnterior.observacoes,
                 campo === 'tipo' ? valor : valorAnterior.tipo,
-                valorAnterior.status
+                valorAnterior.status,
+                campo === 'pacienteId'
+                  ? valor === "" ? null : Number(valor)
+                  : valorAnterior.pacienteId,
+                valorAnterior.pacienteNome
             )
         );
     }
@@ -72,6 +108,32 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
+        {usuarioAutenticado && (
+          <div className="space-y-2">
+            <label htmlFor="pacienteId" className="block text-sm font-medium text-teal-700">
+              Paciente
+            </label>
+            <select
+              id="pacienteId"
+              name="pacienteId"
+              value={receita.pacienteId ?? ""}
+              required
+              onChange={(e) => handlerChange("pacienteId", e.target.value)}
+              className="w-full rounded-lg border border-teal-200 bg-white px-4 py-2.5 text-gray-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="">Selecione um paciente</option>
+              {pacientes.map((paciente) => (
+                <option key={paciente.id} value={paciente.id ?? ""}>
+                  {paciente.nome}
+                </option>
+              ))}
+            </select>
+            {erroPacientes && <p className="text-sm text-red-600">{erroPacientes}</p>}
+            {!erroPacientes && pacientes.length === 0 && (
+              <p className="text-sm text-amber-700">Cadastre um paciente ativo antes de emitir uma receita.</p>
+            )}
+          </div>
+        )}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">
             Data de Validade

@@ -6,8 +6,13 @@ import java.time.LocalDate;
 
 public record ReceitaResponse(Long id, LocalDate dataEmissao,
                               LocalDate dataValidade, String diagnostico,
-                              String observacoes, String tipo, EnumStatusReceita status) {
+                              String observacoes, String tipo, EnumStatusReceita status,
+                              Long pacienteId, String pacienteNome) {
     public ReceitaResponse(Receita receitaEntidade){
+        this(receitaEntidade, true);
+    }
+
+    public ReceitaResponse(Receita receitaEntidade, boolean incluirPaciente) {
         this(
                 receitaEntidade.getId(),
                 receitaEntidade.getDataEmissao(),
@@ -15,7 +20,11 @@ public record ReceitaResponse(Long id, LocalDate dataEmissao,
                 receitaEntidade.getDiagnostico(),
                 receitaEntidade.getObservacoes(),
                 receitaEntidade.getTipo(),
-                receitaEntidade.getStatus()
+                receitaEntidade.getStatus(),
+                incluirPaciente && receitaEntidade.getPaciente() != null
+                        ? receitaEntidade.getPaciente().getId() : null,
+                incluirPaciente && receitaEntidade.getPaciente() != null
+                        ? receitaEntidade.getPaciente().getNome() : null
         );
     }
 }

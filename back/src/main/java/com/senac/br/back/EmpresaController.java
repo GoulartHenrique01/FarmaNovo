@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -27,19 +28,38 @@ public class EmpresaController {
     private TextField txtRazaoSocial;
 
     @FXML
+    private TextField txtAdministradorNome;
+
+    @FXML
+    private TextField txtAdministradorCpf;
+
+    @FXML
+    private TextField txtAdministradorEmail;
+
+    @FXML
+    private PasswordField txtAdministradorSenha;
+
+    @FXML
     public void salvarEmpresa(ActionEvent event) throws Exception {
 
+        // Campos iguais ao EmpresaRequest da API (POST /empresas)
         String jsonRequest = String.format(
                 "{\n" +
-                        "  \"cnpj\": \"%s\",\n" +
-                        "  \"nomeFantasia\": \"%s\",\n" +
                         "  \"razaoSocial\": \"%s\",\n" +
-                        "  \"secretKey\": \"%s\"\n" +
+                        "  \"nomeFantasia\": \"%s\",\n" +
+                        "  \"cnpj\": \"%s\",\n" +
+                        "  \"administradorNome\": \"%s\",\n" +
+                        "  \"administradorCpf\": \"%s\",\n" +
+                        "  \"administradorEmail\": \"%s\",\n" +
+                        "  \"administradorSenha\": \"%s\"\n" +
                         "}",
-                txtCnpj.getText(),
-                txtNomeFantasia.getText(),
-                txtRazaoSocial.getText(),
-                "sakjbhaskjcdhaiubshLKVAShfbdw68asd65d"
+                escapar(txtRazaoSocial.getText()),
+                escapar(txtNomeFantasia.getText()),
+                escapar(txtCnpj.getText()),
+                escapar(txtAdministradorNome.getText()),
+                escapar(txtAdministradorCpf.getText()),
+                escapar(txtAdministradorEmail.getText()),
+                escapar(txtAdministradorSenha.getText())
         );
 
         int respostaApi = executaMetodoAPI(
@@ -109,6 +129,13 @@ public class EmpresaController {
         connection.disconnect();
 
         return resposta;
+    }
+
+    private String escapar(String valor) {
+        if (valor == null) {
+            return "";
+        }
+        return valor.trim().replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private void showMessage(Alert.AlertType type, String msg) {

@@ -71,6 +71,10 @@ public class Usuario implements UserDetails {
         this.setEmpresa(empresa);
     }
 
+    public Usuario(Long id) {
+        this.id = id;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String roleUsuario = this.role == null || this.role.isBlank()
@@ -81,11 +85,11 @@ public class Usuario implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return "";
+        return this.senha;
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return this.email;
     }
 }

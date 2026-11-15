@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { RootState } from "../redux/store";
+import { alternarTema, definirTema } from "../redux/slices/temaSlice";
 
 export default function Header() {
 
     const usuario = useSelector((state: RootState) => state.auth.usuario);
     const dispatch = useDispatch();
 
-    // Guarda a preferência de tema aplicada ao documento.
-    const [darkMode, setDarkMode] = useState(false);
+    // Preferência de tema guardada na store do Redux (slice "tema").
+    const darkMode = useSelector((state: RootState) => state.tema.escuro);
 
     // Recupera o tema salvo; na primeira visita, respeita a preferência do sistema operacional.
     useEffect(() => {
@@ -19,11 +20,9 @@ export default function Header() {
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         const isDark = storedTheme ? storedTheme === "dark" : prefersDark;
 
-        // The persisted browser preference is the initial source of truth.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setDarkMode(isDark);
+        dispatch(definirTema(isDark));
         document.documentElement.classList.toggle("dark", isDark);
-    }, []);
+    }, [dispatch]);
 
     // Aplica a classe global e persiste a escolha feita no controle do cabeçalho.
     useEffect(() => {
@@ -43,20 +42,21 @@ export default function Header() {
                         </div>
                     </div>
                     <span className={`text-sm font-semibold sm:text-base ${darkMode ? "text-slate-100" : "text-gray-700"}`}>
-                        {usuario?.nome.toLocaleUpperCase()|| 'Usuario não identificado!'}
+                        {usuario?.nome.toLocaleUpperCase("pt-BR") || "Usuario não identificado!"}
                     </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
-                        onClick={() => setDarkMode((prev) => !prev)}
+                        onClick={() => dispatch(alternarTema())}
                         className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-2 ${darkMode ? "border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700 focus:ring-slate-400" : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 focus:ring-amber-200"}`}
                     >
                         {darkMode ? "Modo claro" : "Modo dark"}
                     </button>
 
                     <button 
+                    type="button"
                     onClick={()=>{
                         dispatch(logout());
                     }

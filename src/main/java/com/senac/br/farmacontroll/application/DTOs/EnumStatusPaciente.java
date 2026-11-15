@@ -1,6 +1,6 @@
 package com.senac.br.farmacontroll.application.DTOs;
 
-public enum EnumStatusFarmaceutico {
+public enum EnumStatusPaciente {
     ATIVO,
     BLOQUEADO,
     EXCLUIDO

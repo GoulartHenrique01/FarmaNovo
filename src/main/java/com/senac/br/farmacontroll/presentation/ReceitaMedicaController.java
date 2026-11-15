@@ -1,12 +1,9 @@
 package com.senac.br.farmacontroll.presentation;
 
-import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
 import com.senac.br.farmacontroll.application.DTOs.ReceitaRequest;
 import com.senac.br.farmacontroll.application.DTOs.ReceitaResponse;
 import com.senac.br.farmacontroll.application.services.ReceitaService;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusReceita;
-import com.senac.br.farmacontroll.domain.entidade.Receita;
-import com.senac.br.farmacontroll.domain.repository.ReceitaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,8 +19,6 @@ import java.util.List;
 public class ReceitaMedicaController {
 
     @Autowired
-    private ReceitaRepository receitaRepository;
-    @Autowired
     private ReceitaService receitaService;
 
     @GetMapping
@@ -36,9 +31,9 @@ public class ReceitaMedicaController {
     @GetMapping("/{id}")
     @Operation(summary = "Método de busca de receitas!",
             description = "Método responsável em efetuar a busca de uma receita especifica utilizando o ID!")
-    public ResponseEntity<Receita> buscarPorId(@PathVariable Long id){
-        Receita receitaBanco = receitaRepository.findById(id).orElse(null);
-        if (receitaBanco!=null){
+    public ResponseEntity<ReceitaResponse> buscarPorId(@PathVariable Long id){
+        var receitaBanco = receitaService.buscarPorId(id);
+        if (receitaBanco != null) {
             return ResponseEntity.ok(receitaBanco);
         }
         return ResponseEntity.notFound().build();
@@ -54,7 +49,7 @@ public class ReceitaMedicaController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(receitaBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -68,7 +63,7 @@ public class ReceitaMedicaController {
             ReceitaResponse receitaBanco = receitaService.salvarReceita(receita, 0L);
 
             return ResponseEntity.ok(receitaBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

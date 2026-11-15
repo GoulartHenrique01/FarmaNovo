@@ -5,9 +5,15 @@ import { Medicamento } from "@/app/types/medicamentos";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { buscarListaMedicamentos, deletarMedicamento } from "@/app/services/medicamentoService";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 export default function Medicamentos() {
   const router = useRouter();
+  const identidade = useSelector((state: RootState) => state.auth.usuario);
+  const somenteLeitura = identidade !== null
+    && identidade.role !== "ROLE_ADMIN"
+    && !(identidade.usuarioId === null && identidade.empresaId !== null);
 
   const formatarData = (data: string) => {
     const dataNormalizada = data?.slice(0, 10);
@@ -73,13 +79,13 @@ export default function Medicamentos() {
             </p>
           </div>
 
-          <button
+          {!somenteLeitura && <button
             type="button"
             onClick={() => router.push("/medicamentos/novo")}
             className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
           >
             + Novo Medicamento
-          </button>
+          </button>}
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_35px_rgba(15,118,110,0.08)]">
@@ -117,9 +123,11 @@ export default function Medicamentos() {
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
                     Status
                   </th>
-                  <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
-                    Ações
-                  </th>
+                  {!somenteLeitura && (
+                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
+                      Ações
+                    </th>
+                  )}
                 </tr>
               </thead>
 
@@ -177,7 +185,7 @@ export default function Medicamentos() {
                       {medicamento.status}
                     </td>
 
-                    <td className="px-5 py-4">
+                    {!somenteLeitura && <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-2">
                         <Link
                           href={`/medicamentos/${medicamento.id}/editar`}
@@ -193,14 +201,14 @@ export default function Medicamentos() {
                           Deletar
                         </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
 
                 {medicamentos.length === 0 && (
                   <tr>
                     <td
-                      colSpan={11}
+                      colSpan={somenteLeitura ? 10 : 11}
                       className="px-6 py-14 text-center text-sm text-slate-500"
                     >
                       Nenhum medicamento encontrado!

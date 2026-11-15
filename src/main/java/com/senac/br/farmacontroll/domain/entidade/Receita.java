@@ -24,4 +24,16 @@ public class Receita {
     private String observacoes;
     private String tipo;
     private EnumStatusReceita status = EnumStatusReceita.ATIVO;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "paciente_id", referencedColumnName = "id")
+    private Paciente paciente;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    private Empresa empresa;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsavel_id", referencedColumnName = "id")
+    private Usuario responsavel;
 }

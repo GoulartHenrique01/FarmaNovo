@@ -38,7 +38,7 @@ public class EmpresaController {
             EmpresaResponse empresaBanco = empresaService.salvarEmpresa(empresa, 0L);
 
             return ResponseEntity.ok(empresaBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -51,7 +51,7 @@ public class EmpresaController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(empresaBanco);
-        }catch (Exception e){
+        }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

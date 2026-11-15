@@ -1,9 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../redux/slices/authSlice";
+import authReducer from "./slices/authSlice";
+import temaReducer from "./slices/temaSlice";
 
+// Store única: também é lida pelos interceptors do Axios (services/api.ts).
 export const store = configureStore({
-    reducer:{
-        auth : authReducer
+    reducer: {
+        auth: authReducer,
+        tema: temaReducer
     }
 });
 

@@ -5,9 +5,15 @@ import { buscarListaReceitas, deletarReceita } from "@/app/services/receitaServi
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 export default function Receitas() {
   const router = useRouter();
+  const identidade = useSelector((state: RootState) => state.auth.usuario);
+  const podeCriarReceita = identidade?.usuarioId !== null
+    && identidade?.empresaId !== null
+    && identidade?.role === "ROLE_USER";
 
   // Registros que serão exibidos na tabela de receitas.
   const [receitas, setReceitas] = useState<Receita[]>([]);
@@ -64,13 +70,15 @@ export default function Receitas() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push("/receitas/novo")}
-            className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-          >
-            + Nova Receita
-          </button>
+          {podeCriarReceita && (
+            <button
+              type="button"
+              onClick={() => router.push("/receitas/novo")}
+              className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            >
+              + Nova Receita
+            </button>
+          )}
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_35px_rgba(15,118,110,0.08)]">
@@ -92,6 +100,9 @@ export default function Receitas() {
 
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
                     Diagnóstico
+                  </th>
+                  <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
+                    Paciente
                   </th>
 
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
@@ -132,6 +143,9 @@ export default function Receitas() {
 
                     <td className="px-5 py-4 text-sm font-semibold text-slate-800">
                       {receita.diagnostico}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-slate-600">
+                      {receita.pacienteNome ?? "-"}
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-600">
@@ -179,7 +193,7 @@ export default function Receitas() {
                 {receitas.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-6 py-14 text-center text-sm text-slate-500"
                     >
                       Nenhuma receita encontrada!

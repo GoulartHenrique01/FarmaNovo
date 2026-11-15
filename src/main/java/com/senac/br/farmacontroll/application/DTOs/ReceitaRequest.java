@@ -4,5 +4,15 @@ import java.time.LocalDate;
 
 public record ReceitaRequest(LocalDate dataEmissao,
                              LocalDate dataValidade, String diagnostico,
-                             String observacoes, String tipo) {
+                             String observacoes, String tipo,
+                             Long pacienteId) {
+    public ReceitaRequest(
+            LocalDate dataEmissao,
+            LocalDate dataValidade,
+            String diagnostico,
+            String observacoes,
+            String tipo
+    ) {
+        this(dataEmissao, dataValidade, diagnostico, observacoes, tipo, null);
+    }
 }

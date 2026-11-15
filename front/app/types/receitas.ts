@@ -8,7 +8,9 @@ export class Receita {
         public diagnostico: string,
         public observacoes: string,
         public tipo: string,
-        public status: string
+        public status: string,
+        public pacienteId: number | null = null,
+        public pacienteNome: string | null = null
     ) 
     {
         

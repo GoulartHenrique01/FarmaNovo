@@ -2,6 +2,7 @@
 
 import { atualizarUsuario, salvarUsuario } from "@/app/services/usuarioService";
 import { Usuario, UsuarioFormProps } from "@/app/types/usuario";
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,11 +10,12 @@ import { useState } from "react";
 // Formulário reutilizável para cadastrar um usuário ou editar um usuário existente.
 export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  // Permite navegar de volta à listagem após salvar.
   const router = useRouter();
+  const [erro, setErro] = useState("");
 
   // Mantém os valores dos campos sincronizados com o formulário.
   // Na edição, inicia com os dados recebidos; no cadastro, usa valores vazios e status ativo.
   const [usuario, setUsuario] = useState<Usuario>(
-    usuarioExistente || new Usuario(null, "", "", "", "", "ATIVO")
+    usuarioExistente || new Usuario(null, "", "", "", "", "ATIVO", "ROLE_USER")
   );
 
   // Atualiza apenas a propriedade alterada, preservando os demais dados do usuário.
@@ -29,7 +31,8 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
           campo === "email" ? valor : valorAnterior.email,
           campo === "cpf" ? valor : valorAnterior.cpf,
           campo === "senha" ? valor : valorAnterior.senha,
-          valorAnterior.status
+          valorAnterior.status,
+          valorAnterior.role
         )
     );
   };
@@ -37,35 +40,32 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
   // Persiste os dados: PUT quando há usuário existente e POST durante um novo cadastro.
   // O FormData é fornecido pelo atributo action do formulário; os valores são lidos do estado controlado.
   const handlerSalvar = async () => {
-    if (usuarioExistente) {
-      // Atualiza o usuário identificado pelo seu ID.
-      const dadosRetorno = await atualizarUsuario(usuario);
-
-      if (dadosRetorno) {
-        alert("Usuário salvo com sucesso");
+    setErro("");
+    try {
+      if (usuarioExistente) {
+        await atualizarUsuario(usuario);
       } else {
-        alert(dadosRetorno);
-        return;
+        await salvarUsuario(usuario);
       }
-    } else {
-      // Cria um novo usuário na API.
-      const dadosRetorno = await salvarUsuario(usuario);
-
-      if (dadosRetorno) {
-        alert("Usuário salvo com sucesso");
-      } else {
-        alert(dadosRetorno);
-        return;
-      }
+      alert("Usuário salvo com sucesso");
+      router.push("/usuarios");
+    } catch (error: unknown) {
+      const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+      const mensagem =
+        typeof resposta === "string"
+          ? resposta
+          : typeof resposta === "object" && resposta !== null && "message" in resposta
+            ? String(resposta.message)
+            : "";
+      setErro(mensagem || "Não foi possível salvar o usuário. Verifique os dados e tente novamente.");
     }
-    // Após a gravação bem-sucedida, retorna à listagem de usuários.
-    router.push("/usuarios");
   };
 
   // Cada input abaixo é controlado pelo estado; senha só é obrigatória no cadastro.
   return (
     <form action={handlerSalvar} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-6 space-y-5">
+        {erro && <p role="alert" className="text-sm text-red-600">{erro}</p>}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-teal-700">
             Nome Completo:
@@ -98,6 +98,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {  /
           </label>
           <input
             name="email"
+            type="email"
             value={usuario.email}
             required
             onChange={(e) => handlerChange("email", e.target.value)}
