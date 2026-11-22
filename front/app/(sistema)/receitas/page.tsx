@@ -11,9 +11,11 @@ import { RootState } from "@/app/redux/store";
 export default function Receitas() {
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);
-  const podeCriarReceita = identidade?.usuarioId !== null
+  const empresa = identidade?.usuarioId === null && identidade?.empresaId !== null;
+  const funcionario = identidade?.usuarioId !== null
     && identidade?.empresaId !== null
     && identidade?.role === "ROLE_USER";
+  const podeCriarReceita = empresa || funcionario;
 
   // Registros que serão exibidos na tabela de receitas.
   const [receitas, setReceitas] = useState<Receita[]>([]);

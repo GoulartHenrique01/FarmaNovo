@@ -10,7 +10,6 @@ import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +27,24 @@ public class PacienteService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     @Transactional(readOnly = true)
     public List<PacienteResponse> listarTodosPacientesTable() {
-        UsuarioLogado identidade = getUsuarioLogado();
-        return pacienteRepository.findByEmpresa_IdAndUsuario_Id(
-                        identidade.empresaId(), identidade.usuarioId())
-                .stream()
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        List<Paciente> pacientes;
+
+        if (isEmpresa(identidade)) {
+            pacientes = pacienteRepository.findByEmpresa_Id(identidade.empresaId());
+        } else if (isFuncionario(identidade)) {
+            pacientes = pacienteRepository.findByEmpresa_IdAndUsuario_Id(
+                    identidade.empresaId(), identidade.usuarioId());
+        } else {
+            throw new AccessDeniedException("Usuário sem permissão para consultar pacientes.");
+        }
+
+        return pacientes.stream()
                 .filter(paciente -> paciente.getStatus() != EnumStatusPaciente.EXCLUIDO)
                 .map(PacienteResponse::new)
                 .toList();
@@ -41,28 +52,35 @@ public class PacienteService {
 
     @Transactional(readOnly = true)
     public PacienteResponse buscarPorId(Long id) {
-        UsuarioLogado identidade = getUsuarioLogado();
-        return pacienteRepository.findByIdAndEmpresa_IdAndUsuario_Id(
-                        id, identidade.empresaId(), identidade.usuarioId())
-                .filter(paciente -> paciente.getStatus() != EnumStatusPaciente.EXCLUIDO)
-                .map(PacienteResponse::new)
-                .orElse(null);
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        Paciente paciente = buscarPacienteNoEscopo(id, identidade);
+
+        if (paciente == null || paciente.getStatus() == EnumStatusPaciente.EXCLUIDO) {
+            return null;
+        }
+        return new PacienteResponse(paciente);
     }
 
     @Transactional
     public PacienteResponse salvarPaciente(PacienteRequest request, Long id) {
-        UsuarioLogado identidade = getUsuarioLogado();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         validarRequest(request);
+        validarFuncionario(identidade);
 
-        if (id == 0L) {
-            Usuario usuario = usuarioRepository.findById(identidade.usuarioId())
-                    .filter(cadastro -> cadastro.getEmpresa() != null
-                            && cadastro.getEmpresa().getId().equals(identidade.empresaId())
-                            && "ROLE_USER".equals(cadastro.getRole())
-                            && cadastro.getStatus() == EnumStatusUsuario.ATIVO)
-                    .orElseThrow(() -> new AccessDeniedException("Usuário autenticado inválido."));
-            Empresa empresa = empresaRepository.findById(identidade.empresaId())
-                    .orElseThrow(() -> new AccessDeniedException("Empresa do usuário autenticado não encontrada."));
+        if (id == null || id == 0L) {
+            Usuario usuario = usuarioRepository.findById(identidade.usuarioId()).orElse(null);
+            if (usuario == null
+                    || usuario.getEmpresa() == null
+                    || !usuario.getEmpresa().getId().equals(identidade.empresaId())
+                    || !"ROLE_USER".equals(usuario.getRole())
+                    || usuario.getStatus() != EnumStatusUsuario.ATIVO) {
+                throw new AccessDeniedException("Usuário autenticado inválido.");
+            }
+
+            Empresa empresa = empresaRepository.findById(identidade.empresaId()).orElse(null);
+            if (empresa == null || empresa.getStatus() != EnumStatusEmpresa.ATIVO) {
+                throw new AccessDeniedException("Empresa não encontrada ou inativa.");
+            }
 
             Paciente paciente = new Paciente(request, usuario, empresa);
             return new PacienteResponse(pacienteRepository.save(paciente));
@@ -85,15 +103,36 @@ public class PacienteService {
         if (status == null) {
             throw new IllegalArgumentException("Informe o status do paciente.");
         }
-        UsuarioLogado identidade = getUsuarioLogado();
+
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        validarFuncionario(identidade);
+
         Paciente paciente = pacienteRepository.findByIdAndEmpresa_IdAndUsuario_Id(
                 id, identidade.empresaId(), identidade.usuarioId()).orElse(null);
         if (paciente == null) {
             return false;
         }
+
         paciente.setStatus(status);
         pacienteRepository.save(paciente);
         return true;
+    }
+
+    private Paciente buscarPacienteNoEscopo(Long id, UsuarioLogado identidade) {
+        if (isEmpresa(identidade)) {
+            return pacienteRepository.findByIdAndEmpresa_Id(id, identidade.empresaId()).orElse(null);
+        }
+        if (isFuncionario(identidade)) {
+            return pacienteRepository.findByIdAndEmpresa_IdAndUsuario_Id(
+                    id, identidade.empresaId(), identidade.usuarioId()).orElse(null);
+        }
+        throw new AccessDeniedException("Usuário sem permissão para consultar pacientes.");
+    }
+
+    private void validarFuncionario(UsuarioLogado identidade) {
+        if (!isFuncionario(identidade)) {
+            throw new AccessDeniedException("Somente funcionários podem cadastrar, editar ou alterar pacientes.");
+        }
     }
 
     private void validarRequest(PacienteRequest request) {
@@ -104,15 +143,17 @@ public class PacienteService {
         }
     }
 
-    private UsuarioLogado getUsuarioLogado() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()
-                || !(authentication.getPrincipal() instanceof UsuarioLogado identidade)
-                || identidade.usuarioId() == null || identidade.empresaId() == null
-                || identidade.authorities().stream()
-                .noneMatch(authority -> "ROLE_USER".equals(authority.getAuthority()))) {
-            throw new AccessDeniedException("Somente usuários vinculados a uma empresa podem acessar pacientes.");
-        }
-        return identidade;
+    private boolean isEmpresa(UsuarioLogado identidade) {
+        return identidade.usuarioId() == null && identidade.empresaId() != null
+                && identidade.authorities() != null
+                && identidade.authorities().stream()
+                .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority()));
+    }
+
+    private boolean isFuncionario(UsuarioLogado identidade) {
+        return identidade.usuarioId() != null && identidade.empresaId() != null
+                && identidade.authorities() != null
+                && identidade.authorities().stream()
+                .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority()));
     }
 }

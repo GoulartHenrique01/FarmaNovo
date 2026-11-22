@@ -13,11 +13,10 @@ import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,15 +29,18 @@ public class EmpresaService {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UsuarioService usuarioService;
 
     public List<EmpresaResponse> listarTodasEmpresasTable(){
-        UsuarioLogado identidade = getIdentidadeAutenticada();
-        List<Empresa> empresas;
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        List<Empresa> empresas = new ArrayList<>();
         if (isAdministradorGlobal(identidade)) {
             empresas = empresaRepository.findAll();
         } else if (isEmpresa(identidade)) {
-            empresas = empresaRepository.findById(identidade.empresaId()).stream().toList();
+            Empresa empresaLogada = empresaRepository.findById(identidade.empresaId()).orElse(null);
+            if (empresaLogada != null) {
+                empresas.add(empresaLogada);
+            }
         } else {
             throw new AccessDeniedException("Usuário sem permissão para consultar empresas.");
         }
@@ -61,12 +63,12 @@ public class EmpresaService {
             empresaBanco.setNomeResponsavel(empresa.administradorNome());
             empresaBanco.setCpfResponsavel(new CPF(empresa.administradorCpf()));
             empresaBanco.setEmail(empresa.administradorEmail().trim().toLowerCase());
-            empresaBanco.setSenha(passwordEncoder.encode(empresa.administradorSenha()));
+            empresaBanco.setSenha(empresa.administradorSenha());
             empresaBanco = empresaRepository.save(empresaBanco);
             return new EmpresaResponse(empresaBanco);
         }
 
-        UsuarioLogado identidade = getIdentidadeAutenticada();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         if (!isAdministradorGlobal(identidade) && (!isEmpresa(identidade) || !id.equals(identidade.empresaId()))) {
             return null;
         }
@@ -83,28 +85,34 @@ public class EmpresaService {
         empresaBanco.setCpfResponsavel(new CPF(empresa.administradorCpf()));
         empresaBanco.setEmail(empresa.administradorEmail().trim().toLowerCase());
         if (empresa.administradorSenha() != null && !empresa.administradorSenha().isBlank()) {
-            empresaBanco.setSenha(passwordEncoder.encode(empresa.administradorSenha()));
+            empresaBanco.setSenha(empresa.administradorSenha());
         }
         return new EmpresaResponse(empresaRepository.save(empresaBanco));
     }
 
     public EmpresaResponse buscarPorId(Long id){
-        UsuarioLogado identidade = getIdentidadeAutenticada();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         if (!isAdministradorGlobal(identidade) && (!isEmpresa(identidade) || !id.equals(identidade.empresaId()))) {
             return null;
         }
-        return empresaRepository.findById(id).map(EmpresaResponse::new).orElse(null);
+        Empresa empresaBanco = empresaRepository.findById(id).orElse(null);
+        if (empresaBanco == null) {
+            return null;
+        }
+        return new EmpresaResponse(empresaBanco);
     }
 
     @Transactional
     public UsuarioResponse criarAdministrador(Long empresaId, UsuarioRequest administradorRequest) {
-        UsuarioLogado identidade = getIdentidadeAutenticada();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         if (!isAdministradorGlobal(identidade)
                 && (!isEmpresa(identidade) || !empresaId.equals(identidade.empresaId()))) {
             throw new AccessDeniedException("Sem permissão para cadastrar usuários nesta empresa.");
         }
-        Empresa empresa = empresaRepository.findById(empresaId)
-                .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada."));
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        if (empresa == null) {
+            throw new IllegalArgumentException("Empresa não encontrada.");
+        }
         if (administradorRequest.nome() == null || administradorRequest.nome().isBlank()
                 || administradorRequest.email() == null || administradorRequest.email().isBlank()
                 || administradorRequest.senha() == null || administradorRequest.senha().isBlank()
@@ -118,13 +126,13 @@ public class EmpresaService {
 
         Usuario administrador = new Usuario(administradorRequest, empresa);
         administrador.setEmail(email);
-        administrador.setSenha(passwordEncoder.encode(administradorRequest.senha()));
+        administrador.setSenha(administradorRequest.senha());
         usuarioRepository.save(administrador);
         return new UsuarioResponse(administrador);
     }
 
     public boolean atualizarStatus(EnumStatusEmpresa status, Long id){
-        UsuarioLogado identidade = getIdentidadeAutenticada();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         if (!isAdministradorGlobal(identidade) && (!isEmpresa(identidade) || !id.equals(identidade.empresaId()))) {
             return false;
         }
@@ -158,26 +166,25 @@ public class EmpresaService {
             throw new IllegalArgumentException("Informe o e-mail de acesso da empresa.");
         }
         String email = request.administradorEmail().trim().toLowerCase();
-        boolean outraEmpresaUsaEmail = empresaRepository.findByEmail(email)
-                .filter(cadastro -> !cadastro.getId().equals(empresa.getId()))
-                .isPresent();
-        boolean usuarioUsaEmail = usuarioRepository.findByEmail(email)
-                .filter(usuario -> !("ROLE_EMPRESA_ADMIN".equals(usuario.getRole())
-                        && usuario.getEmpresa() != null
-                        && usuario.getEmpresa().getId().equals(empresa.getId())))
-                .isPresent();
+
+        //Outra empresa ja usa este e-mail?
+        Empresa empresaComEmail = empresaRepository.findByEmail(email).orElse(null);
+        boolean outraEmpresaUsaEmail = empresaComEmail != null
+                && !empresaComEmail.getId().equals(empresa.getId());
+
+        //Algum usuario ja usa este e-mail? (a conta antiga da propria empresa nao conta)
+        Usuario usuarioComEmail = usuarioRepository.findByEmail(email).orElse(null);
+        boolean usuarioUsaEmail = false;
+        if (usuarioComEmail != null) {
+            boolean contaAntigaDaEmpresa = "ROLE_EMPRESA_ADMIN".equals(usuarioComEmail.getRole())
+                    && usuarioComEmail.getEmpresa() != null
+                    && usuarioComEmail.getEmpresa().getId().equals(empresa.getId());
+            usuarioUsaEmail = !contaAntigaDaEmpresa;
+        }
+
         if (outraEmpresaUsaEmail || usuarioUsaEmail) {
             throw new IllegalArgumentException("Já existe uma conta cadastrada com este e-mail.");
         }
-    }
-
-    private UsuarioLogado getIdentidadeAutenticada() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()
-                || !(authentication.getPrincipal() instanceof UsuarioLogado identidade)) {
-            throw new AccessDeniedException("Usuário não autenticado.");
-        }
-        return identidade;
     }
 
     private boolean isEmpresa(UsuarioLogado identidade) {

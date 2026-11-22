@@ -21,7 +21,7 @@ public class UsuarioController {
 
 
     @Autowired
-    UsuarioService usuarioService;
+    private UsuarioService usuarioService;
 
     @PostMapping("/admin")
     public ResponseEntity<?> criarAdmin(@RequestBody CriarAdminRequest criarAdminRequest){

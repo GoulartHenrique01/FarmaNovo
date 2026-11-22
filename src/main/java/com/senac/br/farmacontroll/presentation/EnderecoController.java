@@ -5,6 +5,7 @@ import com.senac.br.farmacontroll.application.services.EnderecoService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +21,8 @@ public class EnderecoController {
     @GetMapping("/{cep}")
     @Operation(summary = "Método de busca de endereço",
     description = "Método que busca endereços completos por CEP")
-    public EnderecoResponse buscarEndereco(@PathVariable String cep){
-        return enderecoService.BuscarEndereco(cep);
+    public ResponseEntity<EnderecoResponse> buscarEndereco(@PathVariable String cep){
+        return ResponseEntity.ok(enderecoService.BuscarEndereco(cep));
     }
 
 }

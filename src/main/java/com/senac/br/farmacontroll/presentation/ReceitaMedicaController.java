@@ -1,12 +1,12 @@
 package com.senac.br.farmacontroll.presentation;
 
+import com.senac.br.farmacontroll.application.DTOs.EnumStatusReceita;
 import com.senac.br.farmacontroll.application.DTOs.ReceitaRequest;
 import com.senac.br.farmacontroll.application.DTOs.ReceitaResponse;
 import com.senac.br.farmacontroll.application.services.ReceitaService;
-import com.senac.br.farmacontroll.application.DTOs.EnumStatusReceita;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,66 +15,52 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/receitas")
-@Tag(name = "Receitas", description = "Grupo de APIs Responsável por controlar a estrutura de criação e consulta de receitas emitidas no sistema!")    
+@Tag(name = "Receitas", description = "Cadastro, consulta e gerenciamento de receitas médicas.")
 public class ReceitaMedicaController {
 
     @Autowired
     private ReceitaService receitaService;
 
     @GetMapping
-    @Operation(summary = "Método de consulta da lista de receitas", description = "Método responsável em efetuar a consulta de todos as receitas sem filtro!")
-    public ResponseEntity<List<ReceitaResponse>> listarTodos(){
+    @Operation(summary = "Lista as receitas disponíveis para o usuário autenticado")
+    public ResponseEntity<List<ReceitaResponse>> listarTodos() {
         return ResponseEntity.ok(receitaService.listarTodosReceitasTable());
     }
 
-
     @GetMapping("/{id}")
-    @Operation(summary = "Método de busca de receitas!",
-            description = "Método responsável em efetuar a busca de uma receita especifica utilizando o ID!")
-    public ResponseEntity<ReceitaResponse> buscarPorId(@PathVariable Long id){
-        var receitaBanco = receitaService.buscarPorId(id);
-        if (receitaBanco != null) {
-            return ResponseEntity.ok(receitaBanco);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Método de edição de usuarios",
-            description = "Método responsável pela edição de usuarios cadastrados no sistema")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ReceitaRequest receita){
-        try {
-            ReceitaResponse receitaBanco = receitaService.salvarReceita(receita, id);
-            if (receitaBanco == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(receitaBanco);
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @Operation(summary = "Busca uma receita pelo identificador")
+    public ResponseEntity<ReceitaResponse> buscarPorId(@PathVariable Long id) {
+        ReceitaResponse receita = receitaService.buscarPorId(id);
+        return receita == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(receita);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Método de criação de receitas",
-            description = "Método responsável em efetuar a emissão de receitas médicas")
-    public ResponseEntity<?> criar(@RequestBody ReceitaRequest receita){
+    @Operation(summary = "Cadastra uma receita para a empresa autenticada")
+    public ResponseEntity<?> criar(@RequestBody ReceitaRequest request) {
         try {
-            ReceitaResponse receitaBanco = receitaService.salvarReceita(receita, 0L);
+            return ResponseEntity.status(HttpStatus.CREATED).body(receitaService.salvarReceita(request, 0L));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
-            return ResponseEntity.ok(receitaBanco);
-        }catch (IllegalArgumentException e){
+    @PutMapping("/{id}")
+    @Operation(summary = "Edita uma receita dentro do escopo do usuário autenticado")
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ReceitaRequest request) {
+        try {
+            ReceitaResponse receita = receitaService.salvarReceita(request, id);
+            return receita == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(receita);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}/excluir")
+    @Operation(summary = "Exclui logicamente uma receita")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        var atualizarReceita = receitaService.atualizarStatus(EnumStatusReceita.EXCLUIDO, id);
-
-        if (atualizarReceita){
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        return receitaService.atualizarStatus(EnumStatusReceita.EXCLUIDO, id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }

@@ -15,10 +15,14 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
   // Permite voltar à listagem ao concluir o fluxo de gravação.
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);
-  const usuarioAutenticado = identidade !== null
+  const empresa = identidade !== null
+    && identidade.usuarioId === null
+    && identidade.empresaId !== null;
+  const funcionario = identidade !== null
     && identidade.usuarioId !== null
     && identidade.empresaId !== null
     && identidade.role === "ROLE_USER";
+  const podeSelecionarPaciente = empresa || funcionario;
 
     // Armazena os valores dos campos; na edição, parte dos dados já existentes.
     const [receita, setReceita] = useState<Receita>(
@@ -29,7 +33,7 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
     const [erroPacientes, setErroPacientes] = useState("");
 
     useEffect(() => {
-      if (!usuarioAutenticado) return;
+      if (!podeSelecionarPaciente) return;
 
       let componenteMontado = true;
       buscarListaPacientes()
@@ -40,14 +44,14 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
         })
         .catch(() => {
           if (componenteMontado) {
-            setErroPacientes("Não foi possível carregar seus pacientes.");
+            setErroPacientes("Não foi possível carregar os pacientes da empresa.");
           }
         });
 
       return () => {
         componenteMontado = false;
       };
-    }, [usuarioAutenticado]);
+    }, [podeSelecionarPaciente]);
 
     // Atualiza o campo escolhido criando uma nova instância com os demais valores preservados.
     const handlerChange = (
@@ -108,7 +112,7 @@ export default function ReceitaForm({receitaExistente}:ReceitaFormProps) {
             className="w-full px-4 py-2.5 border border-teal-200 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
           />
         </div>
-        {usuarioAutenticado && (
+        {podeSelecionarPaciente && (
           <div className="space-y-2">
             <label htmlFor="pacienteId" className="block text-sm font-medium text-teal-700">
               Paciente

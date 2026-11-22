@@ -8,7 +8,6 @@ import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
 import com.senac.br.farmacontroll.domain.valueObject.DataValidade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -21,8 +20,11 @@ public class MedicamentoService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     public List<MedicamentoResponse> listarTodosMedicamentosTable(){
-        UsuarioLogado usuarioLogado = getUsuarioLogado();
+        UsuarioLogado usuarioLogado = usuarioService.getUsuarioLogado();
         List<Medicamento> medicamentos;
 
         if (isAdministradorGlobal(usuarioLogado)) {
@@ -39,7 +41,7 @@ public class MedicamentoService {
     }
 
     public CriarMedicamentoResponse criarTipo(CriarMedicamentoRequest criarMedicamentoRequest){
-        UsuarioLogado identidade = getUsuarioLogado();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         exigirGerenciamentoDeMedicamentos(identidade);
         Medicamento medicamentoTipoSalvar = new Medicamento(criarMedicamentoRequest);
         associarEmpresa(medicamentoTipoSalvar, identidade);
@@ -51,7 +53,7 @@ public class MedicamentoService {
     }
 
     public MedicamentoResponse salvarMedicamento(MedicamentoRequest medicamento, Long id){
-        UsuarioLogado usuarioLogado = getUsuarioLogado();
+        UsuarioLogado usuarioLogado = usuarioService.getUsuarioLogado();
         if(id == 0L){
             exigirGerenciamentoDeMedicamentos(usuarioLogado);
             Medicamento medicamentoBanco = new Medicamento();
@@ -91,7 +93,7 @@ public class MedicamentoService {
     }
 
     public MedicamentoResponse buscarPorId(Long id){
-        var medicamento = buscarMedicamentoNoEscopo(id, getUsuarioLogado());
+        var medicamento = buscarMedicamentoNoEscopo(id, usuarioService.getUsuarioLogado());
         if (medicamento == null){
             return null;
         }
@@ -99,7 +101,7 @@ public class MedicamentoService {
     }
 
     public boolean atualizarStatus(EnumStatusMedicamento status, Long id){
-        UsuarioLogado identidade = getUsuarioLogado();
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         if (!isAdministradorGlobal(identidade) && !isEmpresa(identidade)) {
             throw new AccessDeniedException("Somente a empresa pode alterar medicamentos.");
         }
@@ -125,18 +127,11 @@ public class MedicamentoService {
 
     private void associarEmpresa(Medicamento medicamento, UsuarioLogado usuarioLogado) {
         Long empresaId = requireEmpresaId(usuarioLogado);
-        Empresa empresa = empresaRepository.findById(empresaId)
-                .orElseThrow(() -> new AccessDeniedException("Empresa do usuário autenticado não encontrada."));
-        medicamento.setEmpresa(empresa);
-    }
-
-    private UsuarioLogado getUsuarioLogado() {
-        var autenticacao = SecurityContextHolder.getContext().getAuthentication();
-        if (autenticacao != null && autenticacao.isAuthenticated()
-                && autenticacao.getPrincipal() instanceof UsuarioLogado usuarioLogado) {
-            return usuarioLogado;
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        if (empresa == null) {
+            throw new AccessDeniedException("Empresa do usuário autenticado não encontrada.");
         }
-        throw new AccessDeniedException("Usuário não autenticado.");
+        medicamento.setEmpresa(empresa);
     }
 
     private Long requireEmpresaId(UsuarioLogado usuarioLogado) {

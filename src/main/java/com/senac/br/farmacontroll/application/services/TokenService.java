@@ -38,8 +38,10 @@ public class TokenService {
     private TokenRepository tokenRepository;
 
     public String gerarToken(LoginRequest loginRequestDto) {
-        Usuario usuario = usuarioRepository.findByEmail(loginRequestDto.email())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        Usuario usuario = usuarioRepository.findByEmail(loginRequestDto.email()).orElse(null);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário não encontrado");
+        }
         return gerarToken(usuario);
     }
 
@@ -68,8 +70,10 @@ public class TokenService {
                 .withIssuer(emissor)
                 .build();
         var jwt = verificador.verify(token);
-        Token tokenBanco = tokenRepository.findTokenByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Token inválido."));
+        Token tokenBanco = tokenRepository.findTokenByToken(token).orElse(null);
+        if (tokenBanco == null) {
+            throw new IllegalArgumentException("Token inválido.");
+        }
 
         if (tokenBanco.getEmpresa() != null && tokenBanco.getUsuario() == null) {
             Empresa empresa = tokenBanco.getEmpresa();
