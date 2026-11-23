@@ -1,3 +1,4 @@
+
 package com.senac.br.farmacontroll.application.services;
 
 import com.senac.br.farmacontroll.application.DTOs.*;
@@ -44,7 +45,7 @@ public class ReceitaService {
         } else if (isEmpresa(identidade)) {
             receitas = receitaRepository.findByEmpresa_Id(identidade.empresaId());
         } else if (isFuncionario(identidade)) {
-            receitas = receitaRepository.findByResponsavel_IdAndEmpresa_Id(
+            receitas = receitaRepository.findByUsuario_IdAndEmpresa_Id(
                     identidade.usuarioId(), identidade.empresaId());
         } else {
             throw new AccessDeniedException("Usuário sem permissão para consultar receitas.");
@@ -66,6 +67,7 @@ public class ReceitaService {
         }
 
         Receita receitaBanco = buscarNoEscopo(id, identidade);
+
         if (receitaBanco == null || receitaBanco.getStatus() == EnumStatusReceita.EXCLUIDO) {
             return null;
         }
@@ -77,6 +79,7 @@ public class ReceitaService {
 
         aplicarDados(receitaBanco, request);
         receitaRepository.save(receitaBanco);
+
         return new ReceitaResponse(receitaBanco);
     }
 
@@ -90,18 +93,22 @@ public class ReceitaService {
         }
 
         Empresa empresa = empresaRepository.findById(identidade.empresaId()).orElse(null);
+
         if (empresa == null || empresa.getStatus() != EnumStatusEmpresa.ATIVO) {
             throw new AccessDeniedException("Empresa não encontrada ou inativa.");
         }
 
-        Usuario responsavel = null;
+        Usuario usuario = null;
+
         if (isFuncionario(identidade)) {
-            responsavel = usuarioRepository.findById(identidade.usuarioId()).orElse(null);
-            if (responsavel == null
-                    || responsavel.getEmpresa() == null
-                    || !responsavel.getEmpresa().getId().equals(identidade.empresaId())
-                    || !"ROLE_USER".equals(responsavel.getRole())
-                    || responsavel.getStatus() != EnumStatusUsuario.ATIVO) {
+            usuario = usuarioRepository.findById(identidade.usuarioId()).orElse(null);
+
+            if (usuario == null
+                    || usuario.getEmpresa() == null
+                    || !usuario.getEmpresa().getId().equals(identidade.empresaId())
+                    || !"ROLE_USER".equals(usuario.getRole())
+                    || usuario.getStatus() != EnumStatusUsuario.ATIVO) {
+
                 throw new AccessDeniedException("Usuário autenticado inválido.");
             }
         }
@@ -110,22 +117,26 @@ public class ReceitaService {
                 request.pacienteId(), identidade.empresaId(), identidade);
 
         Receita receitaBanco = new Receita();
+
         aplicarDados(receitaBanco, request);
         receitaBanco.setStatus(EnumStatusReceita.ATIVO);
         receitaBanco.setEmpresa(empresa);
-        receitaBanco.setResponsavel(responsavel);
         receitaBanco.setPaciente(paciente);
+        receitaBanco.setUsuario(usuario);
 
         receitaRepository.save(receitaBanco);
+
         return new ReceitaResponse(receitaBanco);
     }
 
     @Transactional(readOnly = true)
     public ReceitaResponse buscarPorId(Long id) {
         Receita receitaBanco = buscarNoEscopo(id, usuarioService.getUsuarioLogado());
+
         if (receitaBanco == null || receitaBanco.getStatus() == EnumStatusReceita.EXCLUIDO) {
             return null;
         }
+
         return new ReceitaResponse(receitaBanco);
     }
 
@@ -136,12 +147,14 @@ public class ReceitaService {
         }
 
         Receita receitaBanco = buscarNoEscopo(id, usuarioService.getUsuarioLogado());
+
         if (receitaBanco == null || receitaBanco.getStatus() == EnumStatusReceita.EXCLUIDO) {
             return false;
         }
 
         receitaBanco.setStatus(status);
         receitaRepository.save(receitaBanco);
+
         return true;
     }
 
@@ -151,11 +164,14 @@ public class ReceitaService {
                 || request.dataValidade() == null
                 || request.diagnostico() == null || request.diagnostico().isBlank()
                 || request.tipo() == null || request.tipo().isBlank()) {
+
             throw new IllegalArgumentException("Informe as datas, o diagnóstico e o tipo da receita.");
         }
+
         if (request.dataValidade().isBefore(request.dataEmissao())) {
             throw new IllegalArgumentException("A validade não pode ser anterior à data de emissão.");
         }
+
         if (request.pacienteId() == null) {
             throw new IllegalArgumentException("Selecione um paciente para a receita.");
         }
@@ -176,12 +192,14 @@ public class ReceitaService {
             paciente = pacienteRepository.findByIdAndEmpresa_IdAndUsuario_Id(
                     pacienteId, empresaId, identidade.usuarioId()).orElse(null);
         } else {
-            paciente = pacienteRepository.findByIdAndEmpresa_Id(pacienteId, empresaId).orElse(null);
+            paciente = pacienteRepository.findByIdAndEmpresa_Id(
+                    pacienteId, empresaId).orElse(null);
         }
 
         if (paciente == null || paciente.getStatus() != EnumStatusPaciente.ATIVO) {
             throw new AccessDeniedException("O paciente não pertence à empresa ou está inativo.");
         }
+
         return paciente;
     }
 
@@ -189,13 +207,17 @@ public class ReceitaService {
         if (isAdministradorGlobal(identidade)) {
             return receitaRepository.findById(id).orElse(null);
         }
+
         if (isEmpresa(identidade)) {
-            return receitaRepository.findByIdAndEmpresa_Id(id, identidade.empresaId()).orElse(null);
+            return receitaRepository.findByIdAndEmpresa_Id(
+                    id, identidade.empresaId()).orElse(null);
         }
+
         if (isFuncionario(identidade)) {
-            return receitaRepository.findByIdAndResponsavel_IdAndEmpresa_Id(
+            return receitaRepository.findByIdAndUsuario_IdAndEmpresa_Id(
                     id, identidade.usuarioId(), identidade.empresaId()).orElse(null);
         }
+
         return null;
     }
 

@@ -162,7 +162,15 @@ export default function Medicamentos() {
                     </td>
 
                     <td className="px-5 py-4 text-sm font-semibold text-slate-700">
-                      {medicamento.quantidade}
+                      <div className="flex items-center gap-2">
+                        {medicamento.quantidade}
+
+                        {medicamento.quantidade < 5 && (
+                          <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
+                            Estoque baixo
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-600">
@@ -171,11 +179,10 @@ export default function Medicamentos() {
 
                     <td className="px-5 py-4 text-sm text-slate-600">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          medicamento.precisaReceita === "SIM"
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${medicamento.precisaReceita === "SIM"
                             ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
                             : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                        }`}
+                          }`}
                       >
                         {medicamento.precisaReceita === "SIM" ? "Sim" : "Não"}
                       </span>
@@ -225,7 +232,7 @@ export default function Medicamentos() {
           onClick={() => router.push("/home")}
           className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
         >
-           ← Voltar para início
+          ← Voltar para início
         </button>
       </div>
     </main>

@@ -34,6 +34,6 @@ public class Receita {
     private Empresa empresa;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "responsavel_id", referencedColumnName = "id")
-    private Usuario responsavel;
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id", nullable = true)
+    private Usuario usuario;
 }

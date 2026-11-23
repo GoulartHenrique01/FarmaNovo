@@ -30,7 +30,6 @@ public class PacienteService {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Transactional(readOnly = true)
     public List<PacienteResponse> listarTodosPacientesTable() {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         List<Paciente> pacientes;
@@ -50,7 +49,6 @@ public class PacienteService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public PacienteResponse buscarPorId(Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         Paciente paciente = buscarPacienteNoEscopo(id, identidade);
@@ -61,33 +59,55 @@ public class PacienteService {
         return new PacienteResponse(paciente);
     }
 
-    @Transactional
+
     public PacienteResponse salvarPaciente(PacienteRequest request, Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+
         validarRequest(request);
-        validarFuncionario(identidade);
 
+        // Cadastro de um novo paciente
         if (id == null || id == 0L) {
-            Usuario usuario = usuarioRepository.findById(identidade.usuarioId()).orElse(null);
-            if (usuario == null
-                    || usuario.getEmpresa() == null
-                    || !usuario.getEmpresa().getId().equals(identidade.empresaId())
-                    || !"ROLE_USER".equals(usuario.getRole())
-                    || usuario.getStatus() != EnumStatusUsuario.ATIVO) {
-                throw new AccessDeniedException("Usuário autenticado inválido.");
-            }
 
-            Empresa empresa = empresaRepository.findById(identidade.empresaId()).orElse(null);
+            Empresa empresa = empresaRepository.findById(identidade.empresaId())
+                    .orElse(null);
+
             if (empresa == null || empresa.getStatus() != EnumStatusEmpresa.ATIVO) {
                 throw new AccessDeniedException("Empresa não encontrada ou inativa.");
             }
 
+            Usuario usuario = null;
+
+            // Se for funcionário, associa o paciente ao funcionário
+            if (isFuncionario(identidade)) {
+
+                usuario = usuarioRepository.findById(identidade.usuarioId())
+                        .orElse(null);
+
+                if (usuario == null
+                        || usuario.getEmpresa() == null
+                        || !usuario.getEmpresa().getId().equals(identidade.empresaId())
+                        || !"ROLE_USER".equals(usuario.getRole())
+                        || usuario.getStatus() != EnumStatusUsuario.ATIVO) {
+
+                    throw new AccessDeniedException("Usuário autenticado inválido.");
+                }
+
+            } else if (!isEmpresa(identidade)) {
+                throw new AccessDeniedException("Usuário sem permissão para cadastrar pacientes.");
+            }
+
             Paciente paciente = new Paciente(request, usuario, empresa);
+
             return new PacienteResponse(pacienteRepository.save(paciente));
         }
 
+        // Edição de paciente: mantém a regra atual para funcionários
+        validarFuncionario(identidade);
+
         Paciente paciente = pacienteRepository.findByIdAndEmpresa_IdAndUsuario_Id(
-                id, identidade.empresaId(), identidade.usuarioId()).orElse(null);
+                id, identidade.empresaId(), identidade.usuarioId()
+        ).orElse(null);
+
         if (paciente == null || paciente.getStatus() == EnumStatusPaciente.EXCLUIDO) {
             return null;
         }
@@ -95,10 +115,11 @@ public class PacienteService {
         paciente.setNome(request.nome().trim());
         paciente.setCpf(new CPF(request.cpf()));
         paciente.setTelefone(request.telefone());
+
         return new PacienteResponse(pacienteRepository.save(paciente));
     }
 
-    @Transactional
+
     public boolean atualizarStatus(EnumStatusPaciente status, Long id) {
         if (status == null) {
             throw new IllegalArgumentException("Informe o status do paciente.");
