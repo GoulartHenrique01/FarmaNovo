@@ -1,23 +1,25 @@
-// Modelo das datas e informações clínicas registradas em uma receita.
-export class Receita {
+export interface ReceitaMedicamento {
+    id?: number | null;
+    medicamentoId: number | null;
+    medicamentoNome?: string | null;
+    dosagemPrescrita: string;
+    posologia: string;
+    quantidadePrescrita: number | null;
+    duracaoTratamento: string;
+}
 
-    constructor(
-        public id: number | null,
-        public dataEmissao: string,
-        public dataValidade: string,
-        public diagnostico: string,
-        public observacoes: string,
-        public tipo: string,
-        public status: string,
-        public pacienteId: number | null = null,
-        public pacienteNome: string | null = null
-    ) 
-    {
-        
-    }
-    }
+export interface Receita {
+    id: number | null;
+    dataEmissao: string;
+    dataValidade: string;
+    diagnostico: string;
+    observacoes: string;
+    status: string;
+    pacienteId: number | null;
+    pacienteNome?: string | null;
+    medicamentos: ReceitaMedicamento[];
+}
 
-// Receita opcional recebida pelo formulário quando o modo é edição.
-export interface ReceitaFormProps{
-    receitaExistente?:Receita
+export interface ReceitaFormProps {
+    receitaExistente?: Receita;
 }

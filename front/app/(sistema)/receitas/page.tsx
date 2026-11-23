@@ -11,11 +11,7 @@ import { RootState } from "@/app/redux/store";
 export default function Receitas() {
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);
-  const empresa = identidade?.usuarioId === null && identidade?.empresaId !== null;
-  const funcionario = identidade?.usuarioId !== null
-    && identidade?.empresaId !== null
-    && identidade?.role === "ROLE_USER";
-  const podeCriarReceita = empresa || funcionario;
+  const podeCriarReceita = identidade !== null && identidade.role === "ROLE_USER" && identidade.empresaId !== null;
 
   // Registros que serão exibidos na tabela de receitas.
   const [receitas, setReceitas] = useState<Receita[]>([]);
@@ -85,7 +81,7 @@ export default function Receitas() {
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_35px_rgba(15,118,110,0.08)]">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] border-collapse">
+            <table className="w-full min-w-[1100px] border-collapse">
               <thead>
                 <tr className="border-b border-emerald-100 bg-emerald-50/70">
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
@@ -106,13 +102,12 @@ export default function Receitas() {
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
                     Paciente
                   </th>
-
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
-                    Observações
+                    Medicamento
                   </th>
 
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
-                    Tipo
+                    Observações
                   </th>
 
                   <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wide text-emerald-800">
@@ -151,13 +146,11 @@ export default function Receitas() {
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-600">
-                      {receita.observacoes}
+                      {receita.medicamentos?.map((item) => item.medicamentoNome).filter(Boolean).join(", ") || "-"}
                     </td>
 
                     <td className="px-5 py-4 text-sm text-slate-600">
-                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
-                        {receita.tipo}
-                      </span>
+                      {receita.observacoes || "-"}
                     </td>
 
                     <td className="px-5 py-4 text-sm">
@@ -195,7 +188,7 @@ export default function Receitas() {
                 {receitas.length === 0 && (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={9}
                       className="px-6 py-14 text-center text-sm text-slate-500"
                     >
                       Nenhuma receita encontrada!

@@ -1,11 +1,9 @@
-// Formato esperado da resposta de autenticação retornada pela API.
-export interface LoginResponse{
-    token:string
+export interface LoginResponse {
+    token: string;
 }
 
 export interface IdentidadeAutenticada {
     id: number;
-    usuarioId: number | null;
     empresaId: number | null;
     nome: string;
     email: string;
@@ -14,7 +12,7 @@ export interface IdentidadeAutenticada {
     status: string | null;
 }
 
-export interface AuthState{
-    usuario: IdentidadeAutenticada|null,
-    token: string
+export interface AuthState {
+    usuario: IdentidadeAutenticada | null;
+    token: string;
 }

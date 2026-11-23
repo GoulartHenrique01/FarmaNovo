@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+// FLUXO DE AUTORIZAÇÃO: libera login e documentação, restringe empresas ao ADMIN e os cadastros operacionais à empresa (USER).
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -33,6 +35,13 @@ public class SecurityConfiguration {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuarios/admin").permitAll()
                         .requestMatchers(HttpMethod.POST, "/empresas").permitAll()
+                        .requestMatchers("/empresas", "/empresas/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/medicamentos", "/medicamentos/**",
+                                "/pacientes", "/pacientes/**",
+                                "/receitas", "/receitas/**"
+                        ).hasRole("USER")
+                        .requestMatchers("/usuarios", "/usuarios/**").denyAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

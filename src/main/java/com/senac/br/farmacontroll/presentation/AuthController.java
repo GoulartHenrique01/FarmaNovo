@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// FLUXO DE AUTENTICAÇÃO: recebe as credenciais, valida a conta e devolve o token usado nas próximas requisições.
+
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Autenticação", description = "Controller de autenticação")

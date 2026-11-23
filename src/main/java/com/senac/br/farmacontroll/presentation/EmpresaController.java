@@ -1,15 +1,17 @@
 package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.EmpresaRequest;
+import com.senac.br.farmacontroll.application.DTOs.AtualizarStatusEmpresaRequest;
 import com.senac.br.farmacontroll.application.DTOs.EmpresaResponse;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa;
-import com.senac.br.farmacontroll.application.DTOs.UsuarioRequest;
 import com.senac.br.farmacontroll.application.services.EmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+// FLUXO HTTP: disponibiliza ao administrador os endpoints de gerenciamento das empresas.
 
 @RestController
 
@@ -56,17 +58,18 @@ public class EmpresaController {
         }
     }
 
-    @PostMapping("/{id}/administrador")
-    public ResponseEntity<?> criarAdministrador(
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> atualizarStatus(
             @PathVariable Long id,
-            @RequestBody UsuarioRequest administrador
+            @RequestBody AtualizarStatusEmpresaRequest request
     ) {
-        try {
-            return ResponseEntity.ok(empresaService.criarAdministrador(id, administrador));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return empresaService.atualizarStatus(request.status(), id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
+
+
 
     @DeleteMapping("/{id}/excluir")
     public ResponseEntity<Void> excluir(@PathVariable Long id){

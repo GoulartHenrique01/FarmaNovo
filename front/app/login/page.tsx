@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/slices/authSlice";
-import { buscarIdentidadeAutenticada } from "../services/usuarioService";
-import { loginBack } from "../services/authService";
+import { buscarIdentidadeAutenticada, loginBack } from "../services/authService";
 import Link from "next/link";
 import axios from "axios";
 import { useState } from "react";

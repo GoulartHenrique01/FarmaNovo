@@ -4,13 +4,11 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.senac.br.farmacontroll.application.DTOs.LoginRequest;
 import com.senac.br.farmacontroll.application.DTOs.UsuarioLogado;
 import com.senac.br.farmacontroll.domain.entidade.Empresa;
 import com.senac.br.farmacontroll.domain.entidade.Token;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.TokenRepository;
-import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+// FLUXO JWT: gera e valida o token; o filtro de segurança usa esse serviço para identificar quem fez a requisição.
 
 @Service
 public class TokenService {
@@ -32,26 +32,21 @@ public class TokenService {
     private String emissor;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
     private TokenRepository tokenRepository;
 
-    public String gerarToken(LoginRequest loginRequestDto) {
-        Usuario usuario = usuarioRepository.findByEmail(loginRequestDto.email()).orElse(null);
-        if (usuario == null) {
-            throw new IllegalArgumentException("Usuário não encontrado");
-        }
-        return gerarToken(usuario);
-    }
-
     public String gerarToken(Usuario usuario) {
+        if (usuario == null || !"ROLE_ADMIN".equals(usuario.getRole()) || usuario.getEmpresa() != null) {
+            throw new IllegalArgumentException("Somente o administrador global pode receber este token.");
+        }
         String token = criarToken(usuario.getEmail());
         tokenRepository.save(new Token(token, usuario));
         return token;
     }
 
     public String gerarToken(Empresa empresa) {
+        if (empresa == null || empresa.getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa.ATIVO) {
+            throw new IllegalArgumentException("Somente uma empresa ativa pode receber este token.");
+        }
         String token = criarToken(empresa.getEmail());
         tokenRepository.save(new Token(token, empresa));
         return token;
@@ -85,16 +80,14 @@ public class TokenService {
         }
 
         Usuario usuario = tokenBanco.getUsuario();
-        if (usuario == null || !jwt.getSubject().equals(usuario.getEmail())
+        if (usuario == null || !"ROLE_ADMIN".equals(usuario.getRole()) || usuario.getEmpresa() != null
+                || !jwt.getSubject().equals(usuario.getEmail())
                 || usuario.getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario.ATIVO) {
             throw new IllegalArgumentException("Usuário do token inválido ou inativo.");
         }
         if (usuario.getEmpresa() != null
                 && usuario.getEmpresa().getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa.ATIVO) {
             throw new IllegalArgumentException("Empresa do usuário inválida ou inativa.");
-        }
-        if ("ROLE_EMPRESA_ADMIN".equals(usuario.getRole()) && usuario.getEmpresa() != null) {
-            return new UsuarioLogado(usuario.getEmpresa());
         }
         return new UsuarioLogado(usuario);
     }

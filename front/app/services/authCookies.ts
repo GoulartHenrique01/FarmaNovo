@@ -1,69 +1,43 @@
-import Cookies from "js-cookie";
 import { IdentidadeAutenticada } from "../types/auth";
 
-const COOKIE_OPTIONS = { expires: 7, path: "/", sameSite: "lax" as const };
+const COOKIE_OPTIONS = "path=/; SameSite=Lax";
 
 export function salvarToken(token: string): void {
-    Cookies.set("token", token, {
-        ...COOKIE_OPTIONS,
-        secure: window.location.protocol === "https:"
-    });
+    document.cookie = `token=${encodeURIComponent(token)}; ${COOKIE_OPTIONS}`;
 }
 
 export function salvarSessao(token: string, usuario: IdentidadeAutenticada): void {
     salvarToken(token);
-    Cookies.set("usuario", JSON.stringify(usuario), {
-        ...COOKIE_OPTIONS,
-        secure: window.location.protocol === "https:"
-    });
+    document.cookie = `usuario=${encodeURIComponent(JSON.stringify(usuario))}; ${COOKIE_OPTIONS}`;
 }
 
 export function carregarSessao(): { token: string; usuario: IdentidadeAutenticada | null } {
-    const token = Cookies.get("token") ?? "";
-    const usuarioCookie = Cookies.get("usuario");
+    const cookies = document.cookie.split("; ");
+    const tokenCookie = cookies.find((item) => item.startsWith("token="));
+    const usuarioCookie = cookies.find((item) => item.startsWith("usuario="));
+    const token = tokenCookie ? decodeURIComponent(tokenCookie.slice(6)) : "";
 
-    if (!usuarioCookie || !token) {
+    if (!token || !usuarioCookie) {
         limparSessao();
         return { token: "", usuario: null };
     }
 
     try {
-        const usuario: unknown = JSON.parse(usuarioCookie);
-        if (typeof usuario === "object" && usuario !== null) {
-            const dados = usuario as Record<string, unknown>;
-            if (typeof dados.id === "number"
-                    && (dados.usuarioId === null || typeof dados.usuarioId === "number")
-                    && (dados.empresaId === null || typeof dados.empresaId === "number")
-                    && typeof dados.nome === "string"
-                    && typeof dados.email === "string"
-                    && (dados.cpf === null || typeof dados.cpf === "string")
-                    && typeof dados.role === "string"
-                    && (dados.status === null || typeof dados.status === "string")) {
-                return {
-                    token,
-                    usuario: {
-                        id: dados.id,
-                        usuarioId: dados.usuarioId,
-                        empresaId: dados.empresaId,
-                        nome: dados.nome,
-                        email: dados.email,
-                        cpf: dados.cpf,
-                        role: dados.role,
-                        status: dados.status
-                    }
-                };
-            }
+        const usuario = JSON.parse(decodeURIComponent(usuarioCookie.slice(8))) as IdentidadeAutenticada;
+        if (typeof usuario.id === "number" && typeof usuario.role === "string"
+                && typeof usuario.nome === "string" && typeof usuario.email === "string"
+                && (usuario.empresaId === null || typeof usuario.empresaId === "number")) {
+            return { token, usuario };
         }
-    } catch (error) {
-        console.error("Não foi possível restaurar a sessão salva.", error);
+    } catch {
+        // Sessão inválida: remove os cookies e exige novo login.
     }
 
-    console.error("A sessão salva está incompleta e foi removida.");
     limparSessao();
     return { token: "", usuario: null };
 }
 
 export function limparSessao(): void {
-    Cookies.remove("token", { path: "/" });
-    Cookies.remove("usuario", { path: "/" });
+    document.cookie = "token=; Max-Age=0; path=/";
+    document.cookie = "usuario=; Max-Age=0; path=/";
 }

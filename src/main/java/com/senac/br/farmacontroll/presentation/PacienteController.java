@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// FLUXO HTTP: recebe as operações de pacientes do frontend e encaminha as validações ao serviço.
+
 @RestController
 @RequestMapping("/pacientes")
 @Tag(name = "Pacientes", description = "Cadastro e consulta de pacientes vinculados ao usuário autenticado.")

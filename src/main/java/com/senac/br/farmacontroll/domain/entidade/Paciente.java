@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// CADASTRO DE PACIENTE: cada paciente pertence a uma empresa, mantendo os dados separados entre empresas.
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -27,19 +29,20 @@ public class Paciente {
 
     private EnumStatusPaciente status = EnumStatusPaciente.ATIVO;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "empresa_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
     private Empresa empresa;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", referencedColumnName = "id", nullable = false)
+    // Mantido como vínculo opcional para compatibilidade com registros antigos.
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id", nullable = true)
     private Usuario usuario;
 
-    public Paciente(PacienteRequest paciente, Usuario usuario, Empresa empresa) {
+    public Paciente(PacienteRequest paciente, Empresa empresa) {
         this.setNome(paciente.nome().trim());
         this.setCpf(new CPF(paciente.cpf()));
         this.setTelefone(paciente.telefone());
         this.setEmpresa(empresa);
-        this.setUsuario(usuario);
+        this.setUsuario(null);
     }
 }

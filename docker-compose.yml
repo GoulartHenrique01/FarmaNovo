@@ -20,6 +20,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/aulafull
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=123456
+      - JWT_SECRET=${JWT_SECRET:-dev-only-change-this-jwt-secret-before-deployment}
+      - ADMIN_REGISTRATION_KEY=${ADMIN_REGISTRATION_KEY:-}
     depends_on:
       - postgres-db
 

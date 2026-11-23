@@ -14,6 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+// FLUXO JWT: extrai o token da requisição, valida a assinatura e registra a conta autenticada no contexto de segurança.
+
 public class JwtFilter extends OncePerRequestFilter{
 
     //Injeção de dependencia

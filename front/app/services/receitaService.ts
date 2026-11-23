@@ -1,11 +1,12 @@
 import { Receita } from "../types/receitas";
 import api from "./api";
 
-type ReceitaRequest = Pick<
+ type ReceitaRequest = Pick<
     Receita,
-    "dataEmissao" | "dataValidade" | "diagnostico" | "observacoes" | "tipo" | "pacienteId"
+    "dataEmissao" | "dataValidade" | "diagnostico" | "observacoes" | "pacienteId" | "medicamentos"
 >;
 
+// FLUXO: funções responsáveis pela comunicação entre as telas de receitas e a API REST.
 export async function buscarListaReceitas(): Promise<Receita[]> {
     const dados = await api.get<Receita[]>("/receitas");
     return dados.data;
@@ -31,13 +32,20 @@ export async function salvarReceita(receita: Receita): Promise<number> {
     return dados.status;
 }
 
+// FLUXO: transforma o estado do formulário no DTO esperado pelo backend, enviando somente os IDs dos cadastros existentes.
 function requestReceita(receita: Receita): ReceitaRequest {
     return {
         dataEmissao: receita.dataEmissao,
         dataValidade: receita.dataValidade,
         diagnostico: receita.diagnostico,
         observacoes: receita.observacoes,
-        tipo: receita.tipo,
         pacienteId: receita.pacienteId,
+        medicamentos: receita.medicamentos.map((item) => ({
+            medicamentoId: item.medicamentoId,
+            dosagemPrescrita: item.dosagemPrescrita,
+            posologia: item.posologia,
+            quantidadePrescrita: item.quantidadePrescrita,
+            duracaoTratamento: item.duracaoTratamento,
+        })),
     };
 }

@@ -1,143 +1,107 @@
-
 package com.senac.br.farmacontroll.application.services;
 
 import com.senac.br.farmacontroll.application.DTOs.*;
 import com.senac.br.farmacontroll.domain.entidade.Empresa;
+import com.senac.br.farmacontroll.domain.entidade.Medicamento;
 import com.senac.br.farmacontroll.domain.entidade.Paciente;
 import com.senac.br.farmacontroll.domain.entidade.Receita;
-import com.senac.br.farmacontroll.domain.entidade.Usuario;
+import com.senac.br.farmacontroll.domain.entidade.ReceitaMedicamento;
 import com.senac.br.farmacontroll.domain.repository.EmpresaRepository;
+import com.senac.br.farmacontroll.domain.repository.MedicamentoRepository;
 import com.senac.br.farmacontroll.domain.repository.PacienteRepository;
 import com.senac.br.farmacontroll.domain.repository.ReceitaRepository;
-import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ReceitaService {
 
     @Autowired
     private ReceitaRepository receitaRepository;
-
     @Autowired
     private EmpresaRepository empresaRepository;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
     @Autowired
     private PacienteRepository pacienteRepository;
-
+    @Autowired
+    private MedicamentoRepository medicamentoRepository;
     @Autowired
     private UsuarioService usuarioService;
 
+    // FLUXO: a empresa autenticada consulta somente as receitas vinculadas ao seu próprio cadastro.
     @Transactional(readOnly = true)
     public List<ReceitaResponse> listarTodosReceitasTable() {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
-        List<Receita> receitas;
-
-        if (isAdministradorGlobal(identidade)) {
-            receitas = receitaRepository.findAll();
-        } else if (isEmpresa(identidade)) {
-            receitas = receitaRepository.findByEmpresa_Id(identidade.empresaId());
-        } else if (isFuncionario(identidade)) {
-            receitas = receitaRepository.findByUsuario_IdAndEmpresa_Id(
-                    identidade.usuarioId(), identidade.empresaId());
-        } else {
-            throw new AccessDeniedException("Usuário sem permissão para consultar receitas.");
-        }
-
-        return receitas.stream()
+        exigirEmpresa(identidade);
+        return receitaRepository.findByEmpresa_Id(identidade.empresaId()).stream()
                 .filter(receita -> receita.getStatus() != EnumStatusReceita.EXCLUIDO)
                 .map(ReceitaResponse::new)
                 .toList();
     }
 
+    // FLUXO: valida a empresa, o paciente e cada medicamento; cria ou atualiza a receita e seus itens em uma única transação.
     @Transactional
     public ReceitaResponse salvarReceita(ReceitaRequest request, Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        Empresa empresa = buscarEmpresaAtiva(identidade);
         validarReceita(request);
 
+        Paciente paciente = buscarPaciente(request.pacienteId(), empresa.getId());
+        Receita receita;
+
         if (id == null || id == 0L) {
-            return criarReceita(request, identidade);
-        }
-
-        Receita receitaBanco = buscarNoEscopo(id, identidade);
-
-        if (receitaBanco == null || receitaBanco.getStatus() == EnumStatusReceita.EXCLUIDO) {
-            return null;
-        }
-
-        if (request.pacienteId() != null) {
-            receitaBanco.setPaciente(buscarPacienteDaEmpresa(
-                    request.pacienteId(), receitaBanco.getEmpresa().getId(), identidade));
-        }
-
-        aplicarDados(receitaBanco, request);
-        receitaRepository.save(receitaBanco);
-
-        return new ReceitaResponse(receitaBanco);
-    }
-
-    private ReceitaResponse criarReceita(ReceitaRequest request, UsuarioLogado identidade) {
-        if (isAdministradorGlobal(identidade)) {
-            throw new AccessDeniedException("O administrador global não pode emitir receitas.");
-        }
-
-        if (!isEmpresa(identidade) && !isFuncionario(identidade)) {
-            throw new AccessDeniedException("Usuário sem permissão para cadastrar receitas.");
-        }
-
-        Empresa empresa = empresaRepository.findById(identidade.empresaId()).orElse(null);
-
-        if (empresa == null || empresa.getStatus() != EnumStatusEmpresa.ATIVO) {
-            throw new AccessDeniedException("Empresa não encontrada ou inativa.");
-        }
-
-        Usuario usuario = null;
-
-        if (isFuncionario(identidade)) {
-            usuario = usuarioRepository.findById(identidade.usuarioId()).orElse(null);
-
-            if (usuario == null
-                    || usuario.getEmpresa() == null
-                    || !usuario.getEmpresa().getId().equals(identidade.empresaId())
-                    || !"ROLE_USER".equals(usuario.getRole())
-                    || usuario.getStatus() != EnumStatusUsuario.ATIVO) {
-
-                throw new AccessDeniedException("Usuário autenticado inválido.");
+            receita = new Receita();
+            receita.setEmpresa(empresa);
+            receita.setStatus(EnumStatusReceita.ATIVO);
+        } else {
+            receita = receitaRepository.findByIdAndEmpresa_Id(id, empresa.getId()).orElse(null);
+            if (receita == null || receita.getStatus() == EnumStatusReceita.EXCLUIDO) {
+                return null;
             }
         }
 
-        Paciente paciente = buscarPacienteDaEmpresa(
-                request.pacienteId(), identidade.empresaId(), identidade);
+        receita.setDataEmissao(request.dataEmissao());
+        receita.setDataValidade(request.dataValidade());
+        receita.setDiagnostico(request.diagnostico().trim());
+        receita.setObservacoes(request.observacoes());
+        receita.setPaciente(paciente);
+        receita.setUsuario(null);
+        receita.getMedicamentos().clear();
 
-        Receita receitaBanco = new Receita();
+        Set<Long> medicamentosSelecionados = new HashSet<>();
+        for (ReceitaMedicamentoRequest itemRequest : request.medicamentos()) {
+            Medicamento medicamento = buscarMedicamento(itemRequest.medicamentoId(), empresa.getId());
+            if (!medicamentosSelecionados.add(medicamento.getId())) {
+                throw new IllegalArgumentException("Não selecione o mesmo medicamento mais de uma vez.");
+            }
 
-        aplicarDados(receitaBanco, request);
-        receitaBanco.setStatus(EnumStatusReceita.ATIVO);
-        receitaBanco.setEmpresa(empresa);
-        receitaBanco.setPaciente(paciente);
-        receitaBanco.setUsuario(usuario);
+            ReceitaMedicamento item = new ReceitaMedicamento();
+            item.setReceita(receita);
+            item.setMedicamento(medicamento);
+            item.setDosagemPrescrita(itemRequest.dosagemPrescrita().trim());
+            item.setPosologia(itemRequest.posologia().trim());
+            item.setQuantidadePrescrita(itemRequest.quantidadePrescrita());
+            item.setDuracaoTratamento(itemRequest.duracaoTratamento().trim());
+            receita.getMedicamentos().add(item);
+        }
 
-        receitaRepository.save(receitaBanco);
-
-        return new ReceitaResponse(receitaBanco);
+        return new ReceitaResponse(receitaRepository.save(receita));
     }
 
     @Transactional(readOnly = true)
     public ReceitaResponse buscarPorId(Long id) {
-        Receita receitaBanco = buscarNoEscopo(id, usuarioService.getUsuarioLogado());
-
-        if (receitaBanco == null || receitaBanco.getStatus() == EnumStatusReceita.EXCLUIDO) {
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        exigirEmpresa(identidade);
+        Receita receita = receitaRepository.findByIdAndEmpresa_Id(id, identidade.empresaId()).orElse(null);
+        if (receita == null || receita.getStatus() == EnumStatusReceita.EXCLUIDO) {
             return null;
         }
-
-        return new ReceitaResponse(receitaBanco);
+        return new ReceitaResponse(receita);
     }
 
     @Transactional
@@ -145,100 +109,76 @@ public class ReceitaService {
         if (status == null) {
             throw new IllegalArgumentException("Informe o status da receita.");
         }
-
-        Receita receitaBanco = buscarNoEscopo(id, usuarioService.getUsuarioLogado());
-
-        if (receitaBanco == null || receitaBanco.getStatus() == EnumStatusReceita.EXCLUIDO) {
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        exigirEmpresa(identidade);
+        Receita receita = receitaRepository.findByIdAndEmpresa_Id(id, identidade.empresaId()).orElse(null);
+        if (receita == null || receita.getStatus() == EnumStatusReceita.EXCLUIDO) {
             return false;
         }
-
-        receitaBanco.setStatus(status);
-        receitaRepository.save(receitaBanco);
-
+        receita.setStatus(status);
+        receitaRepository.save(receita);
         return true;
     }
 
-    private void validarReceita(ReceitaRequest request) {
-        if (request == null
-                || request.dataEmissao() == null
-                || request.dataValidade() == null
-                || request.diagnostico() == null || request.diagnostico().isBlank()
-                || request.tipo() == null || request.tipo().isBlank()) {
-
-            throw new IllegalArgumentException("Informe as datas, o diagnóstico e o tipo da receita.");
+    private Empresa buscarEmpresaAtiva(UsuarioLogado identidade) {
+        exigirEmpresa(identidade);
+        Empresa empresa = empresaRepository.findById(identidade.empresaId()).orElse(null);
+        if (empresa == null || empresa.getStatus() != EnumStatusEmpresa.ATIVO) {
+            throw new AccessDeniedException("Empresa não encontrada ou inativa.");
         }
-
-        if (request.dataValidade().isBefore(request.dataEmissao())) {
-            throw new IllegalArgumentException("A validade não pode ser anterior à data de emissão.");
-        }
-
-        if (request.pacienteId() == null) {
-            throw new IllegalArgumentException("Selecione um paciente para a receita.");
-        }
+        return empresa;
     }
 
-    private void aplicarDados(Receita destino, ReceitaRequest origem) {
-        destino.setDataEmissao(origem.dataEmissao());
-        destino.setDataValidade(origem.dataValidade());
-        destino.setDiagnostico(origem.diagnostico().trim());
-        destino.setObservacoes(origem.observacoes());
-        destino.setTipo(origem.tipo().trim());
-    }
-
-    private Paciente buscarPacienteDaEmpresa(Long pacienteId, Long empresaId, UsuarioLogado identidade) {
-        Paciente paciente;
-
-        if (isFuncionario(identidade)) {
-            paciente = pacienteRepository.findByIdAndEmpresa_IdAndUsuario_Id(
-                    pacienteId, empresaId, identidade.usuarioId()).orElse(null);
-        } else {
-            paciente = pacienteRepository.findByIdAndEmpresa_Id(
-                    pacienteId, empresaId).orElse(null);
-        }
-
+    // Impede associar à receita pacientes que pertencem a outra empresa ou estejam inativos.
+    private Paciente buscarPaciente(Long pacienteId, Long empresaId) {
+        Paciente paciente = pacienteRepository.findByIdAndEmpresa_Id(pacienteId, empresaId).orElse(null);
         if (paciente == null || paciente.getStatus() != EnumStatusPaciente.ATIVO) {
-            throw new AccessDeniedException("O paciente não pertence à empresa ou está inativo.");
+            throw new IllegalArgumentException("Selecione um paciente ativo cadastrado nesta empresa.");
         }
-
         return paciente;
     }
 
-    private Receita buscarNoEscopo(Long id, UsuarioLogado identidade) {
-        if (isAdministradorGlobal(identidade)) {
-            return receitaRepository.findById(id).orElse(null);
+    // Reutiliza o medicamento do cadastro da empresa; não cria um novo medicamento durante a receita.
+    private Medicamento buscarMedicamento(Long medicamentoId, Long empresaId) {
+        Medicamento medicamento = medicamentoRepository.findByIdAndEmpresa_Id(medicamentoId, empresaId).orElse(null);
+        if (medicamento == null || medicamento.getStatus() != EnumStatusMedicamento.ATIVO) {
+            throw new IllegalArgumentException("Selecione um medicamento ativo cadastrado nesta empresa.");
         }
-
-        if (isEmpresa(identidade)) {
-            return receitaRepository.findByIdAndEmpresa_Id(
-                    id, identidade.empresaId()).orElse(null);
-        }
-
-        if (isFuncionario(identidade)) {
-            return receitaRepository.findByIdAndUsuario_IdAndEmpresa_Id(
-                    id, identidade.usuarioId(), identidade.empresaId()).orElse(null);
-        }
-
-        return null;
+        return medicamento;
     }
 
-    private boolean isAdministradorGlobal(UsuarioLogado identidade) {
-        return identidade.authorities() != null && identidade.authorities().stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    private void validarReceita(ReceitaRequest request) {
+        if (request == null || request.dataEmissao() == null || request.dataValidade() == null
+                || request.diagnostico() == null || request.diagnostico().isBlank()) {
+            throw new IllegalArgumentException("Informe as datas e o diagnóstico da receita.");
+        }
+        if (request.dataValidade().isBefore(request.dataEmissao())) {
+            throw new IllegalArgumentException("A validade não pode ser anterior à data de emissão.");
+        }
+        if (request.pacienteId() == null) {
+            throw new IllegalArgumentException("Selecione um paciente para a receita.");
+        }
+        if (request.medicamentos() == null || request.medicamentos().isEmpty()) {
+            throw new IllegalArgumentException("Adicione pelo menos um medicamento à receita.");
+        }
+        for (ReceitaMedicamentoRequest item : request.medicamentos()) {
+            if (item == null || item.medicamentoId() == null
+                    || item.dosagemPrescrita() == null || item.dosagemPrescrita().isBlank()
+                    || item.posologia() == null || item.posologia().isBlank()
+                    || item.quantidadePrescrita() == null || item.quantidadePrescrita() <= 0
+                    || item.duracaoTratamento() == null || item.duracaoTratamento().isBlank()) {
+                throw new IllegalArgumentException("Preencha medicamento, dosagem, posologia, quantidade e duração de cada item.");
+            }
+        }
     }
 
-    private boolean isEmpresa(UsuarioLogado identidade) {
-        return identidade.usuarioId() == null
-                && identidade.empresaId() != null
+    private void exigirEmpresa(UsuarioLogado identidade) {
+        boolean permitido = identidade.empresaId() != null
                 && identidade.authorities() != null
                 && identidade.authorities().stream()
                 .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority()));
-    }
-
-    private boolean isFuncionario(UsuarioLogado identidade) {
-        return identidade.usuarioId() != null
-                && identidade.empresaId() != null
-                && identidade.authorities() != null
-                && identidade.authorities().stream()
-                .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority()));
+        if (!permitido) {
+            throw new AccessDeniedException("Somente uma empresa autenticada pode gerenciar receitas.");
+        }
     }
 }

@@ -2,7 +2,6 @@ package com.senac.br.farmacontroll.application.DTOs;
 
 public record IdentidadeResponse(
         Long id,
-        Long usuarioId,
         Long empresaId,
         String nome,
         String email,
@@ -13,7 +12,6 @@ public record IdentidadeResponse(
     public IdentidadeResponse(UsuarioLogado usuarioLogado) {
         this(
                 usuarioLogado.id(),
-                usuarioLogado.usuarioId(),
                 usuarioLogado.empresaId(),
                 usuarioLogado.nome(),
                 usuarioLogado.email(),

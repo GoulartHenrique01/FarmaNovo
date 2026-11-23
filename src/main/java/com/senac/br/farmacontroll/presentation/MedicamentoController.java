@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// FLUXO HTTP: expõe os endpoints de medicamentos consumidos pelas telas do frontend.
+
 @RestController
 @RequestMapping("/medicamentos")
 @Tag(name = "Medicamentos", description = "Grupo de APIs Responsável por controlar a estrutura de criação e consulta de medicamentos cadastrados no sistema!")

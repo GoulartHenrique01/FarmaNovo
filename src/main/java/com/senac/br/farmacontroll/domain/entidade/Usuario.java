@@ -2,8 +2,6 @@ package com.senac.br.farmacontroll.domain.entidade;
 
 import com.senac.br.farmacontroll.application.DTOs.CriarAdminRequest;
 import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
-import com.senac.br.farmacontroll.application.DTOs.UsuarioLogado;
-import com.senac.br.farmacontroll.application.DTOs.UsuarioRequest;
 import com.senac.br.farmacontroll.domain.valueObject.CPF;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +10,6 @@ import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -33,7 +30,7 @@ public class Usuario implements UserDetails {
     private CPF cpf;
     private String senha;
     private String email;
-    private String role = "ROLE_USER";
+    private String role = "ROLE_ADMIN";
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
     //EAGER carrega a lista de registros instantaneamente
@@ -58,27 +55,10 @@ public class Usuario implements UserDetails {
         this.setRole("ROLE_ADMIN");
     }
 
-    public Usuario(UsuarioRequest usuario) {
-        this.setCpf(new CPF(usuario.cpf()));
-        this.setNome(usuario.nome());
-        this.setSenha(usuario.senha());
-        this.setEmail(usuario.email());
-        this.setRole("ROLE_USER");
-    }
-
-    public Usuario(UsuarioRequest usuario, Empresa empresa) {
-        this(usuario);
-        this.setEmpresa(empresa);
-    }
-
-    public Usuario(Long id) {
-        this.id = id;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String roleUsuario = this.role == null || this.role.isBlank()
-                ? "ROLE_USER"
+                ? "ROLE_ADMIN"
                 : this.role;
         return List.of(new SimpleGrantedAuthority(roleUsuario));
     }

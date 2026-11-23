@@ -1,8 +1,8 @@
 package com.senac.br.farmacontroll.application.DTOs;
 
 import com.senac.br.farmacontroll.domain.entidade.Receita;
-
 import java.time.LocalDate;
+import java.util.List;
 
 public record ReceitaResponse(
         Long id,
@@ -10,10 +10,10 @@ public record ReceitaResponse(
         LocalDate dataValidade,
         String diagnostico,
         String observacoes,
-        String tipo,
         EnumStatusReceita status,
         Long pacienteId,
-        String pacienteNome
+        String pacienteNome,
+        List<ReceitaMedicamentoResponse> medicamentos
 ) {
     public ReceitaResponse(Receita receita) {
         this(
@@ -22,10 +22,10 @@ public record ReceitaResponse(
                 receita.getDataValidade(),
                 receita.getDiagnostico(),
                 receita.getObservacoes(),
-                receita.getTipo(),
                 receita.getStatus(),
                 receita.getPaciente() == null ? null : receita.getPaciente().getId(),
-                receita.getPaciente() == null ? null : receita.getPaciente().getNome()
+                receita.getPaciente() == null ? null : receita.getPaciente().getNome(),
+                receita.getMedicamentos().stream().map(ReceitaMedicamentoResponse::new).toList()
         );
     }
 }

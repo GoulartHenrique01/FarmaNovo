@@ -9,7 +9,11 @@ import com.senac.br.farmacontroll.domain.valueObject.DataValidade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+
+// FLUXO: gerencia o catálogo de medicamentos da empresa autenticada e valida o escopo antes de gravar ou consultar registros.
 
 @Service
 public class MedicamentoService {
@@ -23,136 +27,115 @@ public class MedicamentoService {
     @Autowired
     private UsuarioService usuarioService;
 
-    public List<MedicamentoResponse> listarTodosMedicamentosTable(){
-        UsuarioLogado usuarioLogado = usuarioService.getUsuarioLogado();
-        List<Medicamento> medicamentos;
-
-        if (isAdministradorGlobal(usuarioLogado)) {
-            medicamentos = medicamentoRepository.findAll();
-        } else {
-            medicamentos = medicamentoRepository.findByEmpresa_Id(requireEmpresaId(usuarioLogado));
-        }
-
-        return medicamentos
-                .stream()
+    @Transactional(readOnly = true)
+    public List<MedicamentoResponse> listarTodosMedicamentosTable() {
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        exigirEmpresa(identidade);
+        return medicamentoRepository.findByEmpresa_Id(identidade.empresaId()).stream()
                 .filter(medicamento -> medicamento.getStatus() != EnumStatusMedicamento.EXCLUIDO)
                 .map(MedicamentoResponse::new)
                 .toList();
     }
 
-    public CriarMedicamentoResponse criarTipo(CriarMedicamentoRequest criarMedicamentoRequest){
+    @Transactional
+    public CriarMedicamentoResponse criarTipo(CriarMedicamentoRequest request) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
-        exigirGerenciamentoDeMedicamentos(identidade);
-        Medicamento medicamentoTipoSalvar = new Medicamento(criarMedicamentoRequest);
-        associarEmpresa(medicamentoTipoSalvar, identidade);
-        medicamentoRepository.save(medicamentoTipoSalvar);
-
-        return new CriarMedicamentoResponse(
-                medicamentoTipoSalvar.getId(),
-                medicamentoTipoSalvar.getTipo());
+        Empresa empresa = buscarEmpresaAtiva(identidade);
+        Medicamento medicamento = new Medicamento(request);
+        medicamento.setEmpresa(empresa);
+        medicamentoRepository.save(medicamento);
+        return new CriarMedicamentoResponse(medicamento.getId(), medicamento.getTipo());
     }
 
-    public MedicamentoResponse salvarMedicamento(MedicamentoRequest medicamento, Long id){
-        UsuarioLogado usuarioLogado = usuarioService.getUsuarioLogado();
-        if(id == 0L){
-            exigirGerenciamentoDeMedicamentos(usuarioLogado);
-            Medicamento medicamentoBanco = new Medicamento();
-            associarEmpresa(medicamentoBanco, usuarioLogado);
-            medicamentoBanco.setNome(medicamento.nome());
-            medicamentoBanco.setTipo(medicamento.tipo());
-            medicamentoBanco.setDataValidade(new DataValidade(medicamento.dataValidade()));
-            medicamentoBanco.setDosagem(medicamento.dosagem());
-            medicamentoBanco.setUnidadeDosagem(medicamento.unidadeDosagem());
-            medicamentoBanco.setQuantidade(medicamento.quantidade());
-            medicamentoBanco.setMarca(medicamento.marca());
-            medicamentoBanco.setPrecisaReceita(medicamento.precisaReceita());
-            medicamentoBanco.setStatus(EnumStatusMedicamento.ATIVO);
-            medicamentoRepository.save(medicamentoBanco);
+    @Transactional
+    public MedicamentoResponse salvarMedicamento(MedicamentoRequest request, Long id) {
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        Empresa empresa = buscarEmpresaAtiva(identidade);
+        validarMedicamento(request);
 
-            return new MedicamentoResponse(medicamentoBanco);
-        }else{
-            if (!isAdministradorGlobal(usuarioLogado) && !isEmpresa(usuarioLogado)) {
-                throw new AccessDeniedException("Somente a empresa pode alterar medicamentos.");
-            }
-            Medicamento medicamentoBanco = buscarMedicamentoNoEscopo(id, usuarioLogado);
-            if (medicamentoBanco != null){
-                medicamentoBanco.setNome(medicamento.nome());
-                medicamentoBanco.setTipo(medicamento.tipo());
-                medicamentoBanco.setDataValidade(new DataValidade(medicamento.dataValidade()));
-                medicamentoBanco.setDosagem(medicamento.dosagem());
-                medicamentoBanco.setUnidadeDosagem(medicamento.unidadeDosagem());
-                medicamentoBanco.setQuantidade(medicamento.quantidade());
-                medicamentoBanco.setMarca(medicamento.marca());
-                medicamentoBanco.setPrecisaReceita(medicamento.precisaReceita());
-                medicamentoRepository.save(medicamentoBanco);
-
-                return new MedicamentoResponse(medicamentoBanco);
+        Medicamento medicamento;
+        if (id == null || id == 0L) {
+            medicamento = new Medicamento();
+            medicamento.setEmpresa(empresa);
+            medicamento.setStatus(EnumStatusMedicamento.ATIVO);
+        } else {
+            medicamento = medicamentoRepository.findByIdAndEmpresa_Id(id, empresa.getId()).orElse(null);
+            if (medicamento == null || medicamento.getStatus() == EnumStatusMedicamento.EXCLUIDO) {
+                return null;
             }
         }
-        return null;
+
+        medicamento.setNome(request.nome().trim());
+        medicamento.setTipo(request.tipo().trim());
+        medicamento.setDataValidade(new DataValidade(request.dataValidade()));
+        medicamento.setDosagem(request.dosagem());
+        medicamento.setUnidadeDosagem(request.unidadeDosagem());
+        medicamento.setQuantidade(request.quantidade());
+        medicamento.setMarca(request.marca());
+        medicamento.setPrecisaReceita(request.precisaReceita());
+        return new MedicamentoResponse(medicamentoRepository.save(medicamento));
     }
 
-    public MedicamentoResponse buscarPorId(Long id){
-        var medicamento = buscarMedicamentoNoEscopo(id, usuarioService.getUsuarioLogado());
-        if (medicamento == null){
+    @Transactional(readOnly = true)
+    public MedicamentoResponse buscarPorId(Long id) {
+        UsuarioLogado identidade = usuarioService.getUsuarioLogado();
+        exigirEmpresa(identidade);
+        Medicamento medicamento = medicamentoRepository
+                .findByIdAndEmpresa_Id(id, identidade.empresaId()).orElse(null);
+        if (medicamento == null || medicamento.getStatus() == EnumStatusMedicamento.EXCLUIDO) {
             return null;
         }
         return new MedicamentoResponse(medicamento);
     }
 
-    public boolean atualizarStatus(EnumStatusMedicamento status, Long id){
+    @Transactional
+    public boolean atualizarStatus(EnumStatusMedicamento status, Long id) {
+        if (status == null) {
+            throw new IllegalArgumentException("Informe o status do medicamento.");
+        }
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
-        if (!isAdministradorGlobal(identidade) && !isEmpresa(identidade)) {
-            throw new AccessDeniedException("Somente a empresa pode alterar medicamentos.");
+        exigirEmpresa(identidade);
+        Medicamento medicamento = medicamentoRepository
+                .findByIdAndEmpresa_Id(id, identidade.empresaId()).orElse(null);
+        if (medicamento == null || medicamento.getStatus() == EnumStatusMedicamento.EXCLUIDO) {
+            return false;
         }
-        Medicamento medicamentoBanco = buscarMedicamentoNoEscopo(id, identidade);
-        if (medicamentoBanco!= null){
-            medicamentoBanco.setStatus(status);
-            medicamentoRepository.save(medicamentoBanco);
-            return true;
-        }
-        return false;
+        medicamento.setStatus(status);
+        medicamentoRepository.save(medicamento);
+        return true;
     }
 
     public boolean excluir(Long id) {
         return atualizarStatus(EnumStatusMedicamento.EXCLUIDO, id);
     }
 
-    private Medicamento buscarMedicamentoNoEscopo(Long id, UsuarioLogado usuarioLogado) {
-        if (isAdministradorGlobal(usuarioLogado)) {
-            return medicamentoRepository.findById(id).orElse(null);
+    private Empresa buscarEmpresaAtiva(UsuarioLogado identidade) {
+        exigirEmpresa(identidade);
+        Empresa empresa = empresaRepository.findById(identidade.empresaId()).orElse(null);
+        if (empresa == null || empresa.getStatus() != EnumStatusEmpresa.ATIVO) {
+            throw new AccessDeniedException("Empresa não encontrada ou inativa.");
         }
-        return medicamentoRepository.findByIdAndEmpresa_Id(id, requireEmpresaId(usuarioLogado)).orElse(null);
+        return empresa;
     }
 
-    private void associarEmpresa(Medicamento medicamento, UsuarioLogado usuarioLogado) {
-        Long empresaId = requireEmpresaId(usuarioLogado);
-        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
-        if (empresa == null) {
-            throw new AccessDeniedException("Empresa do usuário autenticado não encontrada.");
+    private void exigirEmpresa(UsuarioLogado identidade) {
+        boolean permitido = identidade.empresaId() != null
+                && identidade.authorities() != null
+                && identidade.authorities().stream()
+                .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority()));
+        if (!permitido) {
+            throw new AccessDeniedException("Somente uma empresa autenticada pode gerenciar medicamentos.");
         }
-        medicamento.setEmpresa(empresa);
     }
 
-    private Long requireEmpresaId(UsuarioLogado usuarioLogado) {
-        if (usuarioLogado.empresaId() == null) {
-            throw new AccessDeniedException("Usuário sem empresa vinculada.");
-        }
-        return usuarioLogado.empresaId();
-    }
-
-    private boolean isAdministradorGlobal(UsuarioLogado usuarioLogado) {
-        return usuarioLogado.authorities().stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
-    }
-
-    private boolean isEmpresa(UsuarioLogado usuarioLogado) {
-        return usuarioLogado.usuarioId() == null && usuarioLogado.empresaId() != null;
-    }
-
-    private void exigirGerenciamentoDeMedicamentos(UsuarioLogado usuarioLogado) {
-        if (!isEmpresa(usuarioLogado)) {
-            throw new AccessDeniedException("Somente uma empresa autenticada pode cadastrar medicamentos.");
+    private void validarMedicamento(MedicamentoRequest request) {
+        if (request == null || request.nome() == null || request.nome().isBlank()
+                || request.tipo() == null || request.tipo().isBlank()
+                || request.dataValidade() == null
+                || request.unidadeDosagem() == null || request.unidadeDosagem().isBlank()
+                || request.quantidade() < 0
+                || request.precisaReceita() == null || request.precisaReceita().isBlank()) {
+            throw new IllegalArgumentException("Informe os dados obrigatórios do medicamento.");
         }
     }
 }

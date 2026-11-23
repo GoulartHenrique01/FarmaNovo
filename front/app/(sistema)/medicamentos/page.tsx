@@ -11,9 +11,7 @@ import { RootState } from "@/app/redux/store";
 export default function Medicamentos() {
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);
-  const somenteLeitura = identidade !== null
-    && identidade.role !== "ROLE_ADMIN"
-    && !(identidade.usuarioId === null && identidade.empresaId !== null);
+  const somenteLeitura = identidade === null || identidade.role !== "ROLE_USER" || identidade.empresaId === null;
 
   const formatarData = (data: string) => {
     const dataNormalizada = data?.slice(0, 10);

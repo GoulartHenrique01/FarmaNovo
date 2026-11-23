@@ -21,6 +21,7 @@ public class ReceitaMedicaController {
     @Autowired
     private ReceitaService receitaService;
 
+    // FLUXO HTTP: recebe as requisições da tela, delega as regras ao service e devolve os códigos HTTP adequados.
     @GetMapping
     @Operation(summary = "Lista as receitas disponíveis para o usuário autenticado")
     public ResponseEntity<List<ReceitaResponse>> listarTodos() {

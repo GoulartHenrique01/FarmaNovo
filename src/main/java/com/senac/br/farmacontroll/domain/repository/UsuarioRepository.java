@@ -1,28 +1,19 @@
 package com.senac.br.farmacontroll.domain.repository;
 
-import com.senac.br.farmacontroll.application.DTOs.EnumStatusUsuario;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    boolean existsUsuarioByEmailAndSenha(String email, String senha);
-
-    boolean existsByEmail(String email);
-
-    boolean existsByEmailAndIdNot(String email, Long id);
-
     Optional<Usuario> findByEmail(String email);
+
     Optional<Usuario> findByEmailIgnoreCase(String email);
+
     boolean existsByEmailIgnoreCase(String email);
-    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
-    Optional<List<Usuario>> findByStatusNot(EnumStatusUsuario status);
-
-    List<Usuario> getUsuariosByEmpresa_Id(Long empresa);
+    boolean existsByRole(String role);
 }

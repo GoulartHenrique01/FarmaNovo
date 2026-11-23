@@ -11,7 +11,6 @@ import java.util.List;
 
 public record UsuarioLogado(
         Long id,
-        Long usuarioId,
         Long empresaId,
         String nome,
         String email,
@@ -23,8 +22,7 @@ public record UsuarioLogado(
     public UsuarioLogado(Usuario usuario) {
         this(
                 usuario.getId(),
-                usuario.getId(),
-                usuario.getEmpresa() == null ? null : usuario.getEmpresa().getId(),
+                null,
                 usuario.getNome(),
                 usuario.getEmail(),
                 usuario.getCpf(),
@@ -36,7 +34,6 @@ public record UsuarioLogado(
     public UsuarioLogado(Empresa empresa) {
         this(
                 empresa.getId(),
-                null,
                 empresa.getId(),
                 empresa.getNomeFantasia(),
                 empresa.getEmail(),

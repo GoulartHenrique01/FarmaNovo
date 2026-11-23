@@ -11,6 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collection;
 import java.util.List;
 
+// CONTA DA EMPRESA: representa a empresa e suas credenciais únicas de acesso ao sistema.
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -39,10 +41,6 @@ public class Empresa {
     private CPF cpfResponsavel;
 
     private EnumStatusEmpresa status = EnumStatusEmpresa.ATIVO;
-
-    //OneToMany private sempre será uma LIST
-    @OneToMany(mappedBy = "empresa")
-    private List<Usuario> usuarios;
 
     public String getRole() {
         return "ROLE_USER";

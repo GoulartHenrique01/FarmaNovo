@@ -1,13 +1,15 @@
-import { LoginResponse } from "../types/auth";
+import { IdentidadeAutenticada, LoginResponse } from "../types/auth";
 import api from "./api";
 
-export async function loginBack(email: string, senha: string) : Promise<LoginResponse>{
+export async function loginBack(email: string, senha: string): Promise<LoginResponse> {
+    const resposta = await api.post<LoginResponse>("/auth/login", { email, senha });
+    return resposta.data;
+}
 
-    const loginResposta = await api.post<LoginResponse>("/auth/login",
-    {email:email,senha:senha});
-
-    if(loginResposta.status!=200){
-        alert("Login ou senha inválido!")
-    }
-    return loginResposta.data
-};
+// Recupera o perfil autenticado após o login; o token ainda é enviado explicitamente.
+export async function buscarIdentidadeAutenticada(token: string): Promise<IdentidadeAutenticada> {
+    const resposta = await api.get<IdentidadeAutenticada>("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return resposta.data;
+}

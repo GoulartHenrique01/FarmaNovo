@@ -50,7 +50,7 @@ export default function Pacientes() {
             </p>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">Pacientes</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Consulte e gerencie os pacientes cadastrados por você.
+              Consulte e gerencie os pacientes cadastrados pela empresa.
             </p>
           </div>
           <button
