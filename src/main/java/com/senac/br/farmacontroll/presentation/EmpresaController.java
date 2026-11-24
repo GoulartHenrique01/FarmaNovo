@@ -21,11 +21,13 @@ public class EmpresaController {
     private EmpresaService empresaService;
 
     @GetMapping
+    // GET /empresas: recebe a consulta do frontend e encaminha ao service, que exige ROLE_ADMIN.
     public ResponseEntity<List<EmpresaResponse>> listarTodos(){
         return ResponseEntity.ok(empresaService.listarTodasEmpresasTable());
     }
 
     @GetMapping("/{id}")
+    // GET /empresas/{id}: busca uma empresa específica; null no service vira HTTP 404.
     public ResponseEntity<EmpresaResponse> buscarPorId(@PathVariable Long id){
         EmpresaResponse empresaBanco = empresaService.buscarPorId(id);
         if(empresaBanco != null){
@@ -35,6 +37,7 @@ public class EmpresaController {
     }
 
     @PostMapping
+    // POST /empresas: cria a conta única ROLE_USER da empresa; este cadastro inicial é público.
     public ResponseEntity<?> criar(@RequestBody EmpresaRequest empresa){
         try {
             EmpresaResponse empresaBanco = empresaService.salvarEmpresa(empresa, 0L);
@@ -46,6 +49,7 @@ public class EmpresaController {
     }
 
     @PutMapping("/{id}")
+    // PUT /empresas/{id}: edição administrativa; o service valida o administrador e preserva senha vazia.
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody EmpresaRequest empresa){
         try {
             EmpresaResponse empresaBanco = empresaService.salvarEmpresa(empresa, id);
@@ -60,6 +64,7 @@ public class EmpresaController {
 
 
     @PatchMapping("/{id}/status")
+    // PATCH /empresas/{id}/status: altera ATIVO/BLOQUEADO sem apagar o registro.
     public ResponseEntity<Void> atualizarStatus(
             @PathVariable Long id,
             @RequestBody AtualizarStatusEmpresaRequest request
@@ -72,6 +77,7 @@ public class EmpresaController {
 
 
     @DeleteMapping("/{id}/excluir")
+    // DELETE lógico: marca a empresa como EXCLUIDO; não remove a linha do banco.
     public ResponseEntity<Void> excluir(@PathVariable Long id){
         var atualizarEmpresa = empresaService.atualizarStatus(EnumStatusEmpresa.EXCLUIDO, id);
         if (atualizarEmpresa){

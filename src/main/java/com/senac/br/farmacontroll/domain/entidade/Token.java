@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "token")
+// TOKEN PERSISTIDO: associa o JWT emitido à conta Empresa ou Usuario para permitir sua validação posterior.
 public class Token {
 
     @Id

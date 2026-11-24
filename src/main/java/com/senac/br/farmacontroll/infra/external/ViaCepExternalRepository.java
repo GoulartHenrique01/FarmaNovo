@@ -3,7 +3,6 @@ package com.senac.br.farmacontroll.infra.external;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senac.br.farmacontroll.domain.interfaces.IViaCepExternalRepository;
 import com.senac.br.farmacontroll.infra.dto.ViaCepResponse;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -20,7 +19,8 @@ public class ViaCepExternalRepository implements IViaCepExternalRepository {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Async
+    // FLUXO: recebe o CEP do EnderecoService, consulta o ViaCEP por HTTP, converte o JSON e devolve o DTO.
+    // O método é síncrono porque a interface IViaCepExternalRepository retorna ViaCepResponse diretamente.
     public ViaCepResponse buscarEnderecoViaCepPorCep(String cep) {
         var url = "https://viacep.com.br/ws/"+cep.replaceAll("[^0-9]","")+"/json/";
 

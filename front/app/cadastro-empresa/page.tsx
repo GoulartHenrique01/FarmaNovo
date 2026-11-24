@@ -6,6 +6,7 @@ import { useState } from "react";
 import axios from "axios";
 import { cadastrarEmpresa } from "../services/empresaService";
 
+// FLUXO DE PRIMEIRO ACESSO DA EMPRESA: formulário -> empresaService -> POST /empresas -> retorno ao login.
 export default function CadastroEmpresa() {
     const router = useRouter();
     const [erro, setErro] = useState("");

@@ -5,6 +5,8 @@ import api from "./api";
 
 
 
+// ATENÇÃO: serviço legado. A API atual bloqueia /usuarios e não oferece CRUD de usuários comuns;
+// contas ROLE_USER são criadas pelo fluxo de cadastro de empresa (/empresas).
 export async function buscarListaUsuarios() : Promise<Usuario[]> {
 
     const dados = await api.get<Usuario[]>("/usuarios");

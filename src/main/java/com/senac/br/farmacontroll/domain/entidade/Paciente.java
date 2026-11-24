@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// PACIENTE: pertence a uma Empresa; o vínculo é definido no service a partir da identidade do JWT.
 public class Paciente {
 
     @Id

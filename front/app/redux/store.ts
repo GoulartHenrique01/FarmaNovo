@@ -3,6 +3,7 @@ import authReducer from "./slices/authSlice";
 import temaReducer from "./slices/temaSlice";
 
 // Store única: também é lida pelos interceptors do Axios (services/api.ts).
+// Store central consumida pelos componentes React e pelo interceptor Axios.
 export const store = configureStore({
     reducer: {
         auth: authReducer,

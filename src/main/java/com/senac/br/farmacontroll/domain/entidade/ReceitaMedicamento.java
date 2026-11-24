@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// ITEM DA RECEITA: liga uma receita a um medicamento existente e armazena a posologia específica daquela prescrição.
 public class ReceitaMedicamento {
 
     @Id

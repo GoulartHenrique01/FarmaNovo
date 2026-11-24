@@ -24,12 +24,14 @@ public class ReceitaMedicaController {
     // FLUXO HTTP: recebe as requisições da tela, delega as regras ao service e devolve os códigos HTTP adequados.
     @GetMapping
     @Operation(summary = "Lista as receitas disponíveis para o usuário autenticado")
+    // GET /receitas: lista as receitas da empresa autenticada; o controller não monta regras de negócio.
     public ResponseEntity<List<ReceitaResponse>> listarTodos() {
         return ResponseEntity.ok(receitaService.listarTodosReceitasTable());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca uma receita pelo identificador")
+    // GET /receitas/{id}: consulta a receita dentro do escopo da empresa e devolve 404 se não existir.
     public ResponseEntity<ReceitaResponse> buscarPorId(@PathVariable Long id) {
         ReceitaResponse receita = receitaService.buscarPorId(id);
         return receita == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(receita);
@@ -38,6 +40,7 @@ public class ReceitaMedicaController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cadastra uma receita para a empresa autenticada")
+    // POST /receitas: encaminha o DTO ao service; o service valida paciente, medicamentos e persiste a receita.
     public ResponseEntity<?> criar(@RequestBody ReceitaRequest request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(receitaService.salvarReceita(request, 0L));
@@ -48,6 +51,7 @@ public class ReceitaMedicaController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Edita uma receita dentro do escopo do usuário autenticado")
+    // PUT /receitas/{id}: atualiza cabeçalho e itens da receita na mesma transação.
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody ReceitaRequest request) {
         try {
             ReceitaResponse receita = receitaService.salvarReceita(request, id);
@@ -59,6 +63,7 @@ public class ReceitaMedicaController {
 
     @DeleteMapping("/{id}/excluir")
     @Operation(summary = "Exclui logicamente uma receita")
+    // DELETE lógico: altera o status da receita para EXCLUIDO, sem apagar os itens do histórico.
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         return receitaService.atualizarStatus(EnumStatusReceita.EXCLUIDO, id)
                 ? ResponseEntity.ok().build()

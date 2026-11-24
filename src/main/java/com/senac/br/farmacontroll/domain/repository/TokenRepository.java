@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+// Consulta o token persistido depois da validação criptográfica do JWT.
 public interface TokenRepository extends JpaRepository<Token, Long> {
 
     Optional<Token> findTokenByToken(String token);

@@ -3,6 +3,8 @@ import { Empresa, EmpresaRequest } from "../types/empresas";
 
 export interface CadastroEmpresaRequest extends EmpresaRequest { administradorSenha: string; }
 
+// Cada função abaixo representa uma chamada HTTP usada pelas telas administrativas de empresas.
+// O cadastro público cria a conta ROLE_USER; as demais operações exigem JWT de ROLE_ADMIN.
 export async function cadastrarEmpresa(empresa: CadastroEmpresaRequest): Promise<void> {
     await api.post("/empresas", empresa);
 }

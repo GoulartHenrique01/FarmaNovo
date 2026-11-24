@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 
+// FLUXO: lista receitas da empresa; criação/edição usa ReceitaForm e receitaService para enviar o DTO à API.
 export default function Receitas() {
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);

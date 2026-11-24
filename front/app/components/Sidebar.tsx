@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 
+// A navegação é montada conforme a identidade Redux: ADMIN vê empresas; USER vê medicamentos, pacientes e receitas.
 export default function Sidebar() {
     const identidade = useSelector((state: RootState) => state.auth.usuario);
     const administrador = identidade?.role === "ROLE_ADMIN";

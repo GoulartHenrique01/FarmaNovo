@@ -21,6 +21,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Autenticação de usuários", description = "Método de login")
+    // Entrada do login: recebe e-mail/senha, delega a validação ao UsuarioService e devolve o JWT ou 401.
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
         var resultado = usuarioService.validarUsuarioAutenticadoRetornaToken(request);
@@ -33,6 +34,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    // Continuação do login: o JWT já foi validado pelo JwtFilter; retorna os dados da conta autenticada.
     public ResponseEntity<?> identidadeAutenticada() {
         return ResponseEntity.ok(usuarioService.buscarIdentidadeAutenticada());
     }

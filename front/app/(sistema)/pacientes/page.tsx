@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// FLUXO: consulta pacientes da empresa autenticada; edição e exclusão lógica passam pelo pacienteService.
 export default function Pacientes() {
   const router = useRouter();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);

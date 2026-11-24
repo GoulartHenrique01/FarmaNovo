@@ -45,6 +45,7 @@ export default function MedicamentoForm({ medicamentoExistente}: MedicamentoForm
   };
 
   // Envia POST para cadastro ou PUT para edição e apresenta o resultado da operação.
+  // Decide entre POST (novo) e PUT (edição); o service envia o DTO e a API grava no banco.
   const handlerSalvar = async () => {
     try {
       const status = medicamentoExistente

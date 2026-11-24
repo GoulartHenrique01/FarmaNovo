@@ -34,6 +34,7 @@ public class TokenService {
     @Autowired
     private TokenRepository tokenRepository;
 
+    // Gera JWT para o administrador global e registra o token no banco para permitir revogação/consulta posterior.
     public String gerarToken(Usuario usuario) {
         if (usuario == null || !"ROLE_ADMIN".equals(usuario.getRole()) || usuario.getEmpresa() != null) {
             throw new IllegalArgumentException("Somente o administrador global pode receber este token.");
@@ -43,6 +44,7 @@ public class TokenService {
         return token;
     }
 
+    // Gera JWT para a conta única da empresa (ROLE_USER), somente quando ela está ATIVA.
     public String gerarToken(Empresa empresa) {
         if (empresa == null || empresa.getStatus() != com.senac.br.farmacontroll.application.DTOs.EnumStatusEmpresa.ATIVO) {
             throw new IllegalArgumentException("Somente uma empresa ativa pode receber este token.");
@@ -60,6 +62,7 @@ public class TokenService {
                 .sign(Algorithm.HMAC256(secret));
     }
 
+    // Fluxo inverso: valida assinatura/issuer/expiração, procura o token persistido e reconstrói a identidade.
     public UsuarioLogado verificarToken(String token) throws JWTVerificationException {
         JWTVerifier verificador = JWT.require(Algorithm.HMAC256(secret))
                 .withIssuer(emissor)

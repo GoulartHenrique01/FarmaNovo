@@ -23,6 +23,8 @@ const receitaVazia: Receita = {
   medicamentos: [],
 };
 
+// FLUXO DO FORMULÁRIO: carrega pacientes e medicamentos existentes; a seleção é enviada como IDs no ReceitaRequest.
+// O backend valida os vínculos e grava Receita + ReceitaMedicamento em uma transação.
 export default function ReceitaForm({ receitaExistente }: ReceitaFormProps) {
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);
@@ -94,6 +96,7 @@ export default function ReceitaForm({ receitaExistente }: ReceitaFormProps) {
   };
 
   // FLUXO: envia os dados da receita e os IDs dos medicamentos selecionados; após sucesso, retorna à listagem.
+  // Decide entre POST e PUT; receitaService converte os itens selecionados em IDs para o backend validar e persistir.
   const handlerSalvar = async () => {
     try {
       const status = receitaExistente

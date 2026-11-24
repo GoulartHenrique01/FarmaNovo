@@ -14,8 +14,10 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Cadastro inicial protegido por uma chave configurada no backend.
+    // Cadastro inicial do administrador global, sem chave adicional.
     @PostMapping("/admin")
+    // POST /usuarios/admin: endpoint de primeiro acesso, não é o cadastro de contas das empresas.
+    // Se já existir ROLE_ADMIN, UsuarioService bloqueia uma segunda criação; empresas usam POST /empresas.
     public ResponseEntity<?> criarAdmin(@RequestBody CriarAdminRequest request) {
         try {
             CriarAdminResponse resposta = usuarioService.criarAdmin(request);

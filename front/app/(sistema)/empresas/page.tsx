@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Empresa } from "@/app/types/empresas";
 import { alterarStatusEmpresa, buscarListaEmpresas, excluirEmpresa } from "@/app/services/empresaService";
 
+// FLUXO: consulta empresas ao montar a tela; ações de bloquear/ativar/excluir chamam empresaService e recarregam a tabela.
 export default function Empresas() {
     const router = useRouter();
     const [empresas, setEmpresas] = useState<Empresa[]>([]);

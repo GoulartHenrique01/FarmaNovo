@@ -8,6 +8,7 @@ import { buscarListaMedicamentos, deletarMedicamento } from "@/app/services/medi
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 
+// FLUXO: carrega medicamentos da empresa autenticada e encaminha ações para os serviços HTTP de medicamentos.
 export default function Medicamentos() {
   const router = useRouter();
   const identidade = useSelector((state: RootState) => state.auth.usuario);

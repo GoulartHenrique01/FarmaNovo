@@ -25,6 +25,7 @@ public class EmpresaService {
     private UsuarioService usuarioService;
 
     @Transactional(readOnly = true)
+    // Fluxo: exige ROLE_ADMIN -> consulta EmpresaRepository -> remove EXCLUIDO -> converte entidade em DTO.
     public List<EmpresaResponse> listarTodasEmpresasTable() {
         exigirAdministrador();
         return empresaRepository.findAll().stream()
@@ -34,6 +35,7 @@ public class EmpresaService {
     }
 
     @Transactional
+    // Fluxo: id vazio cria uma nova conta ROLE_USER; id preenchido exige ADMIN e atualiza a empresa existente.
     public EmpresaResponse salvarEmpresa(EmpresaRequest request, Long id) {
         if (id == null || id == 0L) {
             validarCadastroEmpresa(request);
@@ -118,6 +120,7 @@ public class EmpresaService {
         }
     }
 
+    // Centraliza a cópia dos campos do DTO para a entidade; senha vazia em edição mantém a senha anterior.
     private void aplicarDados(Empresa empresa, EmpresaRequest request, boolean novoCadastro) {
         empresa.setRazaoSocial(request.razaoSocial().trim());
         empresa.setNomeFantasia(request.nomeFantasia().trim());

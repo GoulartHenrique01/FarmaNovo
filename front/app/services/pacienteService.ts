@@ -1,6 +1,7 @@
 import { Paciente } from "../types/pacientes";
 import api from "./api";
 
+// Camada de comunicação: envia somente nome, CPF e telefone; a empresa vem do JWT no backend.
 type PacienteRequest = Pick<Paciente, "nome" | "cpf" | "telefone">;
 
 export async function buscarListaPacientes(): Promise<Paciente[]> {

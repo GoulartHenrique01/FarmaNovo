@@ -17,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// EMPRESA/CONTA USER: um registro reúne os dados da empresa e as credenciais únicas usadas no login ROLE_USER.
 public class Empresa {
 
     @Id

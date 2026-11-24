@@ -30,6 +30,7 @@ export default function PacienteForm({ pacienteExistente }: PacienteFormProps) {
     ));
   };
 
+  // Decide entre POST (novo paciente) e PUT (paciente existente); após sucesso volta à listagem.
   const handlerSalvar = async () => {
     try {
       const status = pacienteExistente

@@ -46,6 +46,8 @@ public class ReceitaService {
 
     // FLUXO: valida a empresa, o paciente e cada medicamento; cria ou atualiza a receita e seus itens em uma única transação.
     @Transactional
+    // Fluxo completo: JWT -> empresa ativa -> valida DTO -> valida paciente e medicamentos da mesma empresa
+    // -> cria/atualiza Receita e ReceitaMedicamento -> ReceitaRepository.save -> converte em ReceitaResponse.
     public ReceitaResponse salvarReceita(ReceitaRequest request, Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         Empresa empresa = buscarEmpresaAtiva(identidade);
@@ -147,6 +149,7 @@ public class ReceitaService {
         return medicamento;
     }
 
+    // Valida os campos do formulário antes de acessar os registros relacionados e iniciar a persistência.
     private void validarReceita(ReceitaRequest request) {
         if (request == null || request.dataEmissao() == null || request.dataValidade() == null
                 || request.diagnostico() == null || request.diagnostico().isBlank()) {

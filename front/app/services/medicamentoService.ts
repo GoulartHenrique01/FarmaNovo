@@ -1,6 +1,7 @@
 import { Medicamento } from "../types/medicamentos";
 import api from "./api";
 
+// Camada de comunicação: converte dados da tela em DTO e chama os endpoints /medicamentos.
 type MedicamentoRequest = Pick<
     Medicamento,
     | "nome"

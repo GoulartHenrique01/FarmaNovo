@@ -8,6 +8,8 @@ import { RootState } from "../redux/store";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+// Guarda visual das rotas: confere a identidade Redux e exibe somente as áreas permitidas por role.
+// A autorização real também é aplicada no backend; esconder páginas não substitui a segurança da API.
 export default function SistemaLayout({ children }: { children: React.ReactNode }) {
     const { usuario } = useSelector((state: RootState) => state.auth);
     const router = useRouter();

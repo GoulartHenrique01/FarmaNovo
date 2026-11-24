@@ -19,6 +19,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// USUARIO ADMINISTRADOR: representa apenas o ADMIN global. Contas de empresa são armazenadas na entidade Empresa.
 public class Usuario implements UserDetails {
 
     @Id

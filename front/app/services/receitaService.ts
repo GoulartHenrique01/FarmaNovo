@@ -1,6 +1,7 @@
 import { Receita } from "../types/receitas";
 import api from "./api";
 
+// Camada HTTP das receitas: as telas enviam IDs de paciente/medicamentos já cadastrados, não criam esses registros.
  type ReceitaRequest = Pick<
     Receita,
     "dataEmissao" | "dataValidade" | "diagnostico" | "observacoes" | "pacienteId" | "medicamentos"

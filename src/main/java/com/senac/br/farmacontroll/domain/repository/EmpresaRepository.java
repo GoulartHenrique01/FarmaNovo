@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+// Consultas de persistência de empresas; os services aplicam as regras de role e status antes de usar os dados.
 public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     Optional<Empresa> findByEmail(String email);
     Optional<Empresa> findByEmailIgnoreCase(String email);

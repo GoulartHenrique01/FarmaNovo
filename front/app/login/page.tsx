@@ -8,6 +8,7 @@ import Link from "next/link";
 import axios from "axios";
 import { useState } from "react";
 
+// FLUXO DA TELA: formulário -> authService.loginBack -> GET /auth/me -> Redux -> navegação para /home.
 export default function Login(){
     const router = useRouter();
     const dispatch = useDispatch();

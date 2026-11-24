@@ -11,6 +11,7 @@ public class EnderecoService {
     @Autowired
     private IViaCepExternalRepository viaCepExternalRepository;
 
+    // Encaminha o CEP ao adaptador ViaCEP e transforma a resposta externa no DTO público da API.
     public  EnderecoResponse BuscarEndereco(String cep){
         var enderecoCompleto = viaCepExternalRepository.buscarEnderecoViaCepPorCep(cep);
 

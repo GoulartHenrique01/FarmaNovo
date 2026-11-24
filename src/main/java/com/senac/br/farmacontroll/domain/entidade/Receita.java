@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// RECEITA: pertence à empresa e ao paciente; seus medicamentos são persistidos como itens em ReceitaMedicamento.
 public class Receita {
 
     @Id

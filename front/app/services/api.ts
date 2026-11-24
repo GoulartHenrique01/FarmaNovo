@@ -1,5 +1,6 @@
 'use client';
 
+// FLUXO HTTP DO FRONTEND: todas as telas chamam este cliente; ele aponta para a API e injeta o JWT do Redux.
 import axios from "axios";
 import { store } from "../redux/store";
 import { logout } from "../redux/slices/authSlice";

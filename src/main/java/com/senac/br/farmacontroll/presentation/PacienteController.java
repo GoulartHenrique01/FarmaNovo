@@ -26,12 +26,14 @@ public class PacienteController {
 
     @GetMapping
     @Operation(summary = "Lista os pacientes do usuário autenticado")
+    // GET /pacientes: lista somente pacientes associados à empresa identificada no JWT.
     public ResponseEntity<List<PacienteResponse>> listarTodos() {
         return ResponseEntity.ok(pacienteService.listarTodosPacientesTable());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um paciente do usuário autenticado")
+    // GET /pacientes/{id}: o service também confere o empresa_id para impedir acesso cruzado.
     public ResponseEntity<PacienteResponse> buscarPorId(@PathVariable Long id) {
         PacienteResponse paciente = pacienteService.buscarPorId(id);
         return paciente == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(paciente);
@@ -40,6 +42,7 @@ public class PacienteController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cadastra um paciente para o usuário autenticado")
+    // POST /pacientes: recebe os dados, valida e associa automaticamente a empresa autenticada.
     public ResponseEntity<?> criar(@RequestBody PacienteRequest request) {
         try {
             return ResponseEntity.ok(pacienteService.salvarPaciente(request, 0L));
@@ -50,6 +53,7 @@ public class PacienteController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Edita um paciente do usuário autenticado")
+    // PUT /pacientes/{id}: altera paciente somente se o ID pertencer à empresa do token.
     public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody PacienteRequest request) {
         try {
             PacienteResponse paciente = pacienteService.salvarPaciente(request, id);
@@ -60,6 +64,7 @@ public class PacienteController {
     }
 
     @DeleteMapping("/{id}/excluir")
+    // DELETE lógico: altera o status para EXCLUIDO sem remover os dados do paciente.
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         return pacienteService.atualizarStatus(EnumStatusPaciente.EXCLUIDO, id)
                 ? ResponseEntity.ok().build()

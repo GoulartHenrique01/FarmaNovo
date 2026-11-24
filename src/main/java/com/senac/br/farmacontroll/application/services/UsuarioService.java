@@ -6,7 +6,6 @@ import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.EmpresaRepository;
 import com.senac.br.farmacontroll.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,9 +24,8 @@ public class UsuarioService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    @Value("${spring.admin-registration-key:}")
-    private String secret;
-
+    // FLUXO DE LOGIN: procura primeiro a conta Empresa (ROLE_USER); se não encontrar, verifica o administrador.
+    // Quando os dados conferem, TokenService gera e registra o JWT que será usado pelo frontend.
     public LoginResponse validarUsuarioAutenticadoRetornaToken(LoginRequest request) {
         if (request == null || request.email() == null || request.email().isBlank()
                 || request.senha() == null || request.senha().isBlank()) {
@@ -55,20 +53,17 @@ public class UsuarioService {
         return new LoginResponse(tokenService.gerarToken(usuario));
     }
 
-    // Cadastro inicial do único administrador global, protegido pela chave do backend.
+    // Cadastro inicial do único administrador global, sem exigir chave adicional.
+    // FLUXO DO CADASTRO ADMIN: valida campos, unicidade do e-mail e existência de outro ROLE_ADMIN.
+    // Ao final cria Usuario e salva pelo UsuarioRepository. Esse fluxo aceita apenas um administrador global.
     public CriarAdminResponse criarAdmin(CriarAdminRequest request) {
-        if (secret == null || secret.isBlank()) {
-            throw new IllegalStateException("Configure ADMIN_REGISTRATION_KEY no ambiente antes de cadastrar o administrador.");
-        }
-        if (request == null || request.secretKey() == null || !secret.equals(request.secretKey())) {
-            throw new IllegalArgumentException("Chave de cadastro inválida.");
-        }
         if (request.nome() == null || request.nome().isBlank()
                 || request.email() == null || request.email().isBlank()
                 || request.senha() == null || request.senha().isBlank()
                 || request.cpf() == null || request.cpf().isBlank()) {
             throw new IllegalArgumentException("Informe nome, e-mail, senha e CPF do administrador.");
         }
+        // Esta condição explica o HTTP 403 observado no Desktop: o sistema permite apenas um ADMIN global.
         if (usuarioRepository.existsByRole("ROLE_ADMIN")) {
             throw new AccessDeniedException("O administrador inicial já foi cadastrado.");
         }
@@ -84,6 +79,7 @@ public class UsuarioService {
         return new CriarAdminResponse(admin.getId(), "Administrador cadastrado com sucesso!");
     }
 
+    // Recupera o principal colocado no SecurityContext pelo JwtFilter; services usam esse dado para filtrar empresa.
     public UsuarioLogado getUsuarioLogado() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()

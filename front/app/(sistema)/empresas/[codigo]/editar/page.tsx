@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Empresa, EmpresaRequest } from "@/app/types/empresas";
 import { atualizarEmpresa, buscarEmpresaPorId } from "@/app/services/empresaService";
 
+// FLUXO: lê o ID da rota, consulta a empresa, preenche o formulário e envia PUT /empresas/{id}.
 export default function EditarEmpresa() {
     const params = useParams(); const router = useRouter(); const id = Number(params.codigo);
     const [empresa, setEmpresa] = useState<Empresa | null>(null); const [erro, setErro] = useState("");

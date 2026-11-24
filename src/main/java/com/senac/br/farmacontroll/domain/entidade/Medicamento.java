@@ -16,6 +16,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// MEDICAMENTO: pertence ao catálogo de uma Empresa. ReceitaMedicamento referencia este registro existente.
 public class Medicamento {
 
     @Id

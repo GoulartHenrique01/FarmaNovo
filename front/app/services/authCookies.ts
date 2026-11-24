@@ -1,3 +1,4 @@
+// Utilitário de cookies disponível no projeto, mas não integrado ao fluxo de login atual (que usa Redux em memória).
 import { IdentidadeAutenticada } from "../types/auth";
 
 const COOKIE_OPTIONS = "path=/; SameSite=Lax";
