@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { RootState } from "../redux/store";
 import { alternarTema, definirTema } from "../redux/slices/temaSlice";
+import api from "../services/api";
 
 export default function Header() {
 
@@ -57,10 +58,15 @@ export default function Header() {
 
                     <button 
                     type="button"
-                    onClick={()=>{
-                        dispatch(logout());
-                    }
-                    }
+                    onClick={async () => {
+                        try {
+                            await api.post("/auth/logout");
+                        } catch {
+                            // Limpa a sessão local mesmo se o servidor estiver indisponível.
+                        } finally {
+                            dispatch(logout());
+                        }
+                    }}
                     className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 ${darkMode ? "border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 focus:ring-red-400" : "border-red-200 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 hover:text-red-700 focus:ring-red-200"}`}>
                         Sair
                     </button>

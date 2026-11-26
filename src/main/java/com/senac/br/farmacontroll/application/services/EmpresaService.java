@@ -89,6 +89,9 @@ public class EmpresaService {
                 || request.administradorCpf() == null || request.administradorCpf().isBlank()) {
             throw new IllegalArgumentException("Informe todos os dados da empresa e da conta de acesso.");
         }
+        if (request.cep() != null && !request.cep().replaceAll("\\D", "").matches("\\d{8}")) {
+            throw new IllegalArgumentException("Informe um CEP válido com 8 dígitos.");
+        }
         validarEmailDisponivel(request.administradorEmail().trim().toLowerCase(), null);
         if (empresaRepository.existsByCnpj(request.cnpj().trim())) {
             throw new IllegalArgumentException("Já existe uma empresa cadastrada com este CNPJ.");
@@ -128,6 +131,14 @@ public class EmpresaService {
         empresa.setNomeResponsavel(request.administradorNome().trim());
         empresa.setCpfResponsavel(new CPF(request.administradorCpf()));
         empresa.setEmail(request.administradorEmail().trim().toLowerCase());
+        // Endereço informado no cadastro; em atualizações, campos ausentes preservam os dados existentes.
+        if (request.cep() != null) empresa.setCep(request.cep().trim());
+        if (request.logradouro() != null) empresa.setLogradouro(request.logradouro().trim());
+        if (request.numero() != null) empresa.setNumero(request.numero().trim());
+        if (request.complemento() != null) empresa.setComplemento(request.complemento().trim());
+        if (request.bairro() != null) empresa.setBairro(request.bairro().trim());
+        if (request.cidade() != null) empresa.setCidade(request.cidade().trim());
+        if (request.uf() != null) empresa.setUf(request.uf().trim());
         if (novoCadastro || (request.administradorSenha() != null && !request.administradorSenha().isBlank())) {
             empresa.setSenha(request.administradorSenha());
         }

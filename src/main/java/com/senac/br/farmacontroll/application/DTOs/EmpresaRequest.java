@@ -7,6 +7,13 @@ public record EmpresaRequest(
         String administradorNome,
         String administradorEmail,
         String administradorSenha,
-        String administradorCpf
+        String administradorCpf,
+        String cep,
+        String logradouro,
+        String numero,
+        String complemento,
+        String bairro,
+        String cidade,
+        String uf
 ) {
 }

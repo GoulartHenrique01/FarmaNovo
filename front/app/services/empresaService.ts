@@ -3,6 +3,19 @@ import { Empresa, EmpresaRequest } from "../types/empresas";
 
 export interface CadastroEmpresaRequest extends EmpresaRequest { administradorSenha: string; }
 
+export interface EnderecoViaCep {
+    cep: string;
+    logradouro: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+}
+
+// Consulta o endpoint do backend, que por sua vez consulta o serviço ViaCEP.
+export async function buscarEnderecoPorCep(cep: string): Promise<EnderecoViaCep> {
+    return (await api.get<EnderecoViaCep>(`/endereco/${cep.replace(/\D/g, "")}`)).data;
+}
+
 // Cada função abaixo representa uma chamada HTTP usada pelas telas administrativas de empresas.
 // O cadastro público cria a conta ROLE_USER; as demais operações exigem JWT de ROLE_ADMIN.
 export async function cadastrarEmpresa(empresa: CadastroEmpresaRequest): Promise<void> {

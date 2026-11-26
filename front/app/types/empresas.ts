@@ -7,6 +7,13 @@ export interface Empresa {
     nomeResponsavel: string;
     cpfResponsavel: string | null;
     email: string;
+    cep?: string;
+    logradouro?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
 }
 
 export interface EmpresaRequest {
@@ -17,4 +24,11 @@ export interface EmpresaRequest {
     administradorEmail: string;
     administradorSenha?: string;
     administradorCpf: string;
+    cep?: string;
+    logradouro?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
 }

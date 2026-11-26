@@ -12,4 +12,7 @@ import java.util.Optional;
 public interface TokenRepository extends JpaRepository<Token, Long> {
 
     Optional<Token> findTokenByToken(String token);
+
+    // Remove somente o JWT da sessão atual, sem encerrar sessões de outros dispositivos.
+    void deleteByToken(String token);
 }

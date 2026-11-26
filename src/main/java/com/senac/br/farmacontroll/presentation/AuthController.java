@@ -3,6 +3,7 @@ package com.senac.br.farmacontroll.presentation;
 
 import com.senac.br.farmacontroll.application.DTOs.LoginRequest;
 import com.senac.br.farmacontroll.application.services.UsuarioService;
+import com.senac.br.farmacontroll.application.services.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class AuthController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping("/login")
     @Operation(summary = "Autenticação de usuários", description = "Método de login")
     // Entrada do login: recebe e-mail/senha, delega a validação ao UsuarioService e devolve o JWT ou 401.
@@ -31,6 +35,14 @@ public class AuthController {
         }
 
         return ResponseEntity.status(401).body("Usuário ou senha inválidos.");
+    }
+
+    // Revoga a sessão atual no banco; o JwtFilter exige um JWT válido antes de chegar aqui.
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
+        String token = authorization.substring("Bearer ".length()).trim();
+        tokenService.revogarToken(token);
+        return ResponseEntity.ok("Sessão encerrada com sucesso.");
     }
 
     @GetMapping("/me")

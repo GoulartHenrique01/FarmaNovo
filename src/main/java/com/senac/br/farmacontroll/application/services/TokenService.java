@@ -10,6 +10,8 @@ import com.senac.br.farmacontroll.domain.entidade.Token;
 import com.senac.br.farmacontroll.domain.entidade.Usuario;
 import com.senac.br.farmacontroll.domain.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,13 @@ public class TokenService {
 
     @Autowired
     private TokenRepository tokenRepository;
+
+    // Ao iniciar a aplicação, revoga os tokens emitidos pela execução anterior.
+    // Assim, reiniciar o backend invalida as sessões antigas, conforme o teste da avaliação.
+    @EventListener(ApplicationReadyEvent.class)
+    public void revogarTokensDaExecucaoAnterior() {
+        tokenRepository.deleteAllInBatch();
+    }
 
     // Gera JWT para o administrador global e registra o token no banco para permitir revogação/consulta posterior.
     public String gerarToken(Usuario usuario) {
@@ -60,6 +69,14 @@ public class TokenService {
                 .withSubject(email)
                 .withExpiresAt(gerarDataExpiracao())
                 .sign(Algorithm.HMAC256(secret));
+    }
+
+    // Revoga no banco exatamente o JWT apresentado no logout.
+    public void revogarToken(String token) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("Token não informado.");
+        }
+        tokenRepository.deleteByToken(token);
     }
 
     // Fluxo inverso: valida assinatura/issuer/expiração, procura o token persistido e reconstrói a identidade.

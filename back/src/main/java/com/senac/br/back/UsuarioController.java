@@ -104,8 +104,8 @@ public class UsuarioController {
 
         return connection.getResponseCode();
 
-    }
 
+    }
     private void showMessage(Alert.AlertType type, String msg){
         Alert alerta =new Alert(type);
         alerta.setTitle("Mensagem do Sistema!");
