@@ -27,7 +27,6 @@ public class PacienteService {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Transactional(readOnly = true)
     // Fluxo: obtém empresa pelo JWT -> consulta apenas os pacientes dela -> converte para DTO de resposta.
     public List<PacienteResponse> listarTodosPacientesTable() {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
@@ -39,7 +38,6 @@ public class PacienteService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public PacienteResponse buscarPorId(Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         exigirEmpresa(identidade);
@@ -51,7 +49,7 @@ public class PacienteService {
         return new PacienteResponse(paciente);
     }
 
-    @Transactional
+
     // Fluxo: valida empresa e CPF; cria ou atualiza o paciente sem permitir trocar seu vínculo de empresa.
     public PacienteResponse salvarPaciente(PacienteRequest request, Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
@@ -79,7 +77,7 @@ public class PacienteService {
         return new PacienteResponse(pacienteRepository.save(paciente));
     }
 
-    @Transactional
+
     public boolean atualizarStatus(EnumStatusPaciente status, Long id) {
         if (status == null) {
             throw new IllegalArgumentException("Informe o status do paciente.");

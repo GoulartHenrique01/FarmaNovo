@@ -34,7 +34,6 @@ public class ReceitaService {
     private UsuarioService usuarioService;
 
     // FLUXO: a empresa autenticada consulta somente as receitas vinculadas ao seu próprio cadastro.
-    @Transactional(readOnly = true)
     public List<ReceitaResponse> listarTodosReceitasTable() {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         exigirEmpresa(identidade);
@@ -45,7 +44,6 @@ public class ReceitaService {
     }
 
     // FLUXO: valida a empresa, o paciente e cada medicamento; cria ou atualiza a receita e seus itens em uma única transação.
-    @Transactional
     // Fluxo completo: JWT -> empresa ativa -> valida DTO -> valida paciente e medicamentos da mesma empresa
     // -> cria/atualiza Receita e ReceitaMedicamento -> ReceitaRepository.save -> converte em ReceitaResponse.
     public ReceitaResponse salvarReceita(ReceitaRequest request, Long id) {
@@ -95,7 +93,6 @@ public class ReceitaService {
         return new ReceitaResponse(receitaRepository.save(receita));
     }
 
-    @Transactional(readOnly = true)
     public ReceitaResponse buscarPorId(Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         exigirEmpresa(identidade);
@@ -106,7 +103,6 @@ public class ReceitaService {
         return new ReceitaResponse(receita);
     }
 
-    @Transactional
     public boolean atualizarStatus(EnumStatusReceita status, Long id) {
         if (status == null) {
             throw new IllegalArgumentException("Informe o status da receita.");

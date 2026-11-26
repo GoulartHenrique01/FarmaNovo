@@ -14,6 +14,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -72,6 +73,7 @@ public class TokenService {
     }
 
     // Revoga no banco exatamente o JWT apresentado no logout.
+    @Transactional
     public void revogarToken(String token) {
         if (token == null || token.isBlank()) {
             throw new IllegalArgumentException("Token não informado.");

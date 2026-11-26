@@ -27,6 +27,7 @@ public class JwtFilter extends OncePerRequestFilter{
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+        System.out.println("JWT FILTER EXECUTADO");
 
         String uri = request.getRequestURI();
 

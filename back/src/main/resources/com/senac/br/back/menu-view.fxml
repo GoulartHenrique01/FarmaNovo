@@ -2,12 +2,17 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.senac.br.back.MenuController">
    <children>
+      <Label layoutX="209.0" layoutY="44.0" text="Bem Vindo!" textAlignment="CENTER">
+         <font>
+            <Font size="36.0" />
+         </font></Label>
+
       <Button layoutX="34.0" layoutY="352.0" mnemonicParsing="false" onAction="#sair" text="Sair" />
-      <Button layoutX="105.0" layoutY="63.0" mnemonicParsing="false" onAction="#abrirCadastro" prefHeight="25.0" prefWidth="107.0" text="Cadastro Admin" />
-      <Button layoutX="105.0" layoutY="102.0" mnemonicParsing="false" onAction="#abrirCadastroMedicamento" prefHeight="25.0" prefWidth="190.0" text="Cadastro Tipo Medicamento" />
-      <Button layoutX="105.0" layoutY="141.0" mnemonicParsing="false" onAction="#abrirCadastroEmpresa" prefHeight="25.0" prefWidth="190.0" text="Cadastro Empresa" />
+      <Button layoutX="247.0" layoutY="139.0" onAction="#abrirCadastro" prefHeight="25.0" prefWidth="107.0" text="Cadastro Admin" />
+      <Button layoutX="206.0" layoutY="188.0" onAction="#abrirCadastroEmpresa" prefHeight="25.0" prefWidth="190.0" text="Cadastro Empresa" />
    </children>
 </AnchorPane>

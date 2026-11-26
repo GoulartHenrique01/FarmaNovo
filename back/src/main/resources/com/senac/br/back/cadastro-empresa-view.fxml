@@ -11,17 +11,17 @@
         <Label layoutX="78.0" layoutY="56.0" text="CNPJ" />
         <Label layoutX="78.0" layoutY="97.0" text="Nome Fantasia" />
         <Label layoutX="78.0" layoutY="137.0" text="Razão Social" />
-        <TextField fx:id="txtCnpj" layoutX="166.0" layoutY="52.0" />
-        <TextField fx:id="txtNomeFantasia" layoutX="166.0" layoutY="93.0" />
-        <TextField fx:id="txtRazaoSocial" layoutX="166.0" layoutY="133.0" />
+        <TextField fx:id="txtCnpj" layoutX="226.0" layoutY="52.0" />
+        <TextField fx:id="txtNomeFantasia" layoutX="226.0" layoutY="93.0" />
+        <TextField fx:id="txtRazaoSocial" layoutX="226.0" layoutY="133.0" />
 
         <Label layoutX="78.0" layoutY="177.0" text="Responsável" />
         <Label layoutX="78.0" layoutY="217.0" text="CPF Responsável" />
         <Label layoutX="78.0" layoutY="257.0" text="E-mail de acesso" />
         <Label layoutX="78.0" layoutY="297.0" text="Senha de acesso" />
-        <TextField fx:id="txtAdministradorNome" layoutX="190.0" layoutY="173.0" />
-        <TextField fx:id="txtAdministradorCpf" layoutX="190.0" layoutY="213.0" />
-        <TextField fx:id="txtAdministradorEmail" layoutX="190.0" layoutY="253.0" />
-        <PasswordField fx:id="txtAdministradorSenha" layoutX="190.0" layoutY="293.0" />
+        <TextField fx:id="txtAdministradorNome" layoutX="226.0" layoutY="173.0" />
+        <TextField fx:id="txtAdministradorCpf" layoutX="226.0" layoutY="213.0" />
+        <TextField fx:id="txtAdministradorEmail" layoutX="226.0" layoutY="253.0" />
+        <PasswordField fx:id="txtAdministradorSenha" layoutX="226.0" layoutY="293.0" />
     </children>
 </AnchorPane>

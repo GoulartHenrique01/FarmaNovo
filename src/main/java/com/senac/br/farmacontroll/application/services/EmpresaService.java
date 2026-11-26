@@ -24,7 +24,7 @@ public class EmpresaService {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Transactional(readOnly = true)
+
     // Fluxo: exige ROLE_ADMIN -> consulta EmpresaRepository -> remove EXCLUIDO -> converte entidade em DTO.
     public List<EmpresaResponse> listarTodasEmpresasTable() {
         exigirAdministrador();
@@ -34,7 +34,7 @@ public class EmpresaService {
                 .toList();
     }
 
-    @Transactional
+
     // Fluxo: id vazio cria uma nova conta ROLE_USER; id preenchido exige ADMIN e atualiza a empresa existente.
     public EmpresaResponse salvarEmpresa(EmpresaRequest request, Long id) {
         if (id == null || id == 0L) {
@@ -54,7 +54,7 @@ public class EmpresaService {
         return new EmpresaResponse(empresaRepository.save(empresa));
     }
 
-    @Transactional(readOnly = true)
+
     public EmpresaResponse buscarPorId(Long id) {
         exigirAdministrador();
         Empresa empresa = empresaRepository.findById(id).orElse(null);
@@ -64,7 +64,7 @@ public class EmpresaService {
         return new EmpresaResponse(empresa);
     }
 
-    @Transactional
+
     public boolean atualizarStatus(EnumStatusEmpresa status, Long id) {
         exigirAdministrador();
         if (status == null) {

@@ -27,7 +27,7 @@ public class MedicamentoService {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Transactional(readOnly = true)
+
     // Fluxo: lê identidade do JWT -> exige ROLE_USER -> busca por empresa_id -> remove excluídos -> monta DTOs.
     public List<MedicamentoResponse> listarTodosMedicamentosTable() {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
@@ -38,7 +38,6 @@ public class MedicamentoService {
                 .toList();
     }
 
-    @Transactional
     // O tipo é cadastrado dentro da empresa autenticada e fica associado ao mesmo empresa_id.
     public CriarMedicamentoResponse criarTipo(CriarMedicamentoRequest request) {
         // O tipo não é global: a conta autenticada define a empresa proprietária do registro.
@@ -50,7 +49,7 @@ public class MedicamentoService {
         return new CriarMedicamentoResponse(medicamento.getId(), medicamento.getTipo());
     }
 
-    @Transactional
+
     // Fluxo: valida identidade e formulário; cria ou localiza item da própria empresa; salva e devolve DTO.
     public MedicamentoResponse salvarMedicamento(MedicamentoRequest request, Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
@@ -80,7 +79,6 @@ public class MedicamentoService {
         return new MedicamentoResponse(medicamentoRepository.save(medicamento));
     }
 
-    @Transactional(readOnly = true)
     public MedicamentoResponse buscarPorId(Long id) {
         UsuarioLogado identidade = usuarioService.getUsuarioLogado();
         exigirEmpresa(identidade);
@@ -92,7 +90,7 @@ public class MedicamentoService {
         return new MedicamentoResponse(medicamento);
     }
 
-    @Transactional
+
     public boolean atualizarStatus(EnumStatusMedicamento status, Long id) {
         if (status == null) {
             throw new IllegalArgumentException("Informe o status do medicamento.");
