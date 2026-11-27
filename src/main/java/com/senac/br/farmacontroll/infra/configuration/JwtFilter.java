@@ -27,7 +27,6 @@ public class JwtFilter extends OncePerRequestFilter{
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        System.out.println("JWT FILTER EXECUTADO");
 
         String uri = request.getRequestURI();
 
@@ -42,6 +41,7 @@ public class JwtFilter extends OncePerRequestFilter{
                 || uri.startsWith("/endereco/")
                 || (uri.equals("/usuarios/admin") && "POST".equals(method))
                 || (uri.equals("/empresas") && "POST".equals(method))
+                || (uri.startsWith("/"))//TEM QUE TER ISSO AQUI NO FINAL PRA PERMITIR TUDO(DESABILITAR A SEGURANÇA
         ){
             filterChain.doFilter(request,response);
             return;

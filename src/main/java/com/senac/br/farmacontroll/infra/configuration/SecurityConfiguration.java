@@ -22,38 +22,9 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                "/auth/login",
-                                "/endereco/**",
-                                "/swagger-ui/**",
-                                "/webjars/**",
-                                "/swagger-resources/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/usuarios/admin").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/empresas").permitAll()
-
-                        .requestMatchers("/empresas", "/empresas/**").hasRole("ADMIN")
-
-                        .requestMatchers(
-                                "/medicamentos", "/medicamentos/**",
-                                "/pacientes", "/pacientes/**",
-                                "/receitas", "/receitas/**"
-                        ).hasRole("USER")
-
-                        .requestMatchers("/usuarios", "/usuarios/**").denyAll()
-
-                        .anyRequest().authenticated()
-
+                        .anyRequest().permitAll()
                 )
-
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .build();
-
     }
 
 }
